@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "./ui/button"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,26 +11,43 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { toast } from "sonner"
-import { Clock } from "lucide-react"
+} from "./ui/dialog";
+import { toast } from "sonner";
+import { Clock } from "lucide-react";
 
-export default function CheckInDialog() {
-  const [open, setOpen] = useState(false)
+export default function CheckInDialog({ onRegister }) {
+  const [rfid, setRfid] = useState("");
+  const [open, setOpen] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Aquí iría la lógica para registrar la asistencia
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      if (rfid.trim() !== "") {
+        verifyAndRegisterAttendance(rfid.trim());
+        setRfid("");
+      }
+    } else {
+      setRfid((prev) => prev + e.key);
+    }
+  };
 
-    toast.success("Asistencia registrada", {
-      description: "El registro de asistencia se ha guardado correctamente.",
-    })
+  const verifyAndRegisterAttendance = async (rfid) => {
+    try {
+      const response = await axios.post("http://localhost:8002/api/asistencias/registrar", { rfid });
+      if (response.status === 200) {
+        const { mensaje } = response.data; // Obtener el mensaje del backend
+        console.log(response.data);
+        toast.success(mensaje); // Mostrar el mensaje específico
+        if (onRegister) onRegister(); // Llama a la función para actualizar los datos
+      }
+    } catch (error) {
+      toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor." });
+    }
+  };
 
-    setOpen(false)
-  }
+  useEffect(() => {
+    window.addEventListener("keypress", handleKeyPress);
+    return () => window.removeEventListener("keypress", handleKeyPress);
+  }, [rfid]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -42,62 +60,21 @@ export default function CheckInDialog() {
       <DialogContent className="sm:max-w-[425px] max-w-[95vw]">
         <DialogHeader>
           <DialogTitle>Registrar Asistencia</DialogTitle>
-          <DialogDescription>Ingrese los datos para registrar la asistencia del empleado.</DialogDescription>
+          <DialogDescription>
+            Pase su tarjeta RFID para registrar la asistencia.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="employee" className="text-right">
-                Empleado
-              </Label>
-              <Select>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Seleccionar empleado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="emp001">John Doe</SelectItem>
-                  <SelectItem value="emp002">Jane Smith</SelectItem>
-                  <SelectItem value="emp003">Robert Johnson</SelectItem>
-                  <SelectItem value="emp004">Emily Davis</SelectItem>
-                  <SelectItem value="emp005">Michael Wilson</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Tipo
-              </Label>
-              <Select>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="check-in">Entrada</SelectItem>
-                  <SelectItem value="check-out">Salida</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="time" className="text-right">
-                Hora
-              </Label>
-              <Input id="time" type="time" className="col-span-3" required />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-right">
-                Notas
-              </Label>
-              <Input id="notes" className="col-span-3" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" className="w-full sm:w-auto">
-              Registrar
-            </Button>
-          </DialogFooter>
-        </form>
+        <div className="grid gap-4 py-4">
+          <p className="text-center text-muted-foreground">
+            Esperando lectura de tarjeta...
+          </p>
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setOpen(false)} className="w-full sm:w-auto">
+            Cerrar
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
