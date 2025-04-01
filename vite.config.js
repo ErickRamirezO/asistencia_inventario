@@ -10,6 +10,8 @@ export default defineConfig({
     registerType: 'prompt',
     injectRegister: false,
 
+    includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
+      
     pwaAssets: {
       disabled: false,
       config: true,
@@ -20,16 +22,35 @@ export default defineConfig({
       short_name: 'asistencia_inventario',
       description: 'sistema de control de asistencia e inventario',
       theme_color: '#ffffff',
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable",
+        },
+      ],
     },
 
     workbox: {
       globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
       cleanupOutdatedCaches: true,
       clientsClaim: true,
+      skipWaiting: true,
     },
 
     devOptions: {
-      enabled: false,
+      enabled: true,
       navigateFallback: 'index.html',
       suppressWarnings: true,
       type: 'module',
