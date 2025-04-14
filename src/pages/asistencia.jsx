@@ -24,22 +24,24 @@ export default function Attendance() {
 
   const [searchQuery, setSearchQuery] = useState(""); // Búsqueda por empleado
   const [selectedDepartment, setSelectedDepartment] = useState(""); // Filtro por departamento
-  const [dateFilter, setDateFilter] = useState("today"); // Filtro por rango de fechas
+  const [dateFilter, setDateFilter] = useState("all"); // Filtro por rango de fechas
 
   const recordsPerPage = 10; // Número de registros por página
   const totalPages = Math.ceil(filteredData.length / recordsPerPage); // Calcular el número total de páginas
 
-  // Función para obtener los datos del backend
   const fetchAttendanceData = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:8002/api/asistencias/usuarios");
+      // Obtén los datos directamente de usuarios-resumen
+      const response = await axios.get("http://localhost:8002/api/asistencias/usuarios-resumen");
       const data = response.data;
+  
+      // Actualiza el estado con los datos obtenidos
       setAttendanceData(data);
       setFilteredData(data); // Inicialmente, los datos filtrados son todos los datos
       setTotalEmployees(data.length);
       setPresentToday(data.filter((item) => item.estado === 1).length); // Filtra los presentes
-      setAbsentToday(data.filter((item) => item.estado !== 1).length); // Filtra los ausentes
+      setAbsentToday(data.filter((item) => item.estado === 0).length); // Filtra los ausentes
       setIsLoading(false);
     } catch (error) {
       setError(error.message);
@@ -76,26 +78,31 @@ export default function Attendance() {
       filtered = filtered.filter((item) => item.departamento === selectedDepartment);
     }
 
+    
+
     // Filtro por rango de fechas
     if (dateFilter && dateFilter !== "all") {
       const now = new Date();
+      const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000) // Ajustar a UTC
+      .toISOString()
+      .split("T")[0]; // Fecha actual en formato YYYY-MM-DD
       filtered = filtered.filter((item) => {
-        const fecha = new Date(item.fecha);
-        const today = now.toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
-        const itemDate = fecha.toISOString().split("T")[0]; // Fecha del registro en formato YYYY-MM-DD
-
         if (dateFilter === "today") {
-          return itemDate === today; // Comparar solo la fecha
+          console.log("Fecha actual:", today);
+          console.log("Fecha del registro:", item.fecha);
+          return item.fecha === today; // Comparar directamente con el campo `fecha`
         } else if (dateFilter === "thisWeek") {
           const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
           const endOfWeek = new Date(startOfWeek);
           endOfWeek.setDate(endOfWeek.getDate() + 6);
-          return fecha >= startOfWeek && fecha <= endOfWeek;
+          const itemDate = new Date(item.fecha);
+          return itemDate >= startOfWeek && itemDate <= endOfWeek;
         } else if (dateFilter === "lastMonth") {
           const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
           const startOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
           const endOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0);
-          return fecha >= startOfLastMonth && fecha <= endOfLastMonth;
+          const itemDate = new Date(item.fecha);
+          return itemDate >= startOfLastMonth && itemDate <= endOfLastMonth;
         }
         return true;
       });
@@ -232,27 +239,33 @@ export default function Attendance() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {currentRecords.map(({ id, nombre, departamento, entrada, salida, estado, fecha }) => (
-                        <TableRow key={id}>
-                          <TableCell>{nombre}</TableCell>
-                          <TableCell>{departamento}</TableCell>
-                          <TableCell>{entrada || "--"}</TableCell>
-                          <TableCell>{salida || "--"}</TableCell>
-                          <TableCell>
-                            <Badge variant={estado === 1 ? "presente" : "ausente"}>
-                              {estado === 1 ? "Presente" : "Ausente"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{fecha}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm">Editar</Button>
-                              <Button variant="outline" size="sm">Detalles</Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
+                    {currentRecords.map(({ id, nombre, departamento, entrada, salida, estado, fecha }) => (
+                      <TableRow key={id}>
+                        <TableCell>{nombre}</TableCell>
+                        <TableCell>{departamento}</TableCell>
+                        <TableCell>
+                          {entrada ? new Date(entrada).toLocaleTimeString() : "No registra entrada"}
+                        </TableCell>
+                        <TableCell>
+                          {salida ? new Date(salida).toLocaleTimeString() : "No registra salida"}
+                        </TableCell>
+                        <TableCell>
+                          {estado === 1 ? (
+                            <Badge variant="presente">Presente</Badge>
+                          ) : (
+                            <Badge variant="no_asistio">No asistió</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{fecha || "--"}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">Editar</Button>
+                            <Button variant="outline" size="sm">Detalles</Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                   </Table>
                 </div>
               )}

@@ -19,13 +19,24 @@ export default function CheckInDialog({ onRegister }) {
   const [rfid, setRfid] = useState("");
   const [open, setOpen] = useState(false);
 
+  // Cargar los conteos de tarjetas desde localStorage
+  const loadRfidCounts = () => {
+    const storedCounts = localStorage.getItem("rfidCounts");
+    return storedCounts ? JSON.parse(storedCounts) : {};
+  };
+
+  const [rfidCounts, setRfidCounts] = useState(loadRfidCounts);
+
+  // Guardar los conteos de tarjetas en localStorage
+  const saveRfidCounts = (counts) => {
+    localStorage.setItem("rfidCounts", JSON.stringify(counts));
+  };
+
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      if (rfid.trim() !== "") {
-        verifyAndRegisterAttendance(rfid.trim());
-        setRfid("");
-      }
-    } else {
+    if (e.key === "Enter" && rfid.trim() !== "") {
+      verifyAndRegisterAttendance(rfid.trim());
+      setRfid(""); // Limpia el campo para la siguiente tarjeta
+    } else if (e.key !== "Enter") {
       setRfid((prev) => prev + e.key);
     }
   };
@@ -34,20 +45,31 @@ export default function CheckInDialog({ onRegister }) {
     try {
       const response = await axios.post("http://localhost:8002/api/asistencias/registrar", { rfid });
       if (response.status === 200) {
-        const { mensaje } = response.data; // Obtener el mensaje del backend
-        console.log(response.data);
-        toast.success(mensaje); // Mostrar el mensaje específico
-        if (onRegister) onRegister(); // Llama a la función para actualizar los datos
+        const { mensaje } = response.data;
+        toast.success("Tarjeta leída correctamente");
+        toast.success(mensaje);
+  
+        if (onRegister) onRegister(); // Actualiza los datos en la tabla
       }
     } catch (error) {
-      toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor." });
+      if (error.response && error.response.status === 400) {
+        toast.error(error.response.data); // Mostrar mensaje del backend
+      } else {
+        toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor." });
+      }
+    } finally {
+      setRfid(""); // Limpia el estado de la tarjeta incluso si ocurre un error
     }
   };
 
   useEffect(() => {
-    window.addEventListener("keypress", handleKeyPress);
+    if (open) {
+      window.addEventListener("keypress", handleKeyPress);
+    } else {
+      window.removeEventListener("keypress", handleKeyPress);
+    }
     return () => window.removeEventListener("keypress", handleKeyPress);
-  }, [rfid]);
+  }, [open, rfid]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
