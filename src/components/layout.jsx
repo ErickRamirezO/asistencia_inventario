@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, Building2} from "lucide-react"
+import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import {
@@ -23,7 +23,15 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
 } from "./ui/sidebar"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+
 
 export default function Layout({ children }) {
   const location = useLocation()
@@ -55,7 +63,7 @@ export default function Layout({ children }) {
           <SidebarHeader>
             <div className="flex items-center gap-2 px-4 py-2">
               <Package className="h-6 w-6" />
-              <span className="text-lg font-semibold">InventAssist</span>
+              <span className="text-lg font-semibold">InventAssist (NUEVO MENU)</span>
             </div>
           </SidebarHeader>
 
@@ -71,50 +79,142 @@ export default function Layout({ children }) {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                  <Link to="/inventory">
-                    <Building2 className="h-5 w-5" />
-                    <span>Ver empresa</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                  <Link to="/inventory">
-                    <Building className="h-5 w-5" />
-                    <span>Ver departamentos</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                  <Link to="/inventory">
-                    <Users className="h-5 w-5" />
-                    <span>Ver empleados</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                  <Link to="/inventory">
+                <SidebarMenuButton asChild isActive={isActive("/")}>
+                  <Link to="/">
                     <Package className="h-5 w-5" />
-                    <span>Inventarios</span>
+                    <span>Inventario</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Users className="h-5 w-5" />
+                      <span>Control de usuarios</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/inventory">
+                            <UserPlus className="h-5 w-5" />
+                            <span>Registrar usuarios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <Eye className="h-5 w-5" />
+                            <span>Ver usuarios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <Calendar className="h-5 w-5" />
+                            <span>Crear turnos laborales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Building className="h-5 w-5" />
+                      <span>Bienes</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/inventory">
+                            <Archive className="h-5 w-5" />
+                            <span>Registrar bienes de la empresa</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <Box className="h-5 w-5" />
+                            <span>Bienes empresariales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <Tag className="h-5 w-5" />
+                            <span>Categoría de Bienes empresariales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/attendance")}>
                   <Link to="/attendance">
                     <Clipboard className="h-5 w-5" />
-                    <span>Asistencia</span>
+                    <span>Registrar Asistencia</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <FileText className="h-5 w-5" />
+                      <span>Reportes</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/inventory">
+                            <ClipboardCheck className="h-5 w-5" />
+                            <span>Reporte de asistencia</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <MapPin className="h-5 w-5" />
+                            <span>Reporte de ubicación</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/new-feature">
+                            <CalendarClock className="h-5 w-5" />
+                            <span>Crear turnos laborales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
             </SidebarMenu>
+            
           </SidebarContent>
 
           <SidebarFooter className="p-4">
