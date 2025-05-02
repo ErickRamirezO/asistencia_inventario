@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { Toaster } from "sonner"
 import Layout from "./components/layout"
 import Attendance from "./pages/asistencia"
+import ReporteAsistencia from "./pages/reporteAsistencia"
+import TurnosLaborales from "./pages/turnosLaborales"
+import RegistrarUsuario from "./pages/registrarUsuario"
 
 function App() {
   return (
@@ -11,6 +14,9 @@ function App() {
           <Routes>
             {/* <Route path="/" element={<Dashboard />} /> */}
             {/* <Route path="/inventory" element={<Inventory />} /> */}
+            <Route path="/reporteAsistencia" element={<ReporteAsistencia />} />
+            <Route path="/registrarUsuario" element={<RegistrarUsuario />} />
+            <Route path="/turnosLaborales" element={<TurnosLaborales/>} />
             <Route path="/attendance" element={<Attendance />} />
           </Routes>
         </Layout>

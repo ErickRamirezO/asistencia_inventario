@@ -86,6 +86,15 @@ export default function Layout({ children }) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/attendance")}>
+                  <Link to="/attendance">
+                    <Clipboard className="h-5 w-5" />
+                    <span>Registrar Asistencia</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
@@ -99,7 +108,7 @@ export default function Layout({ children }) {
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/inventory">
+                          <Link to="/registrarUsuario">
                             <UserPlus className="h-5 w-5" />
                             <span>Registrar usuarios</span>
                           </Link>
@@ -115,7 +124,7 @@ export default function Layout({ children }) {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
+                          <Link to="/turnosLaborales">
                             <Calendar className="h-5 w-5" />
                             <span>Crear turnos laborales</span>
                           </Link>
@@ -165,14 +174,6 @@ export default function Layout({ children }) {
                 </Collapsible>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/attendance")}>
-                  <Link to="/attendance">
-                    <Clipboard className="h-5 w-5" />
-                    <span>Registrar Asistencia</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
 
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
@@ -186,7 +187,7 @@ export default function Layout({ children }) {
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/inventory">
+                          <Link to="/reporteAsistencia">
                             <ClipboardCheck className="h-5 w-5" />
                             <span>Reporte de asistencia</span>
                           </Link>
