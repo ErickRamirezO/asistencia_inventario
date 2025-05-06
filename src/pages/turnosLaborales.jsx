@@ -4,6 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import axios from "axios";
 
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -58,18 +59,35 @@ export default function TurnosLaborales() {
     },
   });
 
-  function onSubmit(data) {
-    setTurnos([...turnos, data]);
-    Toaster({
-      title: "Turno creado:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
-    setIsDialogOpen(false); // Cierra el modal después de crear el turno
+  async function onSubmit(data) {
+    try {
+      // Convertir las horas a formato compatible con LocalTime (HH:mm)
+      const payload = {
+        nombreHorario: data.shiftName,
+        horaInicio: data.startTime,
+        horaFin: data.endTime,
+        horaInicioAlmuerzo: data.startLunchTime,
+        horaFinAlmuerzo: data.endLunchTime,
+      };
+      console.log("Payload enviado:", payload); // Verifica los datos enviados
+
+    
+      const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
+  
+      setTurnos([...turnos, response.data]); // Agrega el nuevo turno a la tabla
+      Toaster({
+        title: "Turno creado:",
+        description: "El turno laboral se ha registrado correctamente.",
+      });
+      form.reset();
+      setIsDialogOpen(false); // Cierra el modal después de crear el turno
+    } catch (error) {
+      console.error(error);
+      Toaster({
+        title: "Error:",
+        description: "No se pudo registrar el turno laboral.",
+      });
+    }
   }
 
   return (
@@ -183,11 +201,11 @@ export default function TurnosLaborales() {
           {turnos.length > 0 ? (
             turnos.map((turno, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{turno.shiftName}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.startTime}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.endTime}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.startLunchTime}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.endLunchTime}</td>
+                <td className="border border-gray-300 px-4 py-2">{turno.nombreHora}</td>
+                <td className="border border-gray-300 px-4 py-2">{turno.horaInicio}</td>
+                <td className="border border-gray-300 px-4 py-2">{turno.horaFin}</td>
+                <td className="border border-gray-300 px-4 py-2">{turno.horaInicioAlmuerzo}</td>
+                <td className="border border-gray-300 px-4 py-2">{turno.horaFinAlmuerzo}</td>
               </tr>
             ))
           ) : (
