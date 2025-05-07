@@ -116,7 +116,7 @@ export default function Layout({ children }) {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
+                          <Link to="/verUsuarios">
                             <Eye className="h-5 w-5" />
                             <span>Ver usuarios</span>
                           </Link>

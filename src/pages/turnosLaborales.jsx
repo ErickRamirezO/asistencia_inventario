@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 
-import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -25,6 +25,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import{
+Table,
+TableBody,
+TableCell,
+TableHead,
+TableHeader,
+TableRow,
+} from "@/components/ui/table";
 
 const FormSchema = z.object({
   shiftName: z.string().min(3, {
@@ -59,6 +67,19 @@ export default function TurnosLaborales() {
     },
   });
 
+  async function obtenerHorariosLaborales() {
+    try {
+      const response = await axios.get("http://localhost:8002/api/horarios-laborales");
+      setTurnos(response.data);
+    } catch (error) {
+      console.error("Error al recuperar los horarios laborales:", error);
+    }
+  }
+
+  useEffect(() => {
+    obtenerHorariosLaborales();
+  }, []);
+
   async function onSubmit(data) {
     try {
       // Convertir las horas a formato compatible con LocalTime (HH:mm)
@@ -75,18 +96,16 @@ export default function TurnosLaborales() {
       const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
   
       setTurnos([...turnos, response.data]); // Agrega el nuevo turno a la tabla
-      Toaster({
-        title: "Turno creado:",
+      toast("Turno creado", {
         description: "El turno laboral se ha registrado correctamente.",
       });
       form.reset();
       setIsDialogOpen(false); // Cierra el modal después de crear el turno
     } catch (error) {
       console.error(error);
-      Toaster({
-        title: "Error:",
-        description: "No se pudo registrar el turno laboral.",
-      });
+      toast("Error", {
+      description: "No se pudo registrar el turno laboral.",
+    });
     }
   }
 
@@ -187,36 +206,36 @@ export default function TurnosLaborales() {
       </Dialog>
 
       {/* Tabla de turnos laborales */}
-      <table className="w-full border-collapse border border-gray-300 mb-6">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 px-4 py-2">Nombre del Turno</th>
-            <th className="border border-gray-300 px-4 py-2">Hora de Inicio</th>
-            <th className="border border-gray-300 px-4 py-2">Hora de Fin</th>
-            <th className="border border-gray-300 px-4 py-2">Inicio de Almuerzo</th>
-            <th className="border border-gray-300 px-4 py-2">Fin de Almuerzo</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nombre del Turno</TableHead>
+            <TableHead>Hora de Inicio</TableHead>
+            <TableHead>Hora de Fin</TableHead>
+            <TableHead>Inicio de Almuerzo</TableHead>
+            <TableHead>Fin de Almuerzo</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {turnos.length > 0 ? (
             turnos.map((turno, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{turno.nombreHora}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.horaInicio}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.horaFin}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.horaInicioAlmuerzo}</td>
-                <td className="border border-gray-300 px-4 py-2">{turno.horaFinAlmuerzo}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{turno.nombreHorario}</TableCell>
+                <TableCell>{turno.horaInicio}</TableCell>
+                <TableCell>{turno.horaFin}</TableCell>
+                <TableCell>{turno.horaInicioAlmuerzo}</TableCell>
+                <TableCell>{turno.horaFinAlmuerzo}</TableCell>
+              </TableRow>
             ))
           ) : (
-            <tr>
-              <td colSpan="5" className="text-center border border-gray-300 px-4 py-2">
+            <TableRow>
+              <TableCell colSpan="5" className="text-center">
                 No hay turnos laborales registrados.
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

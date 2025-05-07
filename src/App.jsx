@@ -5,6 +5,7 @@ import Attendance from "./pages/asistencia"
 import ReporteAsistencia from "./pages/reporteAsistencia"
 import TurnosLaborales from "./pages/turnosLaborales"
 import RegistrarUsuario from "./pages/registrarUsuario"
+import VerUsuario from "./pages/verUsuario"
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             {/* <Route path="/" element={<Dashboard />} /> */}
             {/* <Route path="/inventory" element={<Inventory />} /> */}
             <Route path="/reporteAsistencia" element={<ReporteAsistencia />} />
+            <Route path="/verUsuarios" element={<VerUsuario />} />
             <Route path="/registrarUsuario" element={<RegistrarUsuario />} />
             <Route path="/turnosLaborales" element={<TurnosLaborales/>} />
             <Route path="/attendance" element={<Attendance />} />
