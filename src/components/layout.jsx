@@ -58,10 +58,10 @@ export default function Layout({ children }) {
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-screen ">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
+            <div className="flex items-center gap-2 px-0 py-0 ">
               <Package className="h-6 w-6" />
               <span className="text-lg font-semibold">InventAssist (NUEVO MENU)</span>
             </div>
@@ -147,7 +147,7 @@ export default function Layout({ children }) {
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/inventory">
+                          <Link to="/bienes">
                             <Archive className="h-5 w-5" />
                             <span>Registrar bienes de la empresa</span>
                           </Link>
@@ -251,9 +251,9 @@ export default function Layout({ children }) {
         </Sidebar>
 
         {/* Main content */}
-        <div className="flex flex-col flex-1 w-full">
+        <div className="flex-1 flex-col flex w-full ">
           {/* Header */}
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background  md:px-6">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
               <h1 className="text-lg font-semibold">
@@ -298,7 +298,11 @@ export default function Layout({ children }) {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 p-4 md:p-6">{children}</main>
+          <main className="flex-1 flex-col flex w-full">
+  <div className="w-full max-w-6xl">{children}</div>
+</main>
+
+
         </div>
       </div>
     </SidebarProvider>

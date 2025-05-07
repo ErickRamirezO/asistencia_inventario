@@ -5,6 +5,8 @@ import Attendance from "./pages/asistencia"
 import ReporteAsistencia from "./pages/reporteAsistencia"
 import TurnosLaborales from "./pages/turnosLaborales"
 import RegistrarUsuario from "./pages/registrarUsuario"
+import RegistroBienes from "./pages/inventario/registroBienes"
+
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
             <Route path="/registrarUsuario" element={<RegistrarUsuario />} />
             <Route path="/turnosLaborales" element={<TurnosLaborales/>} />
             <Route path="/attendance" element={<Attendance />} />
+            <Route path="/bienes" element ={<RegistroBienes/>} />
+            
           </Routes>
         </Layout>
         <Toaster position="top-right" />
