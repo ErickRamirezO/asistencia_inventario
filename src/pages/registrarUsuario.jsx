@@ -53,10 +53,10 @@ export default function RegistrarUsuario() {
   }
 
   return (
-    <div className="p-6">
+    <div className="  p-6">
       <h1 className="text-2xl font-bold mb-4">Registrar Usuario</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="">
           {/* Campo de nombres */}
           <FormField
             control={form.control}

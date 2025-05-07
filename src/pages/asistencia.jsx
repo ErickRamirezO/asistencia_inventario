@@ -118,9 +118,9 @@ export default function Attendance() {
   );
 
   return (
-    <div className="w-full h-full flex flex-col p-12">
+    <div className=" ">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 ">
         <p className="text-muted-foreground">Controla la asistencia y horas de trabajo de los empleados</p>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" className="w-full sm:w-auto">
@@ -132,7 +132,7 @@ export default function Attendance() {
       </div>
 
       {/* Estadísticas */}
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-10">
         {[
           { title: "Total Empleados", value: totalEmployees },
           { title: "Presentes Hoy", value: presentToday },
