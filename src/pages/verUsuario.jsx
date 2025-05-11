@@ -31,17 +31,16 @@ export default function VerUsuario() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+        const usuariosResponse = await axios.get("http://localhost:8002/api/usuarios");
         // Obtenemos los horarios laborales utilizando la misma ruta que en turnosLaborales.jsx
         const horariosResponse = await axios.get("http://localhost:8002/api/horarios-laborales");
-        console.log("Horarios obtenidos:", horariosResponse.data);
         setHorarios(horariosResponse.data);
-        
-        // Obtenemos los usuarios
-        // En un entorno real, esto vendría de tu API
-        // Usamos los datos de prueba por ahora
-        setUsuarios(usuariosDemo);
-        
+        // Mapear los usuarios y agregar la propiedad habilitado basada en status
+        const usuariosMapeados = usuariosResponse.data.map(usuario => ({
+          ...usuario,
+          habilitado: usuario.status === 1
+        }));
+        setUsuarios(usuariosMapeados);
         setLoading(false);
       } catch (error) {
         console.error("Error al cargar datos:", error);
@@ -60,22 +59,26 @@ export default function VerUsuario() {
   }, []);
 
   // Función para cambiar el estado del usuario (habilitado/inhabilitado)
-  const toggleEstadoUsuario = async (id, estadoActual) => {
+  const toggleEstadoUsuario = async (id) => {
     try {
-      const nuevoEstado = !estadoActual;
-
-      const usuario = usuarios.find(u => u.id === id);
-      const nombreCompleto = `${usuario.nombre} ${usuario.apellido}`;
+      // Llamar al endpoint que creamos en el backend
+      const response = await axios.patch(`http://localhost:8002/api/usuarios/${id}/toggle-status`);
       
-      // En un entorno real, esto enviaría la petición al backend
-      // await axios.put(`http://localhost:8002/api/usuarios/${id}/estado`, {
-      //   habilitado: nuevoEstado,
-      // });
+      // La respuesta contiene el usuario actualizado
+      const usuarioActualizado = response.data;
       
-      // Actualizar el estado local
+      // Actualizar el estado local con la respuesta del servidor
       setUsuarios(usuarios.map(usuario => 
-        usuario.id === id ? { ...usuario, habilitado: nuevoEstado } : usuario
+        usuario.id === id ? { 
+          ...usuario, 
+          status: usuarioActualizado.status,
+          // Para la interfaz de usuario:
+          habilitado: usuarioActualizado.status === 1 
+        } : usuario
       ));
+      
+      const nuevoEstado = usuarioActualizado.status === 1;
+      const nombreCompleto = `${usuarioActualizado.nombre} ${usuarioActualizado.apellido}`;
       
       toast(nuevoEstado ? "Usuario habilitado" : "Usuario inhabilitado", {
         description: `${nombreCompleto} ha sido ${nuevoEstado ? "activado" : "desactivado"} correctamente.`,
@@ -99,16 +102,16 @@ export default function VerUsuario() {
         throw new Error("Usuario o horario no encontrado");
       }
       
-      // En un entorno real, esto enviaría la petición al backend
-      // await axios.put(`http://localhost:8002/api/usuarios/${id}/horario`, {
-      //   horarioId: nuevoHorarioId,
-      // });
-      
-      // Actualizar el estado local
+      await axios.post(`http://localhost:8002/api/horarios-laborales/asignar/${id}/${nuevoHorarioId}`);
+    // Actualizar el estado local
       setUsuarios(usuarios.map(u => 
-        u.id === id ? { ...u, horarioLaboralId: parseInt(nuevoHorarioId) } : u
+        u.id === id ? { 
+          ...u, 
+          horarioLaboralId: parseInt(nuevoHorarioId),
+          horarioLaboralNombre: horario.nombreHorario  // Actualizar también el nombre para la UI
+        } : u
       ));
-      
+
       toast("Horario actualizado", {
         description: `Se ha asignado el horario "${horario.nombreHorario}" a ${usuario.nombre} ${usuario.apellido}.`,
       });
@@ -180,23 +183,28 @@ export default function VerUsuario() {
                     <div className="flex items-center space-x-2">
                       <Switch
                         id={`status-${usuario.id}`}
-                        checked={usuario.habilitado}
-                        onCheckedChange={() => toggleEstadoUsuario(usuario.id, usuario.habilitado)}
+                        checked={usuario.status === 1} // Usar status en lugar de habilitado
+                        onCheckedChange={() => toggleEstadoUsuario(usuario.id, usuario.status)}
                       />
-                      <Label htmlFor={`status-${usuario.id}`} className={usuario.habilitado ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                        {usuario.habilitado ? "Activo" : "Inactivo"}
+                      <Label htmlFor={`status-${usuario.id}`} 
+                        className={usuario.status === 1 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                        {usuario.status === 1 ? "Activo" : "Inactivo"}
                       </Label>
                     </div>
                   </TableCell>
-                  <TableCell>{usuario.nombreUsuario}</TableCell>
-                  <TableCell>{usuario.departamento?.nombre || "No asignado"}</TableCell>
+                  <TableCell>{usuario.user}</TableCell>
+                  <TableCell>{usuario.departamentoNombre || "No asignado"}</TableCell>
                   <TableCell>
                     <Select
                       value={usuario.horarioLaboralId?.toString() || ""}
                       onValueChange={(value) => cambiarHorarioLaboral(usuario.id, parseInt(value))}
                     >
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Seleccionar horario" />
+                        <SelectValue>
+                          {usuario.horarioLaboralId 
+                            ? (horarios.find(h => h.id === usuario.horarioLaboralId)?.nombreHorario || usuario.horarioLaboralNombre || "Horario no encontrado") 
+                            : "Seleccionar horario"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {horarios.map((horario) => (
