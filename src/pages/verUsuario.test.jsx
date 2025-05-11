@@ -21,15 +21,15 @@ describe('VerUsuario', () => {
           data: [
             {
               id: 1,
-              nombre: "Juan",
-              apellido: "Pérez",
-              cedula: "1234567890",
-              email: "juan@test.com",
-              telefono: "099123456",
+              nombre: "María",
+              apellido: "González",
+              cedula: "0987654321",
+              email: "maria.gonzalez@empresa.com",
+              telefono: "098765432",
               status: 1,
-              user: "jperez",
-              departamentoNombre: "Recursos Humanos",
-              horarioLaboralId: 1
+              user: "mgonzalez",
+              departamentoNombre: "Tecnología",
+              horarioLaboralId: 2
             }
           ] 
         });
@@ -50,8 +50,8 @@ describe('VerUsuario', () => {
     axios.patch.mockResolvedValue({ 
       data: {
         id: 1,
-        nombre: "Juan",
-        apellido: "Pérez",
+        nombre: "María",
+        apellido: "González",
         status: 0
       }
     });
@@ -83,9 +83,9 @@ describe('VerUsuario', () => {
     
     // Check if user data is displayed after loading
     await vi.waitFor(() => {
-      expect(screen.getByText('Juan')).toBeDefined();
-      expect(screen.getByText('Pérez')).toBeDefined();
-      expect(screen.getByText('1234567890')).toBeDefined();
+      expect(screen.getByText('María')).toBeDefined();
+      expect(screen.getByText('González')).toBeDefined();
+      expect(screen.getByText('0987654321')).toBeDefined();
     });
   });
   
