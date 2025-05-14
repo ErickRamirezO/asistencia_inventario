@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, Outlet } from "react-router-dom"
 import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/collapsible"
 
 
-export default function Layout({ children }) {
+export default function Layout() {
   const location = useLocation()
   const [defaultOpen, setDefaultOpen] = useState(true)
 
@@ -299,10 +299,10 @@ export default function Layout({ children }) {
 
           {/* Page content */}
           <main className="flex-1 flex-col flex w-full">
-  <div className="w-full max-w-6xl">{children}</div>
-</main>
-
-
+            <div className="w-full max-w-6xl">
+              <Outlet />
+            </div>
+          </main>
         </div>
       </div>
     </SidebarProvider>
