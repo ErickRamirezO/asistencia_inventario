@@ -8,7 +8,7 @@ import { CalendarIcon, ScanLine, Check, ChevronsUpDown, ArrowLeft } from "lucide
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
@@ -352,8 +351,14 @@ export default function FormularioUsuario() {
     );
   }
 
-  return (
-    <div className="p-6 max-w-6xl mx-auto">
+  // Reemplazar el div principal del return por esto:
+return (
+  <div className="w-full max-w-6xl mx-auto overflow-hidden">
+    {/* Contenedor externo con overflow-hidden */}
+    
+    <div className="px-4 py-6">
+      {/* Contenedor interno con padding seguro */}
+      
       {/* Botón de regreso solo en modo edición */}
       {modoEdicion && (
         <div className="mb-6">
@@ -368,270 +373,279 @@ export default function FormularioUsuario() {
         </div>
       )}
       
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden">
+        <CardHeader className="px-4 sm:px-6">
           <CardTitle className="text-2xl font-bold">
             {modoEdicion ? "Editar Usuario" : "Registrar Usuario"}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <Form {...form}>
-            <form className="w-full max-w-full overflow-x-hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Columna izquierda - Campos de datos personales */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Columna izquierda - Reorganizada en 4x2 */}
                 <div className="space-y-6">
-                  {/* Campo de nombres */}
-                  <FormField
-                    control={form.control}
-                    name="nombres"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombres</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ejemplo: Juan Carlos" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de apellidos */}
-                  <FormField
-                    control={form.control}
-                    name="apellidos"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Apellidos</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ejemplo: Pérez Gómez" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de cédula */}
-                  <FormField
-                    control={form.control}
-                    name="cedula"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cédula</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ejemplo: 1234567890" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de teléfono */}
-                  <FormField
-                    control={form.control}
-                    name="telefono"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Teléfono</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ejemplo: 0987654321" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de correo electrónico */}
-                  <FormField
-                    control={form.control}
-                    name="correoElectronico"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Correo Electrónico</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ejemplo: usuario@correo.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Primera fila - 2 campos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="nombres"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nombres</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ejemplo: Juan Carlos" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="apellidos"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Apellidos</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ejemplo: Pérez Gómez" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   
-                  {/* Campo de fecha de nacimiento */}
-                  <FormField
-                    control={form.control}
-                    name="fechaNacimiento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha de Nacimiento</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "dd/MM/yyyy")
-                                ) : (
-                                  <span>Seleccionar fecha</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de departamento (Combobox) */}
-                  <FormField
-                    control={form.control}
-                    name="departamento"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Departamento</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? departamentos.find(
-                                      (dept) => dept.value === field.value
-                                    )?.label
-                                  : "Seleccionar departamento"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                            <Command>
-                              <CommandInput
-                                placeholder="Buscar departamento..."
-                                className="h-9"
+                  {/* Segunda fila - 2 campos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="cedula"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cédula</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ejemplo: 1234567890" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="telefono"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Teléfono</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ejemplo: 0987654321" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Tercera fila - 2 campos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="correoElectronico"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Correo Electrónico</FormLabel>
+                          <FormControl>
+                            <Input placeholder="usuario@correo.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="fechaNacimiento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fecha de Nacimiento</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "dd/MM/yyyy")
+                                  ) : (
+                                    <span>Seleccionar fecha</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 max-w-[300px]" align="start">
+                              <DayPicker
+                                mode="single"
+                                animate
+                                captionLayout="dropdown"
+                                navLayout="around"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                required
+                                weekStartsOn={1}                                
                               />
-                              <CommandList>
-                                <CommandEmpty>No se encontraron departamentos.</CommandEmpty>
-                                <CommandGroup>
-                                  {departamentos.map((dept) => (
-                                    <CommandItem
-                                      value={dept.label}
-                                      key={dept.value}
-                                      onSelect={() => {
-                                        form.setValue("departamento", dept.value);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          dept.value === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      {dept.label}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Campo de rol (Combobox) */}
-                  <FormField
-                    control={form.control}
-                    name="rol"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Rol</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? roles.find(
-                                      (rol) => rol.value === field.value
-                                    )?.label
-                                  : "Seleccionar rol"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                            <Command>
-                              <CommandInput
-                                placeholder="Buscar rol..."
-                                className="h-9"
-                              />
-                              <CommandList>
-                                <CommandEmpty>No se encontraron roles.</CommandEmpty>
-                                <CommandGroup>
-                                  {roles.map((rol) => (
-                                    <CommandItem
-                                      value={rol.label}
-                                      key={rol.value}
-                                      onSelect={() => {
-                                        form.setValue("rol", rol.value);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          rol.value === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      {rol.label}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Cuarta fila - 2 campos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="departamento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Departamento</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? departamentos.find(
+                                        (dept) => dept.value === field.value
+                                      )?.label?.substring(0, 20) + 
+                                      (departamentos.find((dept) => dept.value === field.value)?.label?.length > 20 ? "..." : "")
+                                    : "Seleccionar departamento"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[220px] p-0">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Buscar..."
+                                  className="h-9"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>No hay resultados.</CommandEmpty>
+                                  <CommandGroup>
+                                    {departamentos.map((dept) => (
+                                      <CommandItem
+                                        value={dept.label}
+                                        key={dept.value}
+                                        onSelect={() => {
+                                          form.setValue("departamento", dept.value);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            dept.value === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        {dept.label}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="rol"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rol</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? roles.find(
+                                        (rol) => rol.value === field.value
+                                      )?.label
+                                    : "Seleccionar rol"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[220px] p-0">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Buscar rol..."
+                                  className="h-9"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>No hay resultados.</CommandEmpty>
+                                  <CommandGroup>
+                                    {roles.map((rol) => (
+                                      <CommandItem
+                                        value={rol.label}
+                                        key={rol.value}
+                                        onSelect={() => {
+                                          form.setValue("rol", rol.value);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            rol.value === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        {rol.label}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                {/* Columna derecha - Campo de tarjeta RFID */}
+                {/* Columna derecha - Campo de tarjeta RFID (sin cambios) */}
                 <div className="flex flex-col h-full">
+                  {/* Este elemento se mantiene sin cambios como solicitaste */}
                   <FormField
                     control={form.control}
                     name="tarjetaRFID"
@@ -639,6 +653,7 @@ export default function FormularioUsuario() {
                       <FormItem className="flex-1 flex flex-col">
                         <FormLabel>Tarjeta RFID</FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 flex-1 flex flex-col justify-center">
+                          {/* Contenido existente sin cambios */}
                           {rfidValue ? (
                             <div className="flex flex-col items-center justify-center h-full">
                               <div className="text-green-600 font-medium mb-4 text-lg">
@@ -698,7 +713,6 @@ export default function FormularioUsuario() {
               </div>
 
               <div className="flex justify-end space-x-4">
-                {/* Botón de cancelar solo en modo edición */}
                 {modoEdicion && (
                   <Button 
                     type="button" 
@@ -717,5 +731,6 @@ export default function FormularioUsuario() {
         </CardContent>
       </Card>
     </div>
-  );
+  </div>
+);
 }
