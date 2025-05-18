@@ -5,8 +5,8 @@ import Login from "./pages/auth/login"
 import Attendance from "./pages/asistencia"
 import ReporteAsistencia from "./pages/reporteAsistencia"
 import TurnosLaborales from "./pages/turnosLaborales"
-import RegistrarUsuario from "./pages/registrarUsuario"
 import VerUsuario from "./pages/verUsuario"
+import FormularioUsuario from "./pages/formularioUsuario"
 import RegistroBienes from "./pages/inventario/registroBienes"
 
 function App() {
@@ -23,7 +23,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/reporteAsistencia" element={<ReporteAsistencia />} />
           <Route path="/verUsuarios" element={<VerUsuario />} />
-          <Route path="/registrarUsuario" element={<RegistrarUsuario />} />
+          <Route path="/usuarios/editar/:id" element={<FormularioUsuario key="editar"/>} />
+          <Route path="/usuarios/registrar" element={<FormularioUsuario key="registrar"/>} />
           <Route path="/turnosLaborales" element={<TurnosLaborales />} />
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/bienes" element={<RegistroBienes />} />

@@ -15,16 +15,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react"; // Importamos los iconos
-
+import { useNavigate } from "react-router-dom";
 export default function VerUsuario() {
   const [usuarios, setUsuarios] = useState([]);
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dialogoConfirmacionAbierto, setDialogoConfirmacionAbierto] = useState(false);
+  const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
+  const navigate = useNavigate();
 
   // Obtener usuarios y horarios al cargar el componente
   useEffect(() => {
@@ -44,8 +55,9 @@ export default function VerUsuario() {
         setLoading(false);
       } catch (error) {
         console.error("Error al cargar datos:", error);
-        toast("Error", {
+        toast.error("Error", {
           description: "No se pudieron cargar los horarios laborales.",
+          richColors: true,
         });
         setLoading(false);
         
@@ -80,13 +92,15 @@ export default function VerUsuario() {
       const nuevoEstado = usuarioActualizado.status === 1;
       const nombreCompleto = `${usuarioActualizado.nombre} ${usuarioActualizado.apellido}`;
       
-      toast(nuevoEstado ? "Usuario habilitado" : "Usuario inhabilitado", {
+      toast.success(nuevoEstado ? "Usuario habilitado" : "Usuario inhabilitado", {
         description: `${nombreCompleto} ha sido ${nuevoEstado ? "activado" : "desactivado"} correctamente.`,
+        richColors: true,
       });
     } catch (error) {
       console.error("Error al cambiar estado:", error);
-      toast("Error", {
+      toast.error("Error", {
         description: "No se pudo actualizar el estado del usuario.",
+        richColors: true,
       });
     }
   };
@@ -112,38 +126,51 @@ export default function VerUsuario() {
         } : u
       ));
 
-      toast("Horario actualizado", {
+      toast.success("Horario actualizado", {
         description: `Se ha asignado el horario "${horario.nombreHorario}" a ${usuario.nombre} ${usuario.apellido}.`,
+        richColors: true,
       });
     } catch (error) {
       console.error("Error al cambiar horario:", error);
-      toast("Error", {
+      toast.error("Error", {
         description: "No se pudo actualizar el horario laboral.",
+        richColors: true,
       });
     }
   };
 
-  // Función para editar un usuario
-  const editarUsuario = (id) => {
-    const usuario = usuarios.find(u => u.id === id);
-    toast("Editar usuario", {
-      description: `Editando al usuario: ${usuario.nombre} ${usuario.apellido}`,
-    });
-    // Aquí iría la lógica para abrir un modal de edición o navegar a una página de edición
-  };
-
-  // Función para eliminar un usuario
+  // Reemplaza la función eliminarUsuario actual con esta
   const eliminarUsuario = (id) => {
     const usuario = usuarios.find(u => u.id === id);
-    // En un entorno real, esto enviaría una petición al backend
-    // await axios.delete(`http://localhost:8002/api/usuarios/${id}`);
-    
-    // Actualizar el estado local
-    setUsuarios(usuarios.filter(u => u.id !== id));
-    
-    toast("Usuario eliminado", {
-      description: `${usuario.nombre} ${usuario.apellido} ha sido eliminado correctamente.`,
-    });
+    console.log("Usuario a eliminar:", usuario);
+    setUsuarioAEliminar(usuario);
+    setDialogoConfirmacionAbierto(true);
+  };
+
+  // Agrega esta nueva función para confirmar la eliminación
+  const confirmarEliminacion = async () => {
+    try {
+      // En un entorno real, esto enviaría una petición al backend
+      console.log("Usuario eliminado:", usuarioAEliminar.id);
+      await axios.delete(`http://localhost:8002/api/usuarios/${usuarioAEliminar.id}`);
+      // Actualizar el estado local
+      setUsuarios(usuarios.filter(u => u.id !== usuarioAEliminar.id));
+      
+      toast.success("Usuario eliminado", {
+        description: `${usuarioAEliminar.nombre} ${usuarioAEliminar.apellido} ha sido eliminado correctamente.`,
+        richColors: true,
+      });
+      
+      // Cerrar el diálogo
+      setDialogoConfirmacionAbierto(false);
+      setUsuarioAEliminar(null);
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      toast.error("Error", {
+        description: "No se pudo eliminar el usuario. Intente nuevamente.",
+        richColors: true,
+      });
+    }
   };
 
   if (loading) {
@@ -220,10 +247,10 @@ export default function VerUsuario() {
                       <Button 
                         variant="outline" 
                         size="icon"
-                        onClick={() => editarUsuario(usuario.id)}
+                        onClick={() => navigate(`/usuarios/editar/${usuario.id}`)}
                         className="h-8 w-8"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 mr-1" />
                       </Button>
                       <Button 
                         variant="destructive" 
@@ -247,6 +274,32 @@ export default function VerUsuario() {
           </TableBody>
         </Table>
       </div>
+      {/* Diálogo de confirmación para eliminar usuario */}
+      <Dialog open={dialogoConfirmacionAbierto} onOpenChange={setDialogoConfirmacionAbierto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+            <DialogDescription>
+              ¿Está seguro que desea eliminar al usuario {usuarioAEliminar?.nombre} {usuarioAEliminar?.apellido}?
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setDialogoConfirmacionAbierto(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmarEliminacion}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

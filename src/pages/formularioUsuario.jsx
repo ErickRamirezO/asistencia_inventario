@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, ScanLine, Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, ScanLine, Check, ChevronsUpDown, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { cn } from "@/lib/utils";
@@ -80,12 +81,17 @@ const FormSchema = z.object({
   }),
 });
 
-export default function RegistrarUsuario() {
+export default function FormularioUsuario() {
+  const { id } = useParams(); // Obtenemos el ID si existe (modo edición)
+  const navigate = useNavigate();
   const [scanningRFID, setScanningRFID] = useState(false);
   const [rfidValue, setRfidValue] = useState("");
+  const [tarjetasRFID, setTarjetasRFID] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [roles, setRoles] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [usuario, setUsuario] = useState(null);
+  const modoEdicion = !!id; // Si hay ID, estamos en modo edición
   
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -101,37 +107,77 @@ export default function RegistrarUsuario() {
       fechaNacimiento: undefined,
     },
   });
-
-  // Cargar departamentos y roles desde la API
+  // Cargar departamentos, roles y datos del usuario si estamos en modo edición
   useEffect(() => {
     const cargarDatos = async () => {
       setCargando(true);
       try {
         // Obtenemos los departamentos
         const respDepartamentos = await axios.get("http://localhost:8002/api/departamentos");
-        // Transformamos la respuesta al formato esperado
         const departamentosFormateados = respDepartamentos.data.map(dept => ({
           label: dept.nombreDepartamento,
           value: dept.id.toString()
         }));
         setDepartamentos(departamentosFormateados);
-        console.log(departamentosFormateados);
         
         // Obtenemos los roles
         const respRoles = await axios.get("http://localhost:8002/api/roles");
-        // Transformamos la respuesta al formato esperado
         const rolesFormateados = respRoles.data.map(rol => ({
           label: rol.rol,
           value: rol.id.toString()
         }));
         setRoles(rolesFormateados);
 
+        // Obtenemos las tarjetas RFID disponibles
+        const respTarjetas = await axios.get("http://localhost:8002/api/tags-rfid");
+        const tarjetasRFID = respTarjetas.data;
+
+        // Si estamos en modo edición, cargamos los datos del usuario
+        if (modoEdicion) {
+          // Obtener datos del usuario a editar
+          const respUsuario = await axios.get(`http://localhost:8002/api/usuarios/${id}`);
+          const datosUsuario = respUsuario.data;
+          setUsuario(datosUsuario);
+
+          const departamentoEncontrado = departamentosFormateados.find(
+              dept => dept.label === datosUsuario.departamentoNombre
+          );
+
+          const rolEncontrado = rolesFormateados.find(
+              rol => rol.value === datosUsuario.rolesIdroles?.toString()
+          );
+
+          const tarjetaEncontrada = tarjetasRFID.find(
+            tag => tag.id.toString() === datosUsuario.tagsRFIDIdTagsRFID?.toString()
+          );
+          console.log("Tarjeta encontrada:", tarjetaEncontrada);
+          
+          // Actualizar el formulario con los datos del usuario
+          form.reset({
+            nombres: datosUsuario.nombre,
+            apellidos: datosUsuario.apellido,
+            telefono: datosUsuario.telefono,
+            cedula: datosUsuario.cedula,
+            correoElectronico: datosUsuario.email,
+            departamento: departamentoEncontrado ? departamentoEncontrado.value : "", 
+            rol: rolEncontrado ? rolEncontrado.value : "", 
+            tarjetaRFID: tarjetaEncontrada ? tarjetaEncontrada.tag : "",
+            fechaNacimiento: datosUsuario.fechaNacimiento ? new Date(datosUsuario.fechaNacimiento) : undefined,
+          });
+          
+          // Actualizar el valor RFID si existe
+          if (tarjetaEncontrada) {
+            setRfidValue(tarjetaEncontrada.tag);
+          }
+        }
+
       } catch (error) {
         console.error("Error al cargar datos:", error);
-        toast("Error", {
-          description: "No se pudieron cargar los departamentos o roles. Usando datos de respaldo.",
+        toast.error("Error", {
+          description: "No se pudieron cargar los datos. Intente nuevamente.",
+          richColors: true,
         });
-        // En caso de error, usamos los datos de respaldo
+        // En caso de error, usamos los datos de respaldo para departamentos y roles
         setDepartamentos(departamentosRespaldo);
         setRoles(rolesRespaldo);
       } finally {
@@ -140,13 +186,14 @@ export default function RegistrarUsuario() {
     };
 
     cargarDatos();
-  }, []);
+  }, [id, form, modoEdicion]);
 
   // Función para iniciar el modo de escucha del lector RFID
   function startRFIDReader() {
     setScanningRFID(true);
-    toast("Esperando tarjeta", {
-      description: "Acerque la tarjeta al lector RFID..."
+    toast.info("Esperando tarjeta", {
+      description: "Acerque la tarjeta al lector RFID...",
+      richColors: true,
     });
   }
   
@@ -161,7 +208,7 @@ export default function RegistrarUsuario() {
     form.setValue("tarjetaRFID", "");
   }
   
-  // Efecto para manejar eventos del teclado (simulando un lector RFID que actúa como teclado)
+  // Efecto para manejar eventos del teclado (simulando un lector RFID)
   useEffect(() => {
     let buffer = '';
     let lastKeyTime = 0;
@@ -177,24 +224,22 @@ export default function RegistrarUsuario() {
       
       lastKeyTime = currentTime;
       
-      // Si es Enter, procesa el código completo
       if (event.key === 'Enter') {
         if (buffer.length >= 8) {
           setRfidValue(buffer);
           form.setValue("tarjetaRFID", buffer);
           setScanningRFID(false);
-          toast("Tarjeta detectada", {
+          toast.success("Tarjeta detectada", {
             description: `Código RFID registrado correctamente`,
+            richColors: true,
           });
         }
         buffer = '';
       } else if (event.key.match(/[a-zA-Z0-9]/)) {
-        // Solo acepta caracteres alfanuméricos
         buffer += event.key;
       }
     };
     
-    // Añadir/quitar event listeners
     if (scanningRFID) {
       window.addEventListener('keypress', handleKeyPress);
     }
@@ -204,13 +249,95 @@ export default function RegistrarUsuario() {
     };
   }, [scanningRFID, form]);
 
-  function onSubmit(data) {
-    console.log("Datos del usuario:", data);
-    toast("Usuario registrado", {
-      description: "El usuario ha sido registrado exitosamente."
-    });
-    form.reset();
-    setRfidValue("");
+  // Agregar esta función en tu componente
+  async function buscarIdPorCodigoRFID(codigo) {
+    try {
+      const respuesta = await axios.get(`http://localhost:8002/api/tags-rfid/buscar-por-codigo/${codigo}`);
+      console.log("Respuesta de búsqueda por código:", respuesta.data);
+      return respuesta.data
+    } catch (error) {
+      console.error("Error al buscar ID de tarjeta RFID:", error);
+      return null;
+    }
+  }
+
+  // Función para manejar el envío del formulario
+  async function onSubmit(formData) {
+    try {
+      // Buscar ID de tarjeta RFID usando la lista local
+      let tagsRFIDIdTagsRFID = null;
+      if (formData.tarjetaRFID) {
+        // Buscar el ID correspondiente al código
+        tagsRFIDIdTagsRFID = await buscarIdPorCodigoRFID(formData.tarjetaRFID);
+        console.log("ID de tarjeta RFID encontrado:", tagsRFIDIdTagsRFID);
+      }
+      
+      const apiData = {
+        nombre: formData.nombres,
+        apellido: formData.apellidos,
+        telefono: formData.telefono,
+        cedula: formData.cedula,
+        email: formData.correoElectronico,
+        departamentosIddepartamentos: parseInt(formData.departamento),
+        rolesIdroles: parseInt(formData.rol),
+        fechaNacimiento: formData.fechaNacimiento ? format(formData.fechaNacimiento, 'yyyy-MM-dd') : null,
+        tagsRFIDIdTagsRFID
+      };
+
+      if (modoEdicion) {
+        // Preservar campos adicionales que no están en el formulario pero son necesarios
+        const datosCompletos = {
+          ...apiData,
+          // Conservar datos existentes del usuario que no se editan en el formulario
+          password: usuario.password,
+          user: usuario.user,
+          status: usuario.status || 1,
+          horarioLaboralId: usuario.horarioLaboralId || 1
+        };
+
+        console.log("Datos completos a enviar en actualización:", datosCompletos);
+        
+        // Modo edición: Actualizar usuario existente con todos los campos requeridos
+        await axios.put(`http://localhost:8002/api/usuarios/${id}`, datosCompletos);
+        
+        toast.success("Usuario actualizado", {
+          description: "Los datos del usuario han sido actualizados exitosamente.",
+          richColors: true,
+        });
+        
+        // Navegar de vuelta a la lista de usuarios
+        navigate("/verUsuarios");
+      } else {
+        // En caso de nuevo registro necesitamos incluir los campos obligatorios
+        const datosCompletos = {
+          ...apiData,
+          password: "contraseña123", // Contraseña por defecto para nuevos usuarios
+          user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
+          status: 1, // Activo por defecto
+          horarioLaboralId: 1 // Horario por defecto
+        };
+        
+        // Modo registro: Crear nuevo usuario
+        await axios.post("http://localhost:8002/api/usuarios", datosCompletos);
+        
+        toast.success("Usuario registrado", {
+          description: "El usuario ha sido registrado exitosamente.",
+          richColors: true,
+        });
+        
+        // Limpiar el formulario en modo registro
+        form.reset();
+        setRfidValue("");
+      }
+    } catch (error) {
+      console.error("Error al procesar usuario:", error);
+      toast.error("Error", {
+        description: modoEdicion 
+          ? "No se pudo actualizar el usuario. Intente nuevamente."
+          : "No se pudo registrar el usuario. Intente nuevamente.",
+        richColors: true,
+      });
+    }
   }
 
   // Mostrar estado de carga mientras se obtienen los datos
@@ -227,9 +354,25 @@ export default function RegistrarUsuario() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      {/* Botón de regreso solo en modo edición */}
+      {modoEdicion && (
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/verUsuarios")} 
+            className="flex items-center"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver a Usuarios
+          </Button>
+        </div>
+      )}
+      
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Registrar Usuario</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {modoEdicion ? "Editar Usuario" : "Registrar Usuario"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -491,7 +634,7 @@ export default function RegistrarUsuario() {
                   <FormField
                     control={form.control}
                     name="tarjetaRFID"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem className="flex-1 flex flex-col">
                         <FormLabel>Tarjeta RFID</FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 flex-1 flex flex-col justify-center">
@@ -553,9 +696,19 @@ export default function RegistrarUsuario() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end space-x-4">
+                {/* Botón de cancelar solo en modo edición */}
+                {modoEdicion && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigate("/verUsuarios")}
+                  >
+                    Cancelar
+                  </Button>
+                )}
                 <Button type="submit" variant="blue">
-                  Registrar Usuario
+                  {modoEdicion ? "Guardar Cambios" : "Registrar Usuario"}
                 </Button>
               </div>
             </form>

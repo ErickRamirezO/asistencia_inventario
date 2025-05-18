@@ -108,7 +108,7 @@ export default function Layout() {
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/registrarUsuario">
+                          <Link to="/usuarios/registrar">
                             <UserPlus className="h-5 w-5" />
                             <span>Registrar usuarios</span>
                           </Link>

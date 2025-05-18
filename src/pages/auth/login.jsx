@@ -19,7 +19,7 @@ const Login = () => {
           <div className="mx-auto w-full max-w-sm rounded-md p-6 shadow">
             <div className="mb-6 flex flex-col items-center">
               <a href="/" className="mb-6 flex items-center gap-2">
-                <img src="/logo.png" className="max-h-8" alt="Logo Sistema" />
+                <img src="/logo.png" className="max-h-8" alt="Logo SmartControl" />
               </a>
               <h1 className="mb-2 text-2xl font-bold">Iniciar Sesión</h1>
               <p className="text-muted-foreground">Bienvenido de nuevo</p>
