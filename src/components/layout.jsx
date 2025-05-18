@@ -31,6 +31,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import logo from "../assets/LogoName.png"
 
 
 export default function Layout() {
@@ -61,11 +62,12 @@ export default function Layout() {
       <div className="flex min-h-screen w-screen ">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-0 py-0 ">
-              <Package className="h-6 w-6" />
-              <span className="text-lg font-semibold">InventAssist (NUEVO MENU)</span>
-            </div>
-          </SidebarHeader>
+  <div className="flex justify-center gap-2 p-4">
+    <img src={logo} alt="Logo" className="h-20 w-auto" />
+
+  </div>
+</SidebarHeader>
+
 
           <SidebarContent>
             <SidebarMenu>

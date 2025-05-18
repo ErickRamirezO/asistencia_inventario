@@ -376,7 +376,8 @@ export default function FormularioUsuario() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form className="w-full max-w-full overflow-x-hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Columna izquierda - Campos de datos personales */}
                 <div className="space-y-6">

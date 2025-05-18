@@ -8,6 +8,8 @@ import TurnosLaborales from "./pages/turnosLaborales"
 import VerUsuario from "./pages/verUsuario"
 import FormularioUsuario from "./pages/formularioUsuario"
 import RegistroBienes from "./pages/inventario/registroBienes"
+import Categoria from "./pages/inventario/categorias"
+import Departamentos from "./pages/usuarios/departamentos"
 
 function App() {
   return (
@@ -28,6 +30,9 @@ function App() {
           <Route path="/turnosLaborales" element={<TurnosLaborales />} />
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/bienes" element={<RegistroBienes />} />
+          <Route path="/categoria" element={<Categoria/>}/>
+          <Route path="/departamentos" element={<Departamentos/>}/>
+
           {/* Agregar otras rutas aquí */}
         </Route>
       </Routes>

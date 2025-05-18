@@ -9,7 +9,7 @@ export default defineConfig({
     registerType: 'prompt',
     injectRegister: false,
 
-    includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
+    includeAssets: ["logo.png"],
       
     pwaAssets: {
       disabled: false,

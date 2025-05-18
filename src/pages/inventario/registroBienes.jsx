@@ -3,6 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
@@ -15,12 +17,27 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown, ScanLine } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-// Validación Zod
 const FormSchema = z.object({
-  nombreBien: z.string().min(2, { message: "Mínimo 2 caracteres." }),
-  descripcion: z.string().min(2, { message: "Mínimo 2 caracteres." }),
-  precio: z.coerce.number().positive({ message: "Debe ser un número positivo." }),
+  nombreBien: z.string().min(2),
+  descripcion: z.string().min(2),
+  precio: z.coerce.number().positive(),
   status: z.coerce.number().int().min(0).max(1),
   tagInmueble: z.string().min(2),
   serieBien: z.string().min(2),
@@ -30,12 +47,18 @@ const FormSchema = z.object({
   dimensionesBien: z.string().min(2),
   observacionBien: z.string().optional(),
   ubicacionBien: z.string().min(2),
-  categoriaId: z.coerce.number().int(),
-  tagRfidId: z.coerce.number().int(),
-  departamentoId: z.coerce.number().int(),
+  categoriaId: z.string(),
+  tagRfidId: z.coerce.number().int().optional(),
+  departamentoId: z.string(),
+  tagRfidCode: z.string().optional(),
 });
 
 export default function RegistrarBien() {
+  const [scanningRFID, setScanningRFID] = useState(false);
+  const [rfidValue, setRfidValue] = useState("");
+  const [departamentos, setDepartamentos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -54,36 +77,143 @@ export default function RegistrarBien() {
       categoriaId: "",
       tagRfidId: "",
       departamentoId: "",
+      tagRfidCode: "",
     },
   });
 
+  useEffect(() => {
+    axios.get("http://localhost:8002/api/departamentos").then(res => {
+      const options = res.data.map(dep => ({
+        label: dep.nombreDepartamento,
+        value: dep.id.toString(),
+      }));
+      setDepartamentos(options);
+    }).catch(() => toast.error("Error al cargar departamentos"));
+
+    axios.get("http://localhost:8002/api/categorias").then(res => {
+      const options = res.data.map(cat => ({
+        label: cat.nombreCategoria,
+        value: cat.id.toString(),
+      }));
+      setCategorias(options);
+    }).catch(() => toast.error("Error al cargar categorías"));
+  }, []);
+
+  useEffect(() => {
+    let buffer = "";
+    let lastKeyTime = 0;
+
+    const handleKeyPress = (event) => {
+      if (!scanningRFID) return;
+      const currentTime = new Date().getTime();
+      if (currentTime - lastKeyTime > 500 && buffer.length > 0) buffer = "";
+      lastKeyTime = currentTime;
+
+      if (event.key === "Enter") {
+        if (buffer.length >= 8) {
+          setRfidValue(buffer);
+          form.setValue("tagRfidCode", buffer);
+          setScanningRFID(false);
+          toast.success("Tag RFID detectado", {
+            description: `Código RFID: ${buffer}`,
+            richColors: true,
+          });
+        }
+        buffer = "";
+      } else if (event.key.match(/[a-zA-Z0-9]/)) {
+        buffer += event.key;
+      }
+    };
+
+    if (scanningRFID) window.addEventListener("keypress", handleKeyPress);
+    return () => window.removeEventListener("keypress", handleKeyPress);
+  }, [scanningRFID, form]);
+
+  const buscarIdPorCodigoRFID = async (codigo) => {
+    try {
+      const response = await axios.get(`http://localhost:8002/api/tags-rfid/buscar-por-codigo/${codigo}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al buscar el ID del tag RFID:", error);
+      return null;
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:8080/api/bienes-inmuebles", data);
+      let tagId = data.tagRfidId;
+      if (data.tagRfidCode) {
+        const idEncontrado = await buscarIdPorCodigoRFID(data.tagRfidCode);
+        tagId = idEncontrado || data.tagRfidId;
+      }
+      const finalData = {
+        ...data,
+        tagRfidId: tagId,
+        categoriaId: parseInt(data.categoriaId),
+        departamentoId: parseInt(data.departamentoId),
+      };
+      const response = await axios.post("http://localhost:8080/api/bienes-inmuebles", finalData);
       alert(`Bien registrado con ID: ${response.data}`);
       form.reset();
+      setRfidValue("");
     } catch (error) {
       console.error("Error al registrar bien:", error);
-      alert(" Ocurrió un error al registrar el bien.");
+      alert("Ocurrió un error al registrar el bien.");
     }
   };
 
   return (
-    <div className="p-12">
+    <div className="p-6 md:p-12">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Registrar Bien</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-hidden w-full max-w-full">
+          <div className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
+            {rfidValue ? (
+              <div className="text-center">
+                <p className="text-green-600 text-lg mb-2">Tag RFID escaneado:</p>
+                <p className="bg-white dark:bg-gray-800 text-lg p-2 rounded font-mono">{rfidValue}</p>
+                <Button variant="outline" className="mt-4" onClick={() => {
+                  setRfidValue("");
+                  form.setValue("tagRfidCode", "");
+                  setScanningRFID(true);
+                  toast.info("Escaneando nuevo tag RFID...");
+                }}>
+                  <ScanLine className="h-4 w-4 mr-2" /> Escanear otro tag
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className={`text-lg ${scanningRFID ? "text-blue-600 animate-pulse" : "text-gray-600"}`}>
+                  {scanningRFID ? "Escanee un tag RFID..." : "No se ha escaneado ningún tag RFID"}
+                </p>
+                {!scanningRFID && (
+                  <Button variant="outline" className="mt-4" onClick={() => {
+                    setScanningRFID(true);
+                    toast.info("Escaneando tag RFID...");
+                  }}>
+                    <ScanLine className="h-4 w-4 mr-2" /> Iniciar escaneo
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
 
+          <Form {...form}>
+            <form
+  onSubmit={form.handleSubmit(onSubmit)}
+  className="w-full max-w-full grid grid-cols-1 md:grid-cols-2 gap-4"
+>
 
-      <h1 className="text-2xl font-bold mb-6">Registrar Bien</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <FormField
+              <FormField
             control={form.control}
             name="nombreBien"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nombre del Bien</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: Escritorio" {...field} />
+                  <Input placeholder="Ejemplo: Escritorio"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -97,7 +227,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: De madera color negro" {...field} />
+                  <Input placeholder="Ejemplo: De madera color negro" className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,7 +241,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Precio</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="Ejemplo: 120.00" {...field} />
+                  <Input type="number" placeholder="Ejemplo: 120.00"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -125,26 +255,14 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Estado</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="1 para activo, 0 para inactivo" {...field} />
+                  <Input type="number" placeholder="1 para activo, 0 para inactivo"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="tagInmueble"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tag Interno</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ejemplo: TAG001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+         
 
           <FormField
             control={form.control}
@@ -153,7 +271,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Serie</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: SN123456" {...field} />
+                  <Input placeholder="Ejemplo: SN123456" className="w-full"  {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,7 +285,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Modelo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: X300" {...field} />
+                  <Input placeholder="Ejemplo: X300"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -181,7 +299,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Marca</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: HP" {...field} />
+                  <Input placeholder="Ejemplo: HP" className="w-full"  {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -195,7 +313,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Material</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: Acero inoxidable" {...field} />
+                  <Input placeholder="Ejemplo: Acero inoxidable" className="w-full"  {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -209,7 +327,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Dimensiones</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: 1.2m x 0.6m" {...field} />
+                  <Input placeholder="Ejemplo: 1.2m x 0.6m" className="w-full"  {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -223,7 +341,7 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Observaciones</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: Leve desgaste" {...field} />
+                  <Input placeholder="Ejemplo: Leve desgaste"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -237,64 +355,95 @@ export default function RegistrarBien() {
               <FormItem>
                 <FormLabel>Ubicación</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ejemplo: Oficina 101" {...field} />
+                  <Input placeholder="Ejemplo: Oficina 101"  className="w-full" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           
-          <FormField
-            control={form.control}
-            name="categoriaId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ID Categoría</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Ejemplo: 1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           
-          <FormField
-            control={form.control}
-            name="tagRfidId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ID Tag RFID</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Ejemplo: 2" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          
           
           <FormField
             control={form.control}
             name="departamentoId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ID Departamento</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Ejemplo: 3" {...field} />
-                </FormControl>
+                <FormLabel>Departamento</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>{
+                        field.value ? departamentos.find(dep => dep.value === field.value)?.label : "Seleccionar departamento"
+                      }<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full max-w-full">
+                    <Command>
+                      <CommandInput placeholder="Buscar departamento..." className="h-9" />
+                      <CommandList>
+                        <CommandEmpty>No se encontraron departamentos.</CommandEmpty>
+                        <CommandGroup>
+                          {departamentos.map((dep) => (
+                            <CommandItem value={dep.label} key={dep.value} onSelect={() => form.setValue("departamentoId", dep.value)}>
+                              <Check className={cn("mr-2 h-4 w-4", dep.value === field.value ? "opacity-100" : "opacity-0")} />
+                              {dep.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-<div className="">
-  <Button type="submit" className=" md:w-auto">
-    Registrar Bien
-  </Button>
-</div>
+          <FormField
+            control={form.control}
+            name="categoriaId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>{
+                        field.value ? categorias.find(cat => cat.value === field.value)?.label : "Seleccionar categoría"
+                      }<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full max-w-full">
+                    <Command>
+                      <CommandInput placeholder="Buscar categoría..." className="h-9" />
+                      <CommandList>
+                        <CommandEmpty>No se encontraron categorías.</CommandEmpty>
+                        <CommandGroup>
+                          {categorias.map((cat) => (
+                            <CommandItem value={cat.label} key={cat.value} onSelect={() => form.setValue("categoriaId", cat.value)}>
+                              <Check className={cn("mr-2 h-4 w-4", cat.value === field.value ? "opacity-100" : "opacity-0")} />
+                              {cat.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-
-        </form>
-      </Form>
+              <div className="md:col-span-2">
+                <Button type="submit" className="text-black w-full justify-between">Registrar Bien</Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
