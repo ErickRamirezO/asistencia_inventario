@@ -52,6 +52,28 @@ const rolesRespaldo = [
   { label: "Supervisor", value: "3" },
   { label: "Empleado", value: "4" },
 ];
+function validarCedulaEcuatoriana(cedula) {
+  if (!/^\d{10}$/.test(cedula)) return false;
+
+  const provincia = parseInt(cedula.substring(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  const digitos = cedula.split("").map(Number);
+  const digitoVerificador = digitos.pop();
+
+  let suma = 0;
+  for (let i = 0; i < digitos.length; i++) {
+    let valor = digitos[i];
+    if (i % 2 === 0) {
+      valor *= 2;
+      if (valor > 9) valor -= 9;
+    }
+    suma += valor;
+  }
+
+  const resultado = (10 - (suma % 10)) % 10;
+  return resultado === digitoVerificador;
+}
 
 const FormSchema = z.object({
   nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres." }),
@@ -60,8 +82,12 @@ const FormSchema = z.object({
     .string()
     .regex(/^\d{10}$/, { message: "El teléfono debe tener 10 dígitos." }),
   cedula: z
-    .string()
-    .regex(/^\d{10}$/, { message: "La cédula debe tener 10 dígitos." }),
+  .string()
+  .length(10, { message: "La cédula debe tener 10 dígitos." })
+  .refine((value) => validarCedulaEcuatoriana(value), {
+    message: "Cédula ecuatoriana no válida.",
+  }),
+
   correoElectronico: z
     .string()
     .email({ message: "Debe ser un correo electrónico válido." }),
@@ -75,9 +101,18 @@ const FormSchema = z.object({
     .string()
     .regex(/^[a-zA-Z0-9]{8,16}$/, { message: "La tarjeta RFID debe tener entre 8 y 16 caracteres." })
     .optional(),
-  fechaNacimiento: z.date({
-    required_error: "Debe seleccionar una fecha de nacimiento.",
+  fechaNacimiento: z
+  .date({ required_error: "Debe seleccionar una fecha de nacimiento." })
+  .refine((fecha) => {
+    const hoy = new Date();
+    const edad = hoy.getFullYear() - fecha.getFullYear();
+    const mes = hoy.getMonth() - fecha.getMonth();
+    const dia = hoy.getDate() - fecha.getDate();
+    return edad > 18 || (edad === 18 && (mes > 0 || (mes === 0 && dia >= 0)));
+  }, {
+    message: "Debe ser mayor de edad (18 años o más).",
   }),
+
 });
 
 export default function FormularioUsuario() {
@@ -92,6 +127,8 @@ export default function FormularioUsuario() {
   const [usuario, setUsuario] = useState(null);
   const modoEdicion = !!id; // Si hay ID, estamos en modo edición
   
+
+
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -195,7 +232,8 @@ export default function FormularioUsuario() {
       richColors: true,
     });
   }
-  
+ 
+
   // Función para detener el modo de escucha del lector RFID
   function stopRFIDReader() {
     setScanningRFID(false);
@@ -722,7 +760,7 @@ return (
                     Cancelar
                   </Button>
                 )}
-                <Button type="submit" variant="blue">
+                <Button type="submit" variant="blue" className=" text-blue-700">
                   {modoEdicion ? "Guardar Cambios" : "Registrar Usuario"}
                 </Button>
               </div>

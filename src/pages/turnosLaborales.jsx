@@ -44,13 +44,21 @@ const FormSchema = z.object({
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: "Debe ser una hora válida en formato HH:mm.",
   }),
-  startLunchTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+  // Se hacen opcionales con refinamientos posteriores
+  startLunchTime: z.string()
+  .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
     message: "Debe ser una hora válida en formato HH:mm.",
-  }),
-  endLunchTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+  })
+  .optional(),
+
+endLunchTime: z.string()
+  .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
     message: "Debe ser una hora válida en formato HH:mm.",
-  }),
+  })
+  .optional(),
+
 });
+
 
 export default function TurnosLaborales() {
   const [turnos, setTurnos] = useState([]);
@@ -80,34 +88,49 @@ export default function TurnosLaborales() {
     obtenerHorariosLaborales();
   }, []);
 
-  async function onSubmit(data) {
-    try {
-      // Convertir las horas a formato compatible con LocalTime (HH:mm)
-      const payload = {
-        nombreHorario: data.shiftName,
-        horaInicio: data.startTime,
-        horaFin: data.endTime,
-        horaInicioAlmuerzo: data.startLunchTime,
-        horaFinAlmuerzo: data.endLunchTime,
-      };
-      console.log("Payload enviado:", payload); // Verifica los datos enviados
+async function onSubmit(data) {
+  try {
+    // Convertir horas a números para comparar
+    const startHour = parseInt(data.startTime.split(":")[0], 10);
+    const endHour = parseInt(data.endTime.split(":")[0], 10);
 
+    // Validar si el turno está dentro del rango 00:00 a 12:00 (inclusive)
+    if (startHour >= 0 && endHour <= 12) {
+      // Almuerzo no obligatorio, limpiar valores
+      data.startLunchTime = "";
+      data.endLunchTime = "";
+    } else {
+      // Almuerzo obligatorio, validar que estén llenos
+      if (!data.startLunchTime || !data.endLunchTime) {
+        toast.error("Debe ingresar la hora de inicio y fin del almuerzo.");
+        return; // No enviar formulario
+      }
+    }
+
+    // Preparar payload y continuar...
+    const payload = {
+      nombreHorario: data.shiftName,
+      horaInicio: data.startTime,
+      horaFin: data.endTime,
+      horaInicioAlmuerzo: data.startLunchTime,
+      horaFinAlmuerzo: data.endLunchTime,
+    };
     
-      const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
-  
-      setTurnos([...turnos, response.data]); // Agrega el nuevo turno a la tabla
-      toast("Turno creado", {
-        description: "El turno laboral se ha registrado correctamente.",
-      });
-      form.reset();
-      setIsDialogOpen(false); // Cierra el modal después de crear el turno
-    } catch (error) {
-      console.error(error);
-      toast("Error", {
+    const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
+    setTurnos([...turnos, response.data]);
+    toast("Turno creado", {
+      description: "El turno laboral se ha registrado correctamente.",
+    });
+    form.reset();
+    setIsDialogOpen(false);
+  } catch (error) {
+    console.error(error);
+    toast("Error", {
       description: "No se pudo registrar el turno laboral.",
     });
-    }
   }
+}
+
 
   return (
     <div className="p-6">
@@ -116,7 +139,7 @@ export default function TurnosLaborales() {
       {/* Botón para abrir el dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="blue" className="mb-6">
+          <Button variant="blue" className="mb-6 text-black">
             Crear Turno Laboral
           </Button>
         </DialogTrigger>
@@ -196,7 +219,7 @@ export default function TurnosLaborales() {
                 />
               </div>
               <DialogFooter>
-                <Button type="submit" variant="blue">
+                <Button type="submit" variant="blue" className="text-black">
                   Crear turno
                 </Button>
               </DialogFooter>
