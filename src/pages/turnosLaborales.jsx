@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 
-import { toast } from "sonner";
+import { toast } from "sonner"; // Assuming 'sonner' for toasts
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -25,14 +25,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import{
-Table,
-TableBody,
-TableCell,
-TableHead,
-TableHeader,
-TableRow,
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
+
+// Helper function to convert "HH:mm" string to minutes for easy comparison
+const timeToMinutes = (timeString) => {
+    if (!timeString) return null;
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+};
 
 const FormSchema = z.object({
   shiftName: z.string().min(3, {
@@ -43,20 +50,110 @@ const FormSchema = z.object({
   }),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: "Debe ser una hora válida en formato HH:mm.",
-  }),
-  // Se hacen opcionales con refinamientos posteriores
+  })
+    // RN01 (Frontend Validation): Turno no puede finalizar después de las 22:00
+    .refine(time => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours < 22 || (hours === 22 && minutes === 0); // Allows up to 22:00:00
+    }, {
+      message: "El turno no puede finalizar después de las 22:00."
+    }),
+
   startLunchTime: z.string()
-  .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
-    message: "Debe ser una hora válida en formato HH:mm.",
-  })
-  .optional(),
+    .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
+      message: "Debe ser una hora válida en formato HH:mm."
+    })
+    .optional(),
 
-endLunchTime: z.string()
-  .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
-    message: "Debe ser una hora válida en formato HH:mm.",
-  })
-  .optional(),
+  endLunchTime: z.string()
+    .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
+      message: "Debe ser una hora válida en formato HH:mm."
+    })
+    .optional(),
+})
+// RN05 (Frontend Refinement): The lunch schedule must be contained within the shift schedule
+.superRefine((data, ctx) => {
+    const startShiftMinutes = timeToMinutes(data.startTime);
+    const endShiftMinutes = timeToMinutes(data.endTime);
+    const startLunchMinutes = timeToMinutes(data.startLunchTime);
+    const endLunchMinutes = timeToMinutes(data.endLunchTime);
 
+    // Rule: Lunch is optional if shift ends at or before 12:00
+    const isLunchOptional = (endShiftMinutes !== null && endShiftMinutes <= timeToMinutes("12:00"));
+
+    if (!isLunchOptional) { // If lunch is mandatory
+        if (!data.startLunchTime || !data.endLunchTime) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Debe ingresar la hora de inicio y fin del almuerzo.",
+                path: ["startLunchTime"], // Associate with a field for better UX
+            });
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Debe ingresar la hora de inicio y fin del almuerzo.",
+                path: ["endLunchTime"],
+            });
+            return; // Stop further lunch validations if fields are missing
+        }
+
+        // Validate lunch time sequence
+        if (startLunchMinutes !== null && endLunchMinutes !== null && startLunchMinutes >= endLunchMinutes) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "La hora de inicio del almuerzo no puede ser igual o posterior a la hora de fin del almuerzo.",
+                path: ["endLunchTime"],
+            });
+            return;
+        }
+
+        // Validate lunch time range (12:00 to 15:00)
+        const minLunchMinutes = timeToMinutes("12:00");
+        const maxLunchMinutes = timeToMinutes("15:00");
+        if (startLunchMinutes < minLunchMinutes || endLunchMinutes > maxLunchMinutes) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El horario de almuerzo debe estar entre las 12:00 y las 15:00 horas.",
+                path: ["startLunchTime"],
+            });
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El horario de almuerzo debe estar entre las 12:00 y las 15:00 horas.",
+                path: ["endLunchTime"],
+            });
+            return;
+        }
+
+        // Validate lunch contained within shift
+        if (startLunchMinutes < startShiftMinutes || endLunchMinutes > endShiftMinutes) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El horario de almuerzo debe estar contenido dentro del horario del turno laboral.",
+                path: ["startLunchTime"],
+            });
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El horario de almuerzo debe estar contenido dentro del horario del turno laboral.",
+                path: ["endLunchTime"],
+            });
+        }
+    } else { // If lunch is optional, ensure no values are provided
+        if (data.startLunchTime !== "" || data.endLunchTime !== "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
+                path: ["startLunchTime"],
+            });
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
+                path: ["endLunchTime"],
+            });
+        }
+        // IMPORTANT: Clear the form values for optional lunch if they were entered
+        // This ensures they are not sent to the backend if the rule makes them optional.
+        if (data.startLunchTime !== "") data.startLunchTime = "";
+        if (data.endLunchTime !== "") data.endLunchTime = "";
+    }
 });
 
 
@@ -81,6 +178,7 @@ export default function TurnosLaborales() {
       setTurnos(response.data);
     } catch (error) {
       console.error("Error al recuperar los horarios laborales:", error);
+      toast.error("Error al cargar turnos laborales.");
     }
   }
 
@@ -88,55 +186,66 @@ export default function TurnosLaborales() {
     obtenerHorariosLaborales();
   }, []);
 
-async function onSubmit(data) {
-  try {
-    // Convertir horas a números para comparar
-    const startHour = parseInt(data.startTime.split(":")[0], 10);
-    const endHour = parseInt(data.endTime.split(":")[0], 10);
+  async function onSubmit(data) {
+    // The Zod schema with .superRefine handles the logic previously here.
+    // If Zod validation fails, form.handleSubmit will prevent this from running.
 
-    // Validar si el turno está dentro del rango 00:00 a 12:00 (inclusive)
-    if (startHour >= 0 && endHour <= 12) {
-      // Almuerzo no obligatorio, limpiar valores
-      data.startLunchTime = "";
-      data.endLunchTime = "";
-    } else {
-      // Almuerzo obligatorio, validar que estén llenos
-      if (!data.startLunchTime || !data.endLunchTime) {
-        toast.error("Debe ingresar la hora de inicio y fin del almuerzo.");
-        return; // No enviar formulario
+    try {
+      // Prepare payload - Zod has already ensured consistency for lunch times
+      const payload = {
+        nombreHorario: data.shiftName,
+        horaInicio: data.startTime,
+        horaFin: data.endTime,
+        // These will be empty strings if lunch is optional and was cleared by Zod's superRefine
+        horaInicioAlmuerzo: data.startLunchTime,
+        horaFinAlmuerzo: data.endLunchTime,
+      };
+
+      const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
+      setTurnos(prevTurnos => [...prevTurnos, response.data]);
+      toast.success("Turno creado", {
+        description: "El turno laboral se ha registrado correctamente.",
+      });
+      form.reset();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error al registrar el turno laboral:", error);
+
+      let errorMessage = "No se pudo registrar el turno laboral. Intente nuevamente.";
+      if (axios.isAxiosError(error) && error.response) {
+        // This is the part that handles the backend's error message format
+        if (error.response.data) {
+            // Case 1: Backend sends a JSON object with a 'message' field (most common for Spring's ResponseStatusException)
+            if (typeof error.response.data === 'object' && error.response.data.message) {
+                const fullBackendMessage = error.response.data.message;
+                // Try to extract the message from quotes (e.g., "409 CONFLICT "Actual message"")
+                const match = fullBackendMessage.match(/"([^"]*)"$/);
+                errorMessage = (match && match[1]) ? match[1] : fullBackendMessage;
+            }
+            // Case 2: Backend sends a plain string directly as the response body
+            else if (typeof error.response.data === 'string' && error.response.data.length > 0) {
+                errorMessage = error.response.data;
+            }
+        } else if (error.message) {
+            // Fallback for Axios errors where response.data might be missing (e.g., network errors)
+            errorMessage = error.message;
+        }
+      } else if (error.message) {
+        // Fallback for non-Axios errors
+        errorMessage = error.message;
       }
+
+      toast.error("Error", {
+        description: errorMessage,
+        richColors: true,
+      });
     }
-
-    // Preparar payload y continuar...
-    const payload = {
-      nombreHorario: data.shiftName,
-      horaInicio: data.startTime,
-      horaFin: data.endTime,
-      horaInicioAlmuerzo: data.startLunchTime,
-      horaFinAlmuerzo: data.endLunchTime,
-    };
-    
-    const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
-    setTurnos([...turnos, response.data]);
-    toast("Turno creado", {
-      description: "El turno laboral se ha registrado correctamente.",
-    });
-    form.reset();
-    setIsDialogOpen(false);
-  } catch (error) {
-    console.error(error);
-    toast("Error", {
-      description: "No se pudo registrar el turno laboral.",
-    });
   }
-}
-
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Turnos Laborales</h1>
 
-      {/* Botón para abrir el dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="blue" className="mb-6 text-black">
@@ -228,7 +337,6 @@ async function onSubmit(data) {
         </DialogContent>
       </Dialog>
 
-      {/* Tabla de turnos laborales */}
       <Table>
         <TableHeader>
           <TableRow>
