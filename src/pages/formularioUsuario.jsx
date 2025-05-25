@@ -300,82 +300,122 @@ export default function FormularioUsuario() {
 
   // Función para manejar el envío del formulario
   async function onSubmit(formData) {
-    try {
-      // Buscar ID de tarjeta RFID usando la lista local
-      let tagsRFIDIdTagsRFID = null;
-      if (formData.tarjetaRFID) {
-        // Buscar el ID correspondiente al código
-        tagsRFIDIdTagsRFID = await buscarIdPorCodigoRFID(formData.tarjetaRFID);
-        console.log("ID de tarjeta RFID encontrado:", tagsRFIDIdTagsRFID);
-      }
-      
-      const apiData = {
-        nombre: formData.nombres,
-        apellido: formData.apellidos,
-        telefono: formData.telefono,
-        cedula: formData.cedula,
-        email: formData.correoElectronico,
-        departamentosIddepartamentos: parseInt(formData.departamento),
-        rolesIdroles: parseInt(formData.rol),
-        fechaNacimiento: formData.fechaNacimiento ? format(formData.fechaNacimiento, 'yyyy-MM-dd') : null,
-        tagsRFIDIdTagsRFID
-      };
-
-      if (modoEdicion) {
-        // Preservar campos adicionales que no están en el formulario pero son necesarios
-        const datosCompletos = {
-          ...apiData,
-          // Conservar datos existentes del usuario que no se editan en el formulario
-          password: usuario.password,
-          user: usuario.user,
-          status: usuario.status || 1,
-          horarioLaboralId: usuario.horarioLaboralId || 1
-        };
-
-        console.log("Datos completos a enviar en actualización:", datosCompletos);
-        
-        // Modo edición: Actualizar usuario existente con todos los campos requeridos
-        await axios.put(`http://localhost:8002/api/usuarios/${id}`, datosCompletos);
-        
-        toast.success("Usuario actualizado", {
-          description: "Los datos del usuario han sido actualizados exitosamente.",
-          richColors: true,
-        });
-        
-        // Navegar de vuelta a la lista de usuarios
-        navigate("/verUsuarios");
-      } else {
-        // En caso de nuevo registro necesitamos incluir los campos obligatorios
-        const datosCompletos = {
-          ...apiData,
-          password: "contraseña123", // Contraseña por defecto para nuevos usuarios
-          user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
-          status: 1, // Activo por defecto
-          horarioLaboralId: 1 // Horario por defecto
-        };
-        
-        // Modo registro: Crear nuevo usuario
-        await axios.post("http://localhost:8002/api/usuarios", datosCompletos);
-        
-        toast.success("Usuario registrado", {
-          description: "El usuario ha sido registrado exitosamente.",
-          richColors: true,
-        });
-        
-        // Limpiar el formulario en modo registro
-        form.reset();
-        setRfidValue("");
-      }
-    } catch (error) {
-      console.error("Error al procesar usuario:", error);
+    if (!formData.departamento || !formData.rol) {
+    // Mostrar toasts de error
+    if (!formData.departamento) {
       toast.error("Error", {
-        description: modoEdicion 
-          ? "No se pudo actualizar el usuario. Intente nuevamente."
-          : "No se pudo registrar el usuario. Intente nuevamente.",
+        description: "Debe seleccionar un departamento",
         richColors: true,
       });
     }
+    if (!formData.rol) {
+      toast.error("Error", {
+        description: "Debe seleccionar un rol",
+        richColors: true,
+      });
+    }
+    return; // No continuar con el envío
   }
+    try {
+        // Buscar ID de tarjeta RFID usando la lista local
+        let tagsRFIDIdTagsRFID = null;
+        if (formData.tarjetaRFID) {
+            // Buscar el ID correspondiente al código
+            tagsRFIDIdTagsRFID = await buscarIdPorCodigoRFID(formData.tarjetaRFID);
+            console.log("ID de tarjeta RFID encontrado:", tagsRFIDIdTagsRFID);
+        }
+        
+        const apiData = {
+            nombre: formData.nombres,
+            apellido: formData.apellidos,
+            telefono: formData.telefono,
+            cedula: formData.cedula,
+            email: formData.correoElectronico,
+            departamentosIddepartamentos: parseInt(formData.departamento),
+            rolesIdroles: parseInt(formData.rol),
+            fechaNacimiento: formData.fechaNacimiento ? format(formData.fechaNacimiento, 'yyyy-MM-dd') : null,
+            tagsRFIDIdTagsRFID
+        };
+
+        if (modoEdicion) {
+            // Preservar campos adicionales que no están en el formulario pero son necesarios
+            const datosCompletos = {
+                ...apiData,
+                // Conservar datos existentes del usuario que no se editan en el formulario
+                password: usuario.password,
+                user: usuario.user,
+                status: usuario.status || 1,
+                horarioLaboralId: usuario.horarioLaboralId || 1
+            };
+
+            console.log("Datos completos a enviar en actualización:", datosCompletos);
+            
+            // Modo edición: Actualizar usuario existente con todos los campos requeridos
+            await axios.put(`http://localhost:8002/api/usuarios/${id}`, datosCompletos);
+            
+            toast.success("Usuario actualizado", {
+                description: "Los datos del usuario han sido actualizados exitosamente.",
+                richColors: true,
+            });
+            
+            // Navegar de vuelta a la lista de usuarios
+            navigate("/verUsuarios");
+        } else {
+            // En caso de nuevo registro necesitamos incluir los campos obligatorios
+            const datosCompletos = {
+                ...apiData,
+                password: "contraseña123", // Contraseña por defecto para nuevos usuarios
+                user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
+                status: 1, // Activo por defecto
+                horarioLaboralId: 1 // Horario por defecto
+            };
+            
+            // Modo registro: Crear nuevo usuario
+            await axios.post("http://localhost:8002/api/usuarios", datosCompletos);
+            
+            toast.success("Usuario registrado", {
+                description: "El usuario ha sido registrado exitosamente.",
+                richColors: true,
+            });
+            
+            // Limpiar el formulario en modo registro
+            form.reset();
+            setRfidValue("");
+        }
+    } catch (error) {
+        console.error("Error al procesar usuario:", error);
+        
+        let errorMessage = "Ocurrió un error inesperado. Intente nuevamente."; // Mensaje genérico por defecto
+        // Verifica si el error es de Axios y tiene una respuesta
+        if (axios.isAxiosError(error) && error.response) {
+            // Accede a la propiedad 'message' dentro de 'error.response.data'
+            if (error.response.data && typeof error.response.data === 'object' && error.response.data.message) {
+                const fullBackendMessage = error.response.data.message;
+                
+                // Intenta extraer el texto dentro de las comillas dobles al final de la cadena
+                const match = fullBackendMessage.match(/"([^"]*)"$/); 
+                if (match && match[1]) {
+                    errorMessage = match[1]; // Si se encuentra, usa el contenido de las comillas
+                } else {
+                    // Si no hay comillas, usa el mensaje completo del backend (ej. "409 CONFLICT")
+                    errorMessage = fullBackendMessage; 
+                }
+            } 
+            // Esto es un fallback por si 'data' no es un objeto o no tiene 'message'
+            else if (error.message) {
+                errorMessage = error.message;
+            }
+        } else if (error.message) {
+            // Para otros errores que no son de Axios (ej. errores de red, errores de lógica en el frontend)
+            errorMessage = error.message;
+        }
+
+        toast.error("Error", {
+            description: errorMessage, // ¡Usamos el mensaje específico aquí!
+            richColors: true,
+        });
+    }
+}
 
   // Mostrar estado de carga mientras se obtienen los datos
   if (cargando) {
@@ -459,6 +499,7 @@ return (
                     <FormField
                       control={form.control}
                       name="cedula"
+                      min={10}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Cédula</FormLabel>
