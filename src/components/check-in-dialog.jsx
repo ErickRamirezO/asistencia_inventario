@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { Clock } from "lucide-react";
 
-export default function CheckInDialog({ onRegister }) {
+export default function CheckInDialog({ onRegister, onTableUpdate }) {
   const [rfid, setRfid] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -48,17 +48,18 @@ export default function CheckInDialog({ onRegister }) {
         const { mensaje } = response.data;
         toast.success("Tarjeta leída correctamente");
         toast.success(mensaje);
-  
-        if (onRegister) onRegister(); // Actualiza los datos en la tabla
+
+        if (onRegister) onRegister(); // Update summary cards
+        if (onTableUpdate) onTableUpdate(); // **Crucial: Update the detailed table data**
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        toast.error(error.response.data); // Mostrar mensaje del backend
+        toast.error(error.response.data.mensaje);
       } else {
         toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor." });
       }
     } finally {
-      setRfid(""); // Limpia el estado de la tarjeta incluso si ocurre un error
+      setRfid("");
     }
   };
 
