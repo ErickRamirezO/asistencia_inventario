@@ -203,7 +203,7 @@ export default function RegistrarBien() {
           <Form {...form}>
             <form
   onSubmit={form.handleSubmit(onSubmit)}
-  className="w-full max-w-full grid grid-cols-1 md:grid-cols-2 gap-4"
+  className="w-full max-w-full grid grid-cols-1 md:grid-cols-3 gap-4"
 >
 
               <FormField
