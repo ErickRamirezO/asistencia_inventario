@@ -11,6 +11,16 @@ export default function MonitoreoView() {
   const [confirmado, setConfirmado] = useState(false);
   const [scanning, setScanning] = useState(false);
 
+  // Cargar ubicación desde localStorage si existe
+  useEffect(() => {
+    const ubicacionGuardada = localStorage.getItem("ubicacionMonitoreo");
+    if (ubicacionGuardada) {
+      setUbicacion(ubicacionGuardada);
+      setConfirmado(true); // activar modo monitoreo automáticamente
+    }
+  }, []);
+
+  // Iniciar escaneo RFID cuando esté confirmado
   useEffect(() => {
     if (!confirmado) return;
 
@@ -38,14 +48,15 @@ export default function MonitoreoView() {
 
     return () => {
       window.removeEventListener("keypress", handleKeyPress);
+      setScanning(false);
     };
   }, [confirmado]);
 
   const registrarMonitoreo = async (rfid) => {
     try {
-      await axios.post("http://localhost:8002/api/monitoreo", {
+      await axios.post("http://localhost:8002/api/monitoreos", {
         tag: rfid,
-        ubicacion: ubicacion,
+        lugar: ubicacion,
         timestamp: new Date().toISOString(),
       });
       toast.success("Tag registrado", { description: `RFID: ${rfid}` });
@@ -55,39 +66,33 @@ export default function MonitoreoView() {
     }
   };
 
-  if (!confirmado) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <h2 className="text-2xl font-bold ">Configurar monitoreo</h2>
-        <Input
-          placeholder="Lugar del monitoreo"
-          value={ubicacion}
-          onChange={(e) => setUbicacion(e.target.value)}
-        />
-        <Button onClick={() => setConfirmado(true)} disabled={!ubicacion} className="text-blue-700">
-          Iniciar monitoreo
-        </Button>
-      </div>
-    );
-  }
+  const iniciarMonitoreo = () => {
+    localStorage.setItem("ubicacionMonitoreo", ubicacion); // guardar en localStorage
+    setConfirmado(true);
+  };
 
   return (
-  <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-white overflow-x-hidden w-full">
-    <h2 className="text-3xl font-bold mb-2 text-center">Escuchando tarjetas RFID...</h2>
-    <div className="text-center text-blue-600 animate-pulse text-lg">
-      Monitoreando en: <strong>{ubicacion}</strong>
+    <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-white w-full">
+      {!confirmado ? (
+        <>
+          <h2 className="text-2xl font-bold">Configurar monitoreo</h2>
+          <Input
+            placeholder="Lugar del monitoreo"
+            value={ubicacion}
+            onChange={(e) => setUbicacion(e.target.value)}
+          />
+          <Button onClick={iniciarMonitoreo} disabled={!ubicacion}>
+            Iniciar monitoreo
+          </Button>
+        </>
+      ) : (
+        <>
+          <h2 className="text-2xl font-bold mb-4">Escuchando tarjetas RFID...</h2>
+          <div className="text-center text-blue-600 animate-pulse text-lg">
+            Monitoreando en: <strong>{ubicacion}</strong>
+          </div>
+        </>
+      )}
     </div>
-    <Button
-      variant="destructive"
-      onClick={() => {
-        setConfirmado(false);
-        setUbicacion("");
-        setScanning(false);
-      }}
-    >
-      Salir del modo monitoreo
-    </Button>
-  </div>
-);
-
+  );
 }

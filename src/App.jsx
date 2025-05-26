@@ -33,7 +33,7 @@ function App() {
           <Route path="/bienes" element={<RegistroBienes />} />
           <Route path="/categoria" element={<Categoria/>}/>
           <Route path="/departamentos" element={<Departamentos/>}/>
-          <Route path="/registro-monitoreo" element={<RegistroMonitoreo/>}/>
+          <Route path="/lista-monitoreo" element={<RegistroMonitoreo/>}/>
 
           {/* Agregar otras rutas aquí */}
         </Route>
