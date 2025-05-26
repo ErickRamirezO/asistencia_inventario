@@ -10,7 +10,8 @@ import FormularioUsuario from "./pages/formularioUsuario"
 import RegistroBienes from "./pages/inventario/registroBienes"
 import Categoria from "./pages/inventario/categorias"
 import Departamentos from "./pages/usuarios/departamentos"
-
+import MonitoreoView from "./pages/monitoreo/MonitoreoView"
+import RegistroMonitoreo from "./pages/monitoreo/RegistroMonitoreo"
 function App() {
   return (
     <Router>
@@ -20,7 +21,7 @@ function App() {
       <Routes>
         {/* Ruta de login fuera del Layout */}
         {/* <Route path="/" element={<Login />} /> */}
-        
+        <Route path="/monitoreo-tag" element={<MonitoreoView/>}/>
         {/* Todas las demás rutas dentro del Layout */}
         <Route element={<Layout />}>
           <Route path="/reporteAsistencia" element={<ReporteAsistencia />} />
@@ -32,6 +33,7 @@ function App() {
           <Route path="/bienes" element={<RegistroBienes />} />
           <Route path="/categoria" element={<Categoria/>}/>
           <Route path="/departamentos" element={<Departamentos/>}/>
+          <Route path="/registro-monitoreo" element={<RegistroMonitoreo/>}/>
 
           {/* Agregar otras rutas aquí */}
         </Route>
