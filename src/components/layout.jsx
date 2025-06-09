@@ -82,7 +82,7 @@ export default function Layout() {
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/")}>
-                  <Link to="/">
+                  <Link to="/bienes/inventario">
                     <Package className="h-5 w-5" />
                     <span>Inventario</span>
                   </Link>

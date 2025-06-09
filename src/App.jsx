@@ -12,7 +12,11 @@ import Categoria from "./pages/inventario/categorias"
 import Departamentos from "./pages/usuarios/departamentos"
 import MonitoreoView from "./pages/monitoreo/MonitoreoView"
 import ListaMonitoreo from "./pages/monitoreo/ListaMonitoreo"
-//import Inventarios from "./pages/inventario/Inventarios"
+import Inventarios from "./pages/inventario/Inventarios";
+import InventarioDetalle from "./pages/inventario/InventarioDetalle"
+import RealizarInventario  from "./pages/inventario/RealizarInventario"
+//import BienesInventario from "./pages/inventario/Inventarios";
+
 function App() {
   return (
     <Router>
@@ -36,8 +40,11 @@ function App() {
           <Route path="/departamentos" element={<Departamentos/>}/>
           <Route path="/lista-monitoreo" element={<ListaMonitoreo/>}/>
           <Route path="/monitoreo-tag" element={<MonitoreoView/>}/>
-          {/*<Route path="/bienes/inventario" element={<Inventarios/>}/>
-          <Route path="/bienes/inventario/:id/bienes" element={<BienesInventario />} />*/}
+          <Route path="/bienes/inventario" element={<Inventarios/>}/>
+          <Route path="/inventarios/:id/ver" element={<InventarioDetalle />} />
+          <Route path="/inventarios/:id/realizar" element={<RealizarInventario />} />
+
+
           {/* Agregar otras rutas aquí */}
         </Route>
       </Routes>
