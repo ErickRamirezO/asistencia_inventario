@@ -155,7 +155,7 @@ export default function Layout() {
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/bienes">
+                          <Link to="/bienes/registro">
                             <Archive className="h-5 w-5" />
                             <span>Registrar bienes de la empresa</span>
                           </Link>
@@ -171,12 +171,44 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
+                          <Link to="/bienes/categoria">
                             <Tag className="h-5 w-5" />
                             <span>Categoría de Bienes empresariales</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Building className="h-5 w-5" />
+                      <span>Empresa</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/departamentos">
+                            <Archive className="h-5 w-5" />
+                            <span>Departamentos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/departamentos">
+                            <Archive className="h-5 w-5" />
+                            <span>Lugares de Monitoreo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
@@ -203,9 +235,9 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
+                          <Link to="/lista-monitoreo">
                             <MapPin className="h-5 w-5" />
-                            <span>Reporte de ubicación</span>
+                            <span>Monitoreo</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>

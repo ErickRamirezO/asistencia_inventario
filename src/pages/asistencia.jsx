@@ -11,7 +11,7 @@ import { Calendar, Clock } from "lucide-react"; // Removed Filter, Search as the
 import CheckInDialog from "../components/check-in-dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "../components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import EventCheckInDialog from "../components/event-check-in-dialog";
+import EventCheckInDialog from "../components/check-in-dialog";
 import { toast } from "sonner";
 import moment from 'moment'; // Import moment.js for easier date manipulation
 
