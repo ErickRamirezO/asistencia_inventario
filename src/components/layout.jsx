@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, useLocation, Outlet } from "react-router-dom"
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
 import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
@@ -36,7 +36,13 @@ import logo from "../assets/LogoName.png"
 
 export default function Layout() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [defaultOpen, setDefaultOpen] = useState(true)
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
   // Detectar si estamos en móvil para cerrar el sidebar por defecto
   useEffect(() => {
@@ -243,7 +249,7 @@ export default function Layout() {
                   <span>Configuración</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar Sesión</span>
                 </DropdownMenuItem>
@@ -290,7 +296,7 @@ export default function Layout() {
                     <span>Configuración</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Cerrar Sesión</span>
                   </DropdownMenuItem>

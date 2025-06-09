@@ -1,15 +1,41 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import axios from "axios";
+import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const handleSubmit = (e) => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Redirigir si ya hay sesión activa
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/verUsuarios');
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success("Información", {
-      description: "Funcionalidad de inicio de sesión en desarrollo.",
-        // richColors: true,
-    });
+    console.log("Email:", email);
+    console.log("Password:", password);
+    try {
+      const res = await axios.post("http://localhost:8002/api/auth/login", {
+        email: email,
+        password: password,
+      });
+      localStorage.setItem("token", res.data.token);
+      navigate("/verUsuarios");
+    } catch (err) {
+      alert("Usuario o contraseña incorrectos", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -19,7 +45,7 @@ const Login = () => {
           <div className="mx-auto w-full max-w-sm rounded-md p-6 shadow">
             <div className="mb-6 flex flex-col items-center">
               <a href="/" className="mb-6 flex items-center gap-2">
-                <img src="/logo.png" className="max-h-8" alt="Logo SmartControl" />
+                <img src="/logo.png" className="max-h-20" alt="Logo SmartControl" />
               </a>
               <h1 className="mb-2 text-2xl font-bold">Iniciar Sesión</h1>
               <p className="text-muted-foreground">Bienvenido de nuevo</p>
@@ -31,12 +57,16 @@ const Login = () => {
                   type="email" 
                   placeholder="Ingrese su correo electrónico" 
                   required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <div>
                   <Input
                     type="password"
                     placeholder="Ingrese su contraseña"
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
                 
