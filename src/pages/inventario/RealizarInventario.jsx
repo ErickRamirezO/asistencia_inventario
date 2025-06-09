@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import api from "@/utils/axios";
 
 export default function RealizarInventario() {
   const { id: inventarioId } = useParams();
@@ -16,14 +17,15 @@ export default function RealizarInventario() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (tag.trim() !== "") {
-        axios
-          .put("http://localhost:8002/api/historial-inventarios/actualizar-estado", null, {
-            params: {
-              tag,
-              usuarioId,
-              inventarioId,
-            },
-          })
+        api
+  .put("/historial-inventarios/actualizar-estado", null, {
+    params: {
+      tag,
+      usuarioId,
+      inventarioId,
+    },
+  })
+
           .then((res) => {
             setBien(res.data);
             toast.success("Inventario actualizado con tag " + tag);

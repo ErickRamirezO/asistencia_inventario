@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "sonner"
+//import ProtectedRoute from "./components/ProtectedRoute"
 import Layout from "./components/layout"
 import Login from "./pages/auth/login"
 import Attendance from "./pages/asistencia"
@@ -17,6 +18,9 @@ import InventarioDetalle from "./pages/inventario/InventarioDetalle"
 import RealizarInventario  from "./pages/inventario/RealizarInventario"
 //import BienesInventario from "./pages/inventario/Inventarios";
 
+//import Inventarios from "./pages/inventario/Inventarios"
+//import AsistenciaSimple from "./pages/asistenciaSimple"
+
 function App() {
   return (
     <Router>
@@ -24,8 +28,12 @@ function App() {
       <Toaster position="top-right" />
       
       <Routes>
-        {/* Ruta de login fuera del Layout */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Rutas públicas (accesibles sin autenticación) */}
+        <Route path="/login" element={<Login />} />
+        {/* <Route path="/registro" element={<Registro />} /> */}
         {/* <Route path="/" element={<Login />} /> */}
+
         
         {/* Todas las demás rutas dentro del Layout */}
         <Route element={<Layout />}>
@@ -43,7 +51,6 @@ function App() {
           <Route path="/bienes/inventario" element={<Inventarios/>}/>
           <Route path="/inventarios/:id/ver" element={<InventarioDetalle />} />
           <Route path="/inventarios/:id/realizar" element={<RealizarInventario />} />
-
 
           {/* Agregar otras rutas aquí */}
         </Route>

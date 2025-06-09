@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/utils/axios";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,7 +43,8 @@ export default function Categorias() {
 
   const cargarCategorias = async () => {
     try {
-      const res = await axios.get("http://localhost:8002/api/categorias");
+      const res = await api.get("/categorias");
+
       setCategorias(res.data);
     } catch (err) {
       toast.error("Error al cargar categorías");
@@ -63,10 +65,12 @@ export default function Categorias() {
   const onSubmit = async (data) => {
     try {
       if (modoEdicion) {
-        await axios.put(`http://localhost:8002/api/categorias/${categoriaActual.id}`, data);
+        await api.put(`/categorias/${categoriaActual.id}`, data);
+
         toast.success("Categoría actualizada");
       } else {
-        await axios.post("http://localhost:8002/api/categorias", data);
+        await api.post("/categorias", data);
+
         toast.success("Categoría creada");
       }
       cargarCategorias();

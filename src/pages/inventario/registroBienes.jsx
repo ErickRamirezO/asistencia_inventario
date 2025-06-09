@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
+import api from "@/utils/axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -82,7 +83,7 @@ export default function RegistrarBien() {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:8002/api/departamentos").then(res => {
+    api.get("/departamentos").then(res => {
       const options = res.data.map(dep => ({
         label: dep.nombreDepartamento,
         value: dep.id.toString(),
@@ -90,7 +91,7 @@ export default function RegistrarBien() {
       setDepartamentos(options);
     }).catch(() => toast.error("Error al cargar departamentos"));
 
-    axios.get("http://localhost:8002/api/categorias").then(res => {
+    api.get("/categorias").then(res => {
       const options = res.data.map(cat => ({
         label: cat.nombreCategoria,
         value: cat.id.toString(),

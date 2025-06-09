@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/utils/axios";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,7 +45,8 @@ export default function Departamentos() {
 
   const cargarDepartamentos = async () => {
     try {
-      const res = await axios.get("http://localhost:8002/api/departamentos");
+      const res = await api.get("/departamentos");
+
       setDepartamentos(res.data);
     } catch {
       toast.error("Error al cargar departamentos");
@@ -65,13 +67,12 @@ export default function Departamentos() {
   const onSubmit = async (data) => {
     try {
       if (modoEdicion) {
-        await axios.put(
-          `http://localhost:8002/api/departamentos/${departamentoActual.id}`,
-          data
-        );
+        await api.put(`/departamentos/${departamentoActual.id}`, data);
+
         toast.success("Departamento actualizado");
       } else {
-        await axios.post("http://localhost:8002/api/departamentos", data);
+        await api.post("/departamentos", data);
+
         toast.success("Departamento creado");
       }
       cargarDepartamentos();

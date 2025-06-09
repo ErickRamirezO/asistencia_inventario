@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "@/utils/axios";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Clock } from "lucide-react";
@@ -14,11 +15,12 @@ export default function InventarioDetalle() {
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:8002/api/historial-inventarios/inventario/${id}`)
-      .then((res) => setHistorial(res.data))
-      .catch((err) => console.error("Error al cargar historial:", err));
-  }, [id]);
+  api
+    .get(`/historial-inventarios/inventario/${id}`)
+    .then((res) => setHistorial(res.data))
+    .catch((err) => console.error("Error al cargar historial:", err));
+}, [id]);
+
 
   useEffect(() => {
     const intervalo = setInterval(() => {

@@ -60,6 +60,16 @@ export default defineConfig({
       "@": "/src",
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8002',
+        changeOrigin: true,
+        // Si tu API no tiene '/api' como prefijo, puedes reescribir la ruta
+        // rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
   test: {
     environment: 'jsdom',
     globals: true,

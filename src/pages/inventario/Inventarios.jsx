@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +12,7 @@ import { toast } from "sonner";
 import { Pencil, Eye, CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScanLine } from "lucide-react";
+import api from "@/utils/axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,8 @@ export default function Inventarios() {
 
   const cargarInventarios = async () => {
     try {
-      const res = await axios.get("http://localhost:8002/api/inventarios");
+      const res = await api.get("/inventarios");
+
       setInventarios(res.data);
     } catch {
       toast.error("Error al cargar inventarios");
@@ -99,13 +100,10 @@ export default function Inventarios() {
 
     try {
       if (modoEdicion) {
-        await axios.put(
-          `http://localhost:8002/api/inventarios/${inventarioActual.id}`,
-          payload
-        );
+        await api.put(`/inventarios/${inventarioActual.id}`, payload);
         toast.success("Inventario actualizado");
       } else {
-        await axios.post("http://localhost:8002/api/inventarios", payload);
+        await api.post("/inventarios", payload);
         toast.success("Inventario creado");
       }
 

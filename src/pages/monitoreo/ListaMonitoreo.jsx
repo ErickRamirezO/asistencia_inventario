@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/utils/axios";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Clock } from "lucide-react";
@@ -15,11 +16,12 @@ export default function MonitoreoLista() {
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8002/api/monitoreos")
-      .then((res) => setRegistros(res.data))
-      .catch((err) => console.error("Error cargando monitoreos:", err));
-  }, []);
+  api
+    .get("/monitoreos")
+    .then((res) => setRegistros(res.data))
+    .catch((err) => console.error("Error cargando monitoreos:", err));
+}, []);
+
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import axios from "axios";
+import api from "@/utils/axios";
+
 
 export default function MonitoreoView() {
   const [ubicacion, setUbicacion] = useState("");
@@ -54,11 +55,12 @@ export default function MonitoreoView() {
 
   const registrarMonitoreo = async (rfid) => {
     try {
-      await axios.post("http://localhost:8002/api/monitoreos", {
-        tag: rfid,
-        lugar: ubicacion,
-        timestamp: new Date().toISOString(),
-      });
+      await api.post("/monitoreos", {
+  tag: rfid,
+  lugar: ubicacion,
+  timestamp: new Date().toISOString(),
+});
+
       toast.success("Tag registrado", { description: `RFID: ${rfid}` });
     } catch (error) {
       console.error("Error al registrar monitoreo:", error);

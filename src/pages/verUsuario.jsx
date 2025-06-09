@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/utils/axios";
 import {
   Table,
   TableBody,
@@ -35,6 +35,7 @@ export default function VerUsuario() {
   const [loading, setLoading] = useState(true);
   const [dialogoConfirmacionAbierto, setDialogoConfirmacionAbierto] = useState(false);
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
+  const [terminoBusqueda, setTerminoBusqueda] = useState("");
   const navigate = useNavigate();
 
   // Obtener usuarios y horarios al cargar el componente
@@ -42,9 +43,9 @@ export default function VerUsuario() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const usuariosResponse = await axios.get("http://localhost:8002/api/usuarios");
+        const usuariosResponse = await api.get("/usuarios");
         // Obtenemos los horarios laborales utilizando la misma ruta que en turnosLaborales.jsx
-        const horariosResponse = await axios.get("http://localhost:8002/api/horarios-laborales");
+        const horariosResponse = await api.get("/horarios-laborales");
         setHorarios(horariosResponse.data);
         // Mapear los usuarios y agregar la propiedad habilitado basada en status
         const usuariosMapeados = usuariosResponse.data.map(usuario => ({
@@ -74,7 +75,7 @@ export default function VerUsuario() {
   const toggleEstadoUsuario = async (id) => {
     try {
       // Llamar al endpoint que creamos en el backend
-      const response = await axios.patch(`http://localhost:8002/api/usuarios/${id}/toggle-status`);
+      const response = await api.patch(`/usuarios/${id}/toggle-status`);
       
       // La respuesta contiene el usuario actualizado
       const usuarioActualizado = response.data;
@@ -116,7 +117,7 @@ export default function VerUsuario() {
         throw new Error("Usuario o horario no encontrado");
       }
       
-      await axios.post(`http://localhost:8002/api/horarios-laborales/asignar/${id}/${nuevoHorarioId}`);
+      await api.post(`/horarios-laborales/asignar/${id}/${nuevoHorarioId}`);
     // Actualizar el estado local
       setUsuarios(usuarios.map(u => 
         u.id === id ? { 
@@ -138,6 +139,15 @@ export default function VerUsuario() {
       });
     }
   };
+  // Filtrar usuarios según el término de búsqueda, estado y departamento
+  const usuariosFiltrados = usuarios.filter(usuario => {
+    // Filtrar por término de búsqueda (nombre, apellido o cédula)
+    const coincideBusqueda = 
+      usuario.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+      usuario.apellido.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+      usuario.cedula.includes(terminoBusqueda);
+    return coincideBusqueda
+  });
 
   // Reemplaza la función eliminarUsuario actual con esta
   const eliminarUsuario = (id) => {
@@ -152,7 +162,7 @@ export default function VerUsuario() {
     try {
       // En un entorno real, esto enviaría una petición al backend
       console.log("Usuario eliminado:", usuarioAEliminar.id);
-      await axios.delete(`http://localhost:8002/api/usuarios/${usuarioAEliminar.id}`);
+      await api.delete(`/usuarios/${usuarioAEliminar.id}`);
       // Actualizar el estado local
       setUsuarios(usuarios.filter(u => u.id !== usuarioAEliminar.id));
       
@@ -180,7 +190,26 @@ export default function VerUsuario() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Lista de Usuarios</h1>
-      
+      <div className="mb-6 space-y-4">
+        {/* Barra de búsqueda */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Buscar por nombre o cédula..."
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={terminoBusqueda}
+            onChange={(e) => setTerminoBusqueda(e.target.value)}
+          />
+          {terminoBusqueda && (
+            <button 
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setTerminoBusqueda("")}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -198,8 +227,8 @@ export default function VerUsuario() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuarios.length > 0 ? (
-              usuarios.map((usuario) => (
+            {usuariosFiltrados.length > 0 ? (
+              usuariosFiltrados.map((usuario) => (
                 <TableRow key={usuario.id}>
                   <TableCell className="font-medium">{usuario.nombre}</TableCell>
                   <TableCell>{usuario.apellido}</TableCell>
@@ -257,6 +286,7 @@ export default function VerUsuario() {
                         size="icon"
                         onClick={() => eliminarUsuario(usuario.id)}
                         className="h-8 w-8"
+                        aria-label="Eliminar usuario"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -266,8 +296,8 @@ export default function VerUsuario() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-4">
-                  No hay usuarios registrados.
+                <TableCell colSpan={10} className="text-center">
+                  No se encontraron usuarios que coincidan con los filtros.
                 </TableCell>
               </TableRow>
             )}

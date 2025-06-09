@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-const protectedRoute = () => {
+const ProtectedRoute = () => {
   // Verificar si hay un token en localStorage
   const isAuthenticated = localStorage.getItem("token") !== null;
   
@@ -13,4 +13,4 @@ const protectedRoute = () => {
   return <Outlet />;
 };
 
-export default protectedRoute;
+export default ProtectedRoute;
