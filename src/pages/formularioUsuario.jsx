@@ -99,7 +99,7 @@ const FormSchema = z.object({
   }),
   tarjetaRFID: z
     .string()
-    .regex(/^[a-zA-Z0-9]{8,16}$/, { message: "La tarjeta RFID debe tener entre 8 y 16 caracteres." })
+    .regex(/^[a-zA-Z0-9]{8,50}$/, { message: "La tarjeta RFID debe tener entre 8 y 50 caracteres." })
     .optional(),
   fechaNacimiento: z
   .date({ required_error: "Debe seleccionar una fecha de nacimiento." })

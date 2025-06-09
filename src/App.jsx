@@ -11,7 +11,8 @@ import RegistroBienes from "./pages/inventario/registroBienes"
 import Categoria from "./pages/inventario/categorias"
 import Departamentos from "./pages/usuarios/departamentos"
 import MonitoreoView from "./pages/monitoreo/MonitoreoView"
-import RegistroMonitoreo from "./pages/monitoreo/RegistroMonitoreo"
+import ListaMonitoreo from "./pages/monitoreo/ListaMonitoreo"
+//import Inventarios from "./pages/inventario/Inventarios"
 function App() {
   return (
     <Router>
@@ -21,7 +22,7 @@ function App() {
       <Routes>
         {/* Ruta de login fuera del Layout */}
         {/* <Route path="/" element={<Login />} /> */}
-        <Route path="/monitoreo-tag" element={<MonitoreoView/>}/>
+        
         {/* Todas las demás rutas dentro del Layout */}
         <Route element={<Layout />}>
           <Route path="/reporteAsistencia" element={<ReporteAsistencia />} />
@@ -30,11 +31,13 @@ function App() {
           <Route path="/usuarios/registrar" element={<FormularioUsuario key="registrar"/>} />
           <Route path="/turnosLaborales" element={<TurnosLaborales />} />
           <Route path="/attendance" element={<Attendance />} />
-          <Route path="/bienes" element={<RegistroBienes />} />
-          <Route path="/categoria" element={<Categoria/>}/>
+          <Route path="/bienes/registro" element={<RegistroBienes />} />
+          <Route path="/bienes/categoria" element={<Categoria/>}/>
           <Route path="/departamentos" element={<Departamentos/>}/>
-          <Route path="/lista-monitoreo" element={<RegistroMonitoreo/>}/>
-
+          <Route path="/lista-monitoreo" element={<ListaMonitoreo/>}/>
+          <Route path="/monitoreo-tag" element={<MonitoreoView/>}/>
+          {/*<Route path="/bienes/inventario" element={<Inventarios/>}/>
+          <Route path="/bienes/inventario/:id/bienes" element={<BienesInventario />} />*/}
           {/* Agregar otras rutas aquí */}
         </Route>
       </Routes>

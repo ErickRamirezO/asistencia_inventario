@@ -127,7 +127,9 @@ export default function MonitoreoLista() {
             <TableBody>
               {registrosFiltrados.length > 0 ? (
                 registrosFiltrados.map((r, idx) => {
-                  const fecha = new Date(r.fechaMonitoreo);
+                  const [fechaCompleta, horaCompleta] = r.fechaMonitoreo.split("T");
+                  const hora = horaCompleta.split(".")[0]; // quitar milisegundos
+
                   const tipo = r.nombreUsuarioAsignado ? "PERSONAL" : "BIEN";
                   const nombre = r.nombreUsuarioAsignado || r.nombreBienAsignado || "—";
 
@@ -137,8 +139,10 @@ export default function MonitoreoLista() {
                       <TableCell>{tipo}</TableCell>
                       <TableCell>{nombre}</TableCell>
                       <TableCell>{r.lugar}</TableCell>
-                      <TableCell>{fecha.toLocaleDateString()}</TableCell>
-                      <TableCell>{fecha.toLocaleTimeString()}</TableCell>
+                      <TableCell>{fechaCompleta}</TableCell>
+                      <TableCell>{hora}</TableCell>
+
+
                     </TableRow>
                   );
                 })

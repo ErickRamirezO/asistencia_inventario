@@ -81,7 +81,7 @@ export default function MonitoreoView() {
             value={ubicacion}
             onChange={(e) => setUbicacion(e.target.value)}
           />
-          <Button onClick={iniciarMonitoreo} disabled={!ubicacion}>
+          <Button onClick={iniciarMonitoreo} disabled={!ubicacion} className="text-blue-700">
             Iniciar monitoreo
           </Button>
         </>

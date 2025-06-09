@@ -39,7 +39,7 @@ const FormSchema = z.object({
   descripcion: z.string().min(2),
   precio: z.coerce.number().positive(),
   status: z.coerce.number().int().min(0).max(1),
-  tagInmueble: z.string().min(2),
+ // tagInmueble: z.string().min(2),
   serieBien: z.string().min(2),
   modeloBien: z.string().min(2),
   marcaBien: z.string().min(2),
@@ -48,9 +48,11 @@ const FormSchema = z.object({
   observacionBien: z.string().optional(),
   ubicacionBien: z.string().min(2),
   categoriaId: z.string(),
-  tagRfidId: z.coerce.number().int().optional(),
+  //tagRfidId: z.coerce.number().int().optional(),
   departamentoId: z.string(),
-  tagRfidCode: z.string().optional(),
+  tagRfidNumero:z.string()
+  //tagRfidCode: z.string().optional(),
+
 });
 
 export default function RegistrarBien() {
@@ -66,7 +68,6 @@ export default function RegistrarBien() {
       descripcion: "",
       precio: "",
       status: 1,
-      tagInmueble: "",
       serieBien: "",
       modeloBien: "",
       marcaBien: "",
@@ -75,9 +76,8 @@ export default function RegistrarBien() {
       observacionBien: "",
       ubicacionBien: "",
       categoriaId: "",
-      tagRfidId: "",
       departamentoId: "",
-      tagRfidCode: "",
+      tagRfidNumero: "",
     },
   });
 
@@ -112,7 +112,8 @@ export default function RegistrarBien() {
       if (event.key === "Enter") {
         if (buffer.length >= 8) {
           setRfidValue(buffer);
-          form.setValue("tagRfidCode", buffer);
+          form.setValue("tagRfidNumero", buffer); // 
+
           setScanningRFID(false);
           toast.success("Tag RFID detectado", {
             description: `Código RFID: ${buffer}`,
@@ -140,27 +141,29 @@ export default function RegistrarBien() {
   };
 
   const onSubmit = async (data) => {
-    try {
-      let tagId = data.tagRfidId;
-      if (data.tagRfidCode) {
-        const idEncontrado = await buscarIdPorCodigoRFID(data.tagRfidCode);
-        tagId = idEncontrado || data.tagRfidId;
-      }
-      const finalData = {
-        ...data,
-        tagRfidId: tagId,
-        categoriaId: parseInt(data.categoriaId),
-        departamentoId: parseInt(data.departamentoId),
-      };
-      const response = await axios.post("http://localhost:8080/api/bienes-inmuebles", finalData);
-      alert(`Bien registrado con ID: ${response.data}`);
-      form.reset();
-      setRfidValue("");
-    } catch (error) {
-      console.error("Error al registrar bien:", error);
-      alert("Ocurrió un error al registrar el bien.");
-    }
-  };
+  try {
+    const finalData = {
+      ...data,
+      categoriaId: parseInt(data.categoriaId),
+      departamentoId: parseInt(data.departamentoId),
+      tagRfidNumero: data.tagRfidNumero
+    };
+
+    // Muestra por consola el cuerpo del POST
+    console.log("🔍 Enviando datos al backend:", finalData);
+
+    const response = await axios.post("http://localhost:8002/api/bienes-inmuebles", finalData);
+
+    toast.success(` Bien "${data.nombreBien}" registrado con éxito`);
+
+    form.reset();
+    setRfidValue("");
+  } catch (error) {
+    console.error(" Error al registrar bien:", error);
+    toast.error("Ocurrió un error al registrar el bien.");
+  }
+};
+
 
   return (
     <div className="p-6 md:p-12">
@@ -176,7 +179,7 @@ export default function RegistrarBien() {
                 <p className="bg-white dark:bg-gray-800 text-lg p-2 rounded font-mono">{rfidValue}</p>
                 <Button variant="outline" className="mt-4" onClick={() => {
                   setRfidValue("");
-                  form.setValue("tagRfidCode", "");
+                  form.setValue("tagRfidNumero", "");
                   setScanningRFID(true);
                   toast.info("Escaneando nuevo tag RFID...");
                 }}>
