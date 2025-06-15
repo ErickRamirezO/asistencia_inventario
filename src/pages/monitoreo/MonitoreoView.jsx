@@ -1,27 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandEmpty,
+  CommandGroup,
+  CommandList,
+} from "@/components/ui/command";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/utils/axios";
-
+import { cn } from "@/lib/utils";
 
 export default function MonitoreoView() {
+  const [lugares, setLugares] = useState([]);
   const [ubicacion, setUbicacion] = useState("");
   const [confirmado, setConfirmado] = useState(false);
   const [scanning, setScanning] = useState(false);
 
-  // Cargar ubicación desde localStorage si existe
   useEffect(() => {
+    const cargarLugares = async () => {
+      try {
+        const res = await api.get("/lugares");
+        const activos = res.data.filter((l) => l.activo);
+        setLugares(activos);
+      } catch (err) {
+        toast.error("Error al cargar lugares");
+      }
+    };
+
+    cargarLugares();
+
     const ubicacionGuardada = localStorage.getItem("ubicacionMonitoreo");
     if (ubicacionGuardada) {
       setUbicacion(ubicacionGuardada);
-      setConfirmado(true); // activar modo monitoreo automáticamente
+      setConfirmado(true);
     }
   }, []);
 
-  // Iniciar escaneo RFID cuando esté confirmado
   useEffect(() => {
     if (!confirmado) return;
 
@@ -35,8 +60,7 @@ export default function MonitoreoView() {
 
       if (e.key === "Enter") {
         if (buffer.length >= 8) {
-          const rfid = buffer.trim();
-          registrarMonitoreo(rfid);
+          registrarMonitoreo(buffer.trim());
         }
         buffer = "";
       } else if (e.key.match(/[a-zA-Z0-9]/)) {
@@ -46,7 +70,6 @@ export default function MonitoreoView() {
 
     window.addEventListener("keypress", handleKeyPress);
     setScanning(true);
-
     return () => {
       window.removeEventListener("keypress", handleKeyPress);
       setScanning(false);
@@ -56,45 +79,102 @@ export default function MonitoreoView() {
   const registrarMonitoreo = async (rfid) => {
     try {
       await api.post("/monitoreos", {
-  tag: rfid,
-  lugar: ubicacion,
-  timestamp: new Date().toISOString(),
-});
-
+        tag: rfid,
+        lugar: ubicacion,
+        timestamp: new Date().toISOString(),
+      });
       toast.success("Tag registrado", { description: `RFID: ${rfid}` });
     } catch (error) {
-      console.error("Error al registrar monitoreo:", error);
+      console.error("Error al registrar monitoreo:", error.response || error);
       toast.error("Error al registrar tag");
     }
   };
 
   const iniciarMonitoreo = () => {
-    localStorage.setItem("ubicacionMonitoreo", ubicacion); // guardar en localStorage
+    localStorage.setItem("ubicacionMonitoreo", ubicacion);
     setConfirmado(true);
   };
 
+  const pararMonitoreo = () => {
+    localStorage.removeItem("ubicacionMonitoreo");
+    setConfirmado(false);
+    setUbicacion("");
+    toast.info("Monitoreo detenido");
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-white w-full">
-      {!confirmado ? (
-        <>
-          <h2 className="text-2xl font-bold">Configurar monitoreo</h2>
-          <Input
-            placeholder="Lugar del monitoreo"
-            value={ubicacion}
-            onChange={(e) => setUbicacion(e.target.value)}
-          />
-          <Button onClick={iniciarMonitoreo} disabled={!ubicacion} className="text-blue-700">
-            Iniciar monitoreo
-          </Button>
-        </>
-      ) : (
-        <>
-          <h2 className="text-2xl font-bold mb-4">Escuchando tarjetas RFID...</h2>
-          <div className="text-center text-blue-600 animate-pulse text-lg">
-            Monitoreando en: <strong>{ubicacion}</strong>
-          </div>
-        </>
-      )}
+    <div className="p-6 max-w-xl mx-auto space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            {confirmado ? "Escuchando RFID..." : "Configurar monitoreo"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!confirmado ? (
+            <>
+              <div>
+                <label htmlFor="lugar" className="font-semibold text-sm mb-1 block">
+                  Seleccione el lugar de monitoreo:
+                </label>
+                <Popover modal>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" className="justify-between w-full">
+                      {ubicacion
+                        ? lugares.find((l) => l.nombreLugar === ubicacion)?.nombreLugar
+                        : "Seleccionar lugar"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 w-full z-[60]">
+                    <Command>
+                      <CommandInput placeholder="Buscar lugar..." />
+                      <CommandList>
+                        <CommandEmpty>No encontrado</CommandEmpty>
+                        <CommandGroup>
+                          {lugares.map((lugar) => (
+                            <CommandItem
+                              key={lugar.id}
+                              onSelect={() => setUbicacion(lugar.nombreLugar)}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  ubicacion === lugar.nombreLugar ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {lugar.nombreLugar}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Button
+                onClick={iniciarMonitoreo}
+                disabled={!ubicacion}
+                className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Iniciar monitoreo
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="text-blue-600 text-center text-lg animate-pulse">
+                Monitoreando en: <strong>{ubicacion}</strong>
+              </div>
+              <Button
+                onClick={pararMonitoreo}
+                className="w-full bg-red-100 text-red-700 hover:bg-red-200"
+              >
+                Parar monitoreo
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -16,6 +16,10 @@ import ListaMonitoreo from "./pages/monitoreo/ListaMonitoreo"
 import Inventarios from "./pages/inventario/Inventarios";
 import InventarioDetalle from "./pages/inventario/InventarioDetalle"
 import RealizarInventario  from "./pages/inventario/RealizarInventario"
+import VerBienes from "./pages/inventario/VerBienes"
+import CategoriaStock from "./pages/inventario/CategoriaStock"
+import LugaresView from "./pages/lugares/LugaresView"
+import CambioEncargadoView from "./pages/inventario/CambioEncargadoView"
 //import BienesInventario from "./pages/inventario/Inventarios";
 
 //import Inventarios from "./pages/inventario/Inventarios"
@@ -51,7 +55,11 @@ function App() {
           <Route path="/bienes/inventario" element={<Inventarios/>}/>
           <Route path="/inventarios/:id/ver" element={<InventarioDetalle />} />
           <Route path="/inventarios/:id/realizar" element={<RealizarInventario />} />
-
+          <Route path="/bienes/lista-bienes" element={<VerBienes/>} />
+          <Route path="/bienes/registro/:id" element={<RegistroBienes />} />
+          <Route path="/bienes/categoria/stock" element={<CategoriaStock />}/>
+          <Route path="/lugar" element={<LugaresView/>} />
+          <Route path="/cambio-encargado" element={<CambioEncargadoView/>}/>
           {/* Agregar otras rutas aquí */}
         </Route>
       </Routes>

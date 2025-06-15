@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import api from "@/utils/axios";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,53 +26,56 @@ import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 
 const FormSchema = z.object({
-  nombreCategoria: z.string().min(2, { message: "Debe tener al menos 2 caracteres" }),
+  nombreLugar: z.string().min(2, { message: "Debe tener al menos 2 caracteres" }),
 });
 
-export default function Categorias() {
-  const [categorias, setCategorias] = useState([]);
+export default function LugaresView() {
+  const [lugares, setLugares] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [categoriaActual, setCategoriaActual] = useState(null);
+  const [lugarActual, setLugarActual] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
-    defaultValues: { nombreCategoria: "" },
+    defaultValues: { nombreLugar: "" },
   });
 
-  const cargarCategorias = async () => {
+  const cargarLugares = async () => {
     try {
-      const res = await api.get("/categorias/stock");
-      setCategorias(res.data); // Espera { id, nombreCategoria, cantidad }
-    } catch (err) {
-      toast.error("Error al cargar categorías");
+      const res = await api.get("/lugares");
+      setLugares(res.data);
+    } catch {
+      toast.error("Error al cargar lugares");
     }
   };
 
   useEffect(() => {
-    cargarCategorias();
+    cargarLugares();
   }, []);
 
-  const abrirModal = (categoria = null) => {
-    setModoEdicion(!!categoria);
-    setCategoriaActual(categoria);
-    form.reset({ nombreCategoria: categoria?.nombreCategoria || "" });
+  const abrirModal = (lugar = null) => {
+    setModoEdicion(!!lugar);
+    setLugarActual(lugar);
+    form.reset({ nombreLugar: lugar?.nombreLugar || "" });
     setDialogOpen(true);
   };
 
   const onSubmit = async (data) => {
     try {
       if (modoEdicion) {
-        await api.put(`/categorias/${categoriaActual.id}`, data);
-        toast.success("Categoría actualizada");
+        await api.put(`/lugares/${lugarActual.id}`, {
+          ...data,
+          activo: true,
+        });
+        toast.success("Lugar actualizado");
       } else {
-        await api.post("/categorias", data);
-        toast.success("Categoría creada");
+        await api.post("/lugares", data);
+        toast.success("Lugar creado");
       }
-      cargarCategorias();
+      cargarLugares();
       setDialogOpen(false);
-    } catch (error) {
-      toast.error("Error al guardar categoría");
+    } catch {
+      toast.error("Error al guardar lugar");
     }
   };
 
@@ -81,37 +83,36 @@ export default function Categorias() {
     <div className="p-6 max-w-4xl mx-auto">
       <Card>
         <CardHeader className="flex flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold">Categorías y Stock</CardTitle>
+          <CardTitle className="text-2xl font-bold">Lugares</CardTitle>
           <Button
             onClick={() => abrirModal()}
             className="bg-blue-600 text-black hover:bg-blue-700 font-semibold"
           >
-            Agregar Categoría
+            Agregar Lugar
           </Button>
         </CardHeader>
-
         <CardContent>
           <div className="rounded-md border overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="text-left p-2 hidden">ID</th>
                   <th className="text-left p-2">Nombre</th>
-                  <th className="text-left p-2">Stock</th>
+                  <th className="text-left p-2">Estado</th>
                   <th className="text-right p-2">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {categorias.map((categoria) => (
-                  <tr key={categoria.id} className="border-t">
-                    <td className="p-2 hidden">{categoria.id}</td>
-                    <td className="p-2">{categoria.nombreCategoria}</td>
-                    <td className="p-2">{categoria.cantidad ?? 0}</td>
+                {lugares.map((lugar) => (
+                  <tr key={lugar.id} className="border-t">
+                    <td className="p-2">{lugar.nombreLugar}</td>
+                    <td className="p-2">
+                      {lugar.activo ? "Activo" : "Inactivo"}
+                    </td>
                     <td className="p-2 text-right">
                       <Button
                         size="icon"
-                        onClick={() => abrirModal(categoria)}
-                        className="bg-blue-500 text-blue-700 hover:bg-blue-600"
+                        onClick={() => abrirModal(lugar)}
+                        className="bg-blue-500 text-white hover:bg-blue-600"
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -127,18 +128,20 @@ export default function Categorias() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{modoEdicion ? "Editar Categoría" : "Nueva Categoría"}</DialogTitle>
+            <DialogTitle>
+              {modoEdicion ? "Editar Lugar" : "Nuevo Lugar"}
+            </DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
               <FormField
                 control={form.control}
-                name="nombreCategoria"
+                name="nombreLugar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre de Categoría</FormLabel>
+                    <FormLabel>Nombre del Lugar</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ejemplo: Tecnología" {...field} />
+                      <Input placeholder="Ejemplo: Laboratorio B" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

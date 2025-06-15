@@ -4,12 +4,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 import { toast } from "sonner";
-import { Pencil, Eye, CalendarIcon } from "lucide-react";
+import { Pencil, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScanLine } from "lucide-react";
 import api from "@/utils/axios";
@@ -26,53 +22,74 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandEmpty,
+  CommandGroup,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
+  PopoverContent,
 } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const FormSchema = z.object({
   nombreInventario: z.string().min(2, {
     message: "Debe tener al menos 2 caracteres",
   }),
-  fechaInicioInventario: z.date({
-    required_error: "Seleccione una fecha de inicio",
-  }),
-  fechaFinInventario: z.date({
-    required_error: "Seleccione una fecha de fin",
+  lugarInventario: z.string().min(1, {
+    message: "Seleccione un lugar",
   }),
 });
 
 export default function Inventarios() {
   const [inventarios, setInventarios] = useState([]);
+  const [lugares, setLugares] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [inventarioActual, setInventarioActual] = useState(null);
-  const [openInicio, setOpenInicio] = useState(false);
-  const [openFin, setOpenFin] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       nombreInventario: "",
-      fechaInicioInventario: undefined,
-      fechaFinInventario: undefined,
+      lugarInventario: "",
     },
   });
 
   const cargarInventarios = async () => {
     try {
       const res = await api.get("/inventarios");
-
       setInventarios(res.data);
     } catch {
       toast.error("Error al cargar inventarios");
     }
   };
 
+  const cargarLugares = async () => {
+    try {
+      const res = await api.get("/lugares");
+      setLugares(res.data);
+    } catch {
+      toast.error("Error al cargar lugares");
+    }
+  };
+
   useEffect(() => {
     cargarInventarios();
+    cargarLugares();
   }, []);
 
   const abrirFormulario = (inventario = null) => {
@@ -80,12 +97,7 @@ export default function Inventarios() {
     setInventarioActual(inventario);
     form.reset({
       nombreInventario: inventario?.nombreInventario || "",
-      fechaInicioInventario: inventario?.fechaInicioInventario
-        ? new Date(inventario.fechaInicioInventario)
-        : undefined,
-      fechaFinInventario: inventario?.fechaFinInventario
-        ? new Date(inventario.fechaFinInventario)
-        : undefined,
+      lugarInventario: inventario?.lugarInventario || "",
     });
     setFormVisible(true);
   };
@@ -93,9 +105,7 @@ export default function Inventarios() {
   const onSubmit = async (data) => {
     const payload = {
       ...data,
-      fechaInicioInventario: format(data.fechaInicioInventario, "yyyy-MM-dd"),
-      fechaFinInventario: format(data.fechaFinInventario, "yyyy-MM-dd"),
-      usuariosId: 1, // 👈 ID quemado del usuario
+      usuariosId: 1,
     };
 
     try {
@@ -116,111 +126,79 @@ export default function Inventarios() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {formVisible && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>
-              {modoEdicion ? "Editar Inventario" : "Nuevo Inventario"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="nombreInventario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre de Inventario</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ejemplo: Inventario Q2 2025" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <Dialog open={formVisible} onOpenChange={setFormVisible}>
+        <DialogContent className="sm:max-w-lg z-[60]">
+          <DialogHeader>
+            <DialogTitle>{modoEdicion ? "Editar Inventario" : "Nuevo Inventario"}</DialogTitle>
+          </DialogHeader>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fechaInicioInventario"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha de Inicio</FormLabel>
-                        <Popover open={openInicio} onOpenChange={setOpenInicio}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full text-left pl-3 font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? format(field.value, "dd/MM/yyyy")
-                                  : "Seleccionar fecha"}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50">
-                            <DayPicker
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                field.onChange(date);
-                                setOpenInicio(false);
-                              }}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="nombreInventario"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre de Inventario</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ejemplo: Inventario Q2 2025" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="fechaFinInventario"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha de Fin</FormLabel>
-                        <Popover open={openFin} onOpenChange={setOpenFin}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full text-left pl-3 font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? format(field.value, "dd/MM/yyyy")
-                                  : "Seleccionar fecha"}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50">
-                            <DayPicker
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                field.onChange(date);
-                                setOpenFin(false);
-                              }}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name="lugarInventario"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Lugar</FormLabel>
+                    <Popover modal>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button variant="outline" role="combobox" className="justify-between">
+                            {field.value
+                              ? lugares.find((l) => l.nombreLugar === field.value)?.nombreLugar
+                              : "Seleccionar lugar"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0 z-[70]">
+                        <Command>
+                          <CommandInput placeholder="Buscar lugar..." />
+                          <CommandList>
+                            <CommandEmpty>No encontrado</CommandEmpty>
+                            <CommandGroup>
+                              {lugares.map((lugar) => (
+                                <CommandItem
+                                  key={lugar.id}
+                                  onSelect={() => {
+                                    form.setValue("lugarInventario", lugar.nombreLugar);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      field.value === lugar.nombreLugar ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {lugar.nombreLugar}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4">
+                <DialogClose asChild>
                   <Button
                     type="button"
                     variant="outline"
@@ -231,23 +209,20 @@ export default function Inventarios() {
                   >
                     Cancelar
                   </Button>
-                  <Button type="submit" className="bg-blue-600 text-white">
-                    {modoEdicion ? "Actualizar" : "Crear"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      )}
+                </DialogClose>
+                <Button type="submit" className="bg-blue-600 text-white">
+                  {modoEdicion ? "Actualizar" : "Crear"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader className="flex justify-between items-center">
           <CardTitle className="text-2xl">Inventarios</CardTitle>
-          <Button
-            className="bg-blue-600 text-white"
-            onClick={() => abrirFormulario()}
-          >
+          <Button className="bg-blue-600 text-white" onClick={() => abrirFormulario()}>
             Agregar Inventario
           </Button>
         </CardHeader>
@@ -266,29 +241,29 @@ export default function Inventarios() {
                   <td className="hidden">{inv.id}</td>
                   <td className="p-2">{inv.nombreInventario}</td>
                   <td className="p-2 text-right flex gap-2 justify-end">
-                    <Button
-                      size="icon"
-                      className="bg-blue-500 hover:bg-blue-600"
-                      onClick={() => abrirFormulario(inv)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                   <Button
-  size="icon"
-  className="bg-gray-400"
-  onClick={() => navigate(`/inventarios/${inv.id}/ver`)}
->
-  <Eye className="w-4 h-4" />
-</Button>
-<Button
-  size="icon"
-  className="bg-green-600 hover:bg-green-700"
-  onClick={() => navigate(`/inventarios/${inv.id}/realizar`)}
->
-  <ScanLine className="w-4 h-4" />
-</Button>
+  <Button
+    size="icon"
+    className="bg-yellow-400 hover:bg-yellow-500 text-black dark:text-white"
+    onClick={() => abrirFormulario(inv)}
+  >
+    <Pencil className="w-5 h-5" />
+  </Button>
+  <Button
+    size="icon"
+    className="bg-blue-500 hover:bg-blue-600 text-white"
+    onClick={() => navigate(`/inventarios/${inv.id}/ver`)}
+  >
+    <Eye className="w-5 h-5" />
+  </Button>
+  <Button
+    size="icon"
+    className="bg-green-600 hover:bg-green-700 text-white"
+    onClick={() => navigate(`/inventarios/${inv.id}/realizar`)}
+  >
+    <ScanLine className="w-5 h-5" />
+  </Button>
+</td>
 
-                  </td>
                 </tr>
               ))}
             </tbody>

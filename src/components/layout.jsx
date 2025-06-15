@@ -163,9 +163,17 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
+                          <Link to="/bienes/lista-bienes">
                             <Box className="h-5 w-5" />
                             <span>Bienes empresariales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                       <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/cambio-encargado">
+                            <Box className="h-5 w-5" />
+                            <span>Cambio de encargado</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -202,7 +210,7 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/departamentos">
+                          <Link to="/lugar">
                             <Archive className="h-5 w-5" />
                             <span>Lugares de Monitoreo</span>
                           </Link>
@@ -235,9 +243,17 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/lista-monitoreo">
+                          <Link to="/monitoreo-tag">
                             <MapPin className="h-5 w-5" />
                             <span>Monitoreo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/lista-monitoreo">
+                            <MapPin className="h-5 w-5" />
+                            <span>Reporte Monitoreo</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
