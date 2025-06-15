@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import axios from "axios";
 import api from "@/utils/axios";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +39,6 @@ const FormSchema = z.object({
   nombreBien: z.string().min(2),
   descripcion: z.string().min(2),
   precio: z.coerce.number().positive(),
-  status: z.coerce.number().int().min(0).max(1),
- // tagInmueble: z.string().min(2),
   serieBien: z.string().min(2),
   modeloBien: z.string().min(2),
   marcaBien: z.string().min(2),
@@ -49,11 +47,10 @@ const FormSchema = z.object({
   observacionBien: z.string().optional(),
   ubicacionBien: z.string().min(2),
   categoriaId: z.string(),
-  //tagRfidId: z.coerce.number().int().optional(),
   departamentoId: z.string(),
-  tagRfidNumero:z.string()
-  //tagRfidCode: z.string().optional(),
-
+  tagRfidNumero: z.string(),
+  usuarioId: z.string().optional(),
+  status: z.coerce.number().optional().default(1),
 });
 
 export default function RegistrarBien() {
@@ -61,6 +58,9 @@ export default function RegistrarBien() {
   const [rfidValue, setRfidValue] = useState("");
   const [departamentos, setDepartamentos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -68,7 +68,6 @@ export default function RegistrarBien() {
       nombreBien: "",
       descripcion: "",
       precio: "",
-      status: 1,
       serieBien: "",
       modeloBien: "",
       marcaBien: "",
@@ -79,6 +78,8 @@ export default function RegistrarBien() {
       categoriaId: "",
       departamentoId: "",
       tagRfidNumero: "",
+      usuarioId: "",
+      status: 1,
     },
   });
 
@@ -98,96 +99,110 @@ export default function RegistrarBien() {
       }));
       setCategorias(options);
     }).catch(() => toast.error("Error al cargar categorías"));
+
+    api.get("/usuarios").then(res => {
+      const options = res.data.map(user => ({
+        label: `${user.nombre} ${user.apellido}`,
+        value: user.id.toString(),
+      }));
+      setUsuarios(options);
+    }).catch(() => toast.error("Error al cargar usuarios"));
   }, []);
 
   useEffect(() => {
-    let buffer = "";
-    let lastKeyTime = 0;
+    if (id) {
+      api.get(`/bienes-inmuebles/${id}`).then(res => {
+        const bien = res.data;
+        form.reset({
+          nombreBien: bien.nombreBien,
+          descripcion: bien.descripcion,
+          precio: bien.precio,
+          serieBien: bien.serieBien,
+          modeloBien: bien.modeloBien,
+          marcaBien: bien.marcaBien,
+          materialBien: bien.materialBien,
+          dimensionesBien: bien.dimensionesBien,
+          observacionBien: bien.observacionBien || "",
+          ubicacionBien: bien.ubicacionBien,
+          categoriaId: String(bien.categoriaId),
+          departamentoId: String(bien.departamentoId),
+          tagRfidNumero: bien.tagRfidNumero,
+          usuarioId: bien.usuarioId ? String(bien.usuarioId) : "",
+          status: bien.status ?? 1,
+        });
+        setRfidValue(bien.tagRfidNumero);
+      }).catch(() => toast.error("No se pudo cargar el bien"));
+    }
+  }, [id]);
 
-    const handleKeyPress = (event) => {
-      if (!scanningRFID) return;
-      const currentTime = new Date().getTime();
-      if (currentTime - lastKeyTime > 500 && buffer.length > 0) buffer = "";
-      lastKeyTime = currentTime;
+  const [lugares, setLugares] = useState([]);
 
-      if (event.key === "Enter") {
-        if (buffer.length >= 8) {
-          setRfidValue(buffer);
-          form.setValue("tagRfidNumero", buffer); // 
+useEffect(() => {
+  api.get("/lugares").then(res => {
+    const options = res.data
+      .filter(l => l.activo) // si filtras solo los activos
+      .map(l => ({
+        label: l.nombreLugar,
+        value: l.nombreLugar, // usamos el nombre directamente como value
+      }));
+    setLugares(options);
+  }).catch(() => toast.error("Error al cargar lugares"));
+}, []);
 
-          setScanningRFID(false);
-          toast.success("Tag RFID detectado", {
-            description: `Código RFID: ${buffer}`,
-            richColors: true,
-          });
-        }
-        buffer = "";
-      } else if (event.key.match(/[a-zA-Z0-9]/)) {
-        buffer += event.key;
-      }
-    };
-
-    if (scanningRFID) window.addEventListener("keypress", handleKeyPress);
-    return () => window.removeEventListener("keypress", handleKeyPress);
-  }, [scanningRFID, form]);
-
-  const buscarIdPorCodigoRFID = async (codigo) => {
+  const onSubmit = async (data) => {
+     console.log("Formulario enviado. Datos:", data);
     try {
-      const response = await axios.get(`http://localhost:8002/api/tags-rfid/buscar-por-codigo/${codigo}`);
-      return response.data;
+      const payload = {
+        ...data,
+        categoriaId: parseInt(data.categoriaId),
+        departamentoId: parseInt(data.departamentoId),
+        tagRfidNumero: data.tagRfidNumero,
+        usuarioId: data.usuarioId ? parseInt(data.usuarioId) : null,
+      };
+
+      if (id) {
+        await api.put(`/bienes-inmuebles/${id}`, payload);
+        toast.success("Bien actualizado correctamente");
+      } else {
+        await api.post("/bienes-inmuebles", payload);
+        toast.success("Bien registrado correctamente");
+      }
+
+      navigate("/bienes/lista-bienes");
     } catch (error) {
-      console.error("Error al buscar el ID del tag RFID:", error);
-      return null;
+      console.error("Error al guardar el bien:", error);
+      toast.error("Error al guardar el bien.");
     }
   };
 
-  const onSubmit = async (data) => {
-  try {
-    const finalData = {
-      ...data,
-      categoriaId: parseInt(data.categoriaId),
-      departamentoId: parseInt(data.departamentoId),
-      tagRfidNumero: data.tagRfidNumero
-    };
-
-    // Muestra por consola el cuerpo del POST
-    console.log("🔍 Enviando datos al backend:", finalData);
-
-    const response = await axios.post("http://localhost:8002/api/bienes-inmuebles", finalData);
-
-    toast.success(` Bien "${data.nombreBien}" registrado con éxito`);
-
-    form.reset();
-    setRfidValue("");
-  } catch (error) {
-    console.error(" Error al registrar bien:", error);
-    toast.error("Ocurrió un error al registrar el bien.");
-  }
-};
-
-
   return (
-    <div className="p-6 md:p-12">
+    <div className="p-6 md:p-10">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Registrar Bien</CardTitle>
+         <CardTitle className="text-2xl font-bold">
+  {id ? "Editar Bien" : "Registrar Bien"}
+</CardTitle>
+
         </CardHeader>
         <CardContent className="overflow-x-hidden w-full max-w-full">
           <div className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
             {rfidValue ? (
-              <div className="text-center">
-                <p className="text-green-600 text-lg mb-2">Tag RFID escaneado:</p>
-                <p className="bg-white dark:bg-gray-800 text-lg p-2 rounded font-mono">{rfidValue}</p>
-                <Button variant="outline" className="mt-4" onClick={() => {
-                  setRfidValue("");
-                  form.setValue("tagRfidNumero", "");
-                  setScanningRFID(true);
-                  toast.info("Escaneando nuevo tag RFID...");
-                }}>
-                  <ScanLine className="h-4 w-4 mr-2" /> Escanear otro tag
-                </Button>
-              </div>
-            ) : (
+  <div className="text-center">
+    <p className="text-green-600 text-lg mb-2">Tag RFID escaneado:</p>
+    <p className="bg-white dark:bg-gray-800 text-lg p-2 rounded font-mono">{rfidValue}</p>
+    { !id && ( // ⛔ solo permitir escanear si es nuevo
+      <Button variant="outline" className="mt-4" onClick={() => {
+        setRfidValue("");
+        form.setValue("tagRfidNumero", "");
+        setScanningRFID(true);
+        toast.info("Escaneando nuevo tag RFID...");
+      }}>
+        <ScanLine className="h-4 w-4 mr-2" /> Escanear otro tag
+      </Button>
+    )}
+  </div>
+) : (
+
               <div className="text-center">
                 <p className={`text-lg ${scanningRFID ? "text-blue-600 animate-pulse" : "text-gray-600"}`}>
                   {scanningRFID ? "Escanee un tag RFID..." : "No se ha escaneado ningún tag RFID"}
@@ -205,9 +220,12 @@ export default function RegistrarBien() {
           </div>
 
           <Form {...form}>
-            <form
-  onSubmit={form.handleSubmit(onSubmit)}
-  className="w-full max-w-full grid grid-cols-1 md:grid-cols-3 gap-4"
+            <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+  console.error("❌ Errores de validación:", errors);
+  toast.error("Corrige los errores del formulario");
+})}
+
+  className="w-full max-w-full grid grid-cols-1 md:grid-cols-2 gap-4"
 >
 
               <FormField
@@ -251,22 +269,49 @@ export default function RegistrarBien() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="status"
+            name="usuarioId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="1 para activo, 0 para inactivo"  className="w-full" {...field} />
-                </FormControl>
+                <FormLabel>Usuario Encargado (opcional)</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
+                        {field.value ? usuarios.find(u => u.value === field.value)?.label : "Seleccionar usuario"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full max-w-full">
+                    <Command>
+                      <CommandInput placeholder="Buscar usuario..." />
+                      <CommandList>
+                        <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
+                        <CommandGroup>
+                          {usuarios.map((user) => (
+                            <CommandItem
+                              key={user.value}
+                              value={user.label}
+                              onSelect={() => {console.log("✅ Usuario seleccionado:", user.label, "| ID:", user.value); 
+                                form.setValue("usuarioId", user.value)}}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", user.value === field.value ? "opacity-100" : "opacity-0")} />
+                              {user.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-         
+                   
 
           <FormField
             control={form.control}
@@ -352,19 +397,47 @@ export default function RegistrarBien() {
             )}
           />
           
-          <FormField
-            control={form.control}
-            name="ubicacionBien"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ubicación</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ejemplo: Oficina 101"  className="w-full" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+         <FormField
+  control={form.control}
+  name="ubicacionBien"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Ubicación (Lugar)</FormLabel>
+      <Popover>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
+              {field.value ? lugares.find(l => l.value === field.value)?.label : "Seleccionar lugar"}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-full max-w-full">
+          <Command>
+            <CommandInput placeholder="Buscar lugar..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No se encontraron lugares.</CommandEmpty>
+              <CommandGroup>
+                {lugares.map((lugar) => (
+                  <CommandItem
+                    key={lugar.value}
+                    value={lugar.label}
+                    onSelect={() => form.setValue("ubicacionBien", lugar.value)}
+                  >
+                    <Check className={cn("mr-2 h-4 w-4", lugar.value === field.value ? "opacity-100" : "opacity-0")} />
+                    {lugar.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
           
           
           
@@ -442,7 +515,10 @@ export default function RegistrarBien() {
           />
 
               <div className="md:col-span-2">
-                <Button type="submit" className="text-black w-full justify-between">Registrar Bien</Button>
+                <Button type="submit" className="text-black w-full justify-between">
+  {id ? "Actualizar Bien" : "Registrar Bien"}
+</Button>
+
               </div>
             </form>
           </Form>
@@ -451,3 +527,5 @@ export default function RegistrarBien() {
     </div>
   );
 }
+
+
