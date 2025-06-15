@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { registerSW } from "virtual:pwa-register";
+import { UserProvider } from "./utils/UserContext";
+import { BrowserRouter } from "react-router-dom";
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -17,6 +19,10 @@ const updateSW = registerSW({
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <UserProvider>
+        <App />
+      </UserProvider>
+    </BrowserRouter>
   </StrictMode>,
 )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
 import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin} from "lucide-react"
 import { Button } from "./ui/button"
@@ -32,17 +32,47 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import logo from "../assets/LogoName.png"
-
+import api from "@/utils/axios";
+import { useUser } from "@/utils/UserContext";
 
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [defaultOpen, setDefaultOpen] = useState(true)
+  const { user, setUser } = useUser();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  const handleLogout = useCallback(async (event) => {
+    event.stopPropagation(); // Evita la propagación del evento
+
+    try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
+    // Enviamos el token al endpoint para invalidarlo
+    await api.post('/auth/logout', {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    // Eliminamos el token del localStorage
+    localStorage.removeItem('token');
+
+    setUser(null); // Establece el usuario como null
+    
+    // Redirigimos al login
+    navigate('/login');
+  } catch (error) {
+    console.error('Error al cerrar sesión', error);
+    // En caso de error, eliminamos igual el token local
+    localStorage.removeItem('token');
+    setUser(null); // Asegúrate de limpiar el contexto también en caso de error
+    navigate('/login');
+  }
+  },[setUser, navigate]);
 
   // Detectar si estamos en móvil para cerrar el sidebar por defecto
   useEffect(() => {
@@ -74,17 +104,19 @@ export default function Layout() {
   </div>
 </SidebarHeader>
 
-
+          
           <SidebarContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/")}>
-                  <Link to="/">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {user?.rol === "Administrador" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/")}>
+                    <Link to="/">
+                      <LayoutDashboard className="h-5 w-5" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/")}>
@@ -95,14 +127,36 @@ export default function Layout() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/attendance")}>
-                  <Link to="/attendance">
-                    <Clipboard className="h-5 w-5" />
-                    <span>Registrar Asistencia</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+             {(user?.rol === "Administrador" || user?.rol === "Usuario") && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
+                    <Link to="/asistencia">
+                      <Clipboard className="h-5 w-5" />
+                      <span>Registrar Asistencia</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {user?.rol === "Administrador" && (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")}>
+                      <Link to="/asistencia-evento">
+                        <Clipboard className="h-5 w-5" />
+                        <span>Registrar Asistencia Evento</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")}>
+                      <Link to="/asistencia-dashboard">
+                        <LayoutDashboard className="h-5 w-5" />
+                        <span>Asistencia</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )}
 
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
@@ -288,13 +342,9 @@ export default function Layout() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem  onClick={() => navigate('/perfil')}>
                   <Users className="mr-2 h-4 w-4" />
                   <span>Perfil</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configuración</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
