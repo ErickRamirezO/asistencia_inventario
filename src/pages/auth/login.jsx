@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import api from "@/utils/axios";
+import { jwtDecode } from "jwt-decode";
+import { useUser } from "../../utils/UserContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Login = () => {
 
@@ -11,28 +14,49 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useUser();
+  const [error, setError] = useState("");
 
-  // Redirigir si ya hay sesión activa
+  const roleBasedRedirects = {
+    Administrador: "/verUsuarios",
+    Usuario: "/asistencia",
+    "Encargado de Bodega": "/bienes/inventario",
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/verUsuarios');
+    if (error) {
+      const timer = setTimeout(() => setError(""), 4000);
+      return () => clearTimeout(timer);
     }
-  }, [navigate]);
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Email:", email);
     console.log("Password:", password);
     try {
-      const res = await axios.post("http://localhost:8002/api/auth/login", {
-        email: email,
-        password: password,
-      });
-      localStorage.setItem("token", res.data.token);
-      navigate("/verUsuarios");
+      const loginResponse = await api.post("/auth/login", { email, password });
+      const token = loginResponse.data.token;
+      localStorage.setItem("token", token);
+      //decodificar el token para obtener el id del usuario
+      const decoded = jwtDecode(token);
+      try {
+        const rolResponse = await api.get(`/usuarios/${decoded.userId}/rol`);
+        // Actualizar el contexto con el rol
+        const rol = rolResponse.data;
+        setUser({ ...decoded, rol: rol });
+        // Navegar después de actualizar el contexto
+        const redirectPath = roleBasedRedirects[rol] || "/no-autorizado"; // Usa /no-autorizado si el rol no está en el mapa
+        navigate(redirectPath); // O la ruta que corresponda
+      } catch (error) {
+        console.error("Error al obtener el rol:", error);
+        // Manejar el error (mostrar un mensaje, etc.)
+      }
     } catch (err) {
-      alert("Usuario o contraseña incorrectos", err);
+      setError(
+        err.response?.data?.message ||
+        "No se pudo iniciar sesión. Verifica tus credenciales."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -49,6 +73,11 @@ const Login = () => {
               </a>
               <h1 className="mb-2 text-2xl font-bold">Iniciar Sesión</h1>
               <p className="text-muted-foreground">Bienvenido de nuevo</p>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -83,9 +112,9 @@ const Login = () => {
                       Recordarme
                     </label>
                   </div>
-                  <a href="#" className="text-sm text-primary hover:underline">
+                  <Link to="/recuperar-contrasena"  className="text-sm text-primary hover:underline">
                     ¿Olvidó su contraseña?
-                  </a>
+                  </Link>
                 </div>
                 
                 <Button type="submit" className="mt-2 w-full">
@@ -93,13 +122,6 @@ const Login = () => {
                 </Button>
               </div>
             </form>
-            
-            <div className="mx-auto mt-8 flex justify-center gap-1 text-sm text-muted-foreground">
-              <p>¿No tiene una cuenta?</p>
-              <a href="/registro" className="font-medium text-primary">
-                Regístrese
-              </a>
-            </div>
           </div>
         </div>
       </div>
