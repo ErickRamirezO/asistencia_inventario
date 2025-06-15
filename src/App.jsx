@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "sonner"
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./components/protectedRoute"
 import Layout from "./components/layout"
 import Login from "./pages/auth/login"
 import AsistenciaSimple from "./pages/asistencia/asistenciaSimple"
