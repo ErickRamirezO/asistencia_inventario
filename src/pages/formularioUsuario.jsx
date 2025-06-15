@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { CalendarIcon, ScanLine, Check, ChevronsUpDown, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import api from "@/utils/axios";
 import axios from "axios";
 import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -75,9 +76,12 @@ function validarCedulaEcuatoriana(cedula) {
   return resultado === digitoVerificador;
 }
 
+const nameRegex = /^[A-Za-z]+$/;
+
+
 const FormSchema = z.object({
-  nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres." }),
-  apellidos: z.string().min(2, { message: "Los apellidos deben tener al menos 2 caracteres." }),
+  nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres." }).regex(nameRegex, { message: "Los nombres solo deben contener letras." }).max(30),
+  apellidos: z.string().min(2, { message: "Los apellidos deben tener al menos 2 caracteres." }).regex(nameRegex, { message: "Los apellidos solo deben contener letras." }).max(30),
   telefono: z
     .string()
     .regex(/^\d{10}$/, { message: "El teléfono debe tener 10 dígitos." }),
@@ -97,7 +101,7 @@ const FormSchema = z.object({
   rol: z.string({
     required_error: "Debe seleccionar un rol.",
   }),
-  tarjetaRFID: z
+  tagsRFIDTag: z
     .string()
     .regex(/^[a-zA-Z0-9]{8,50}$/, { message: "La tarjeta RFID debe tener entre 8 y 50 caracteres." })
     .optional(),
@@ -139,7 +143,7 @@ export default function FormularioUsuario() {
       correoElectronico: "",
       departamento: "",
       rol: "",
-      tarjetaRFID: "",
+      tagsRFIDTag: "",
       fechaNacimiento: undefined,
     },
   });
@@ -149,7 +153,7 @@ export default function FormularioUsuario() {
       setCargando(true);
       try {
         // Obtenemos los departamentos
-        const respDepartamentos = await axios.get("http://localhost:8002/api/departamentos");
+        const respDepartamentos = await api.get("/departamentos");
         const departamentosFormateados = respDepartamentos.data.map(dept => ({
           label: dept.nombreDepartamento,
           value: dept.id.toString()
@@ -157,7 +161,7 @@ export default function FormularioUsuario() {
         setDepartamentos(departamentosFormateados);
         
         // Obtenemos los roles
-        const respRoles = await axios.get("http://localhost:8002/api/roles");
+        const respRoles = await api.get("/roles");
         const rolesFormateados = respRoles.data.map(rol => ({
           label: rol.rol,
           value: rol.id.toString()
@@ -165,13 +169,13 @@ export default function FormularioUsuario() {
         setRoles(rolesFormateados);
 
         // Obtenemos las tarjetas RFID disponibles
-        const respTarjetas = await axios.get("http://localhost:8002/api/tags-rfid");
+        const respTarjetas = await api.get("/tags-rfid");
         const tarjetasRFID = respTarjetas.data;
 
         // Si estamos en modo edición, cargamos los datos del usuario
         if (modoEdicion) {
           // Obtener datos del usuario a editar
-          const respUsuario = await axios.get(`http://localhost:8002/api/usuarios/${id}`);
+          const respUsuario = await api.get(`/usuarios/${id}`);
           const datosUsuario = respUsuario.data;
           setUsuario(datosUsuario);
 
@@ -197,7 +201,7 @@ export default function FormularioUsuario() {
             correoElectronico: datosUsuario.email,
             departamento: departamentoEncontrado ? departamentoEncontrado.value : "", 
             rol: rolEncontrado ? rolEncontrado.value : "", 
-            tarjetaRFID: tarjetaEncontrada ? tarjetaEncontrada.tag : "",
+            tagsRFIDTag: tarjetaEncontrada ? tarjetaEncontrada.tag : "",
             fechaNacimiento: datosUsuario.fechaNacimiento ? new Date(datosUsuario.fechaNacimiento) : undefined,
           });
           
@@ -242,7 +246,7 @@ export default function FormularioUsuario() {
   // Función para reiniciar y escanear una nueva tarjeta
   function resetRFID() {
     setRfidValue("");
-    form.setValue("tarjetaRFID", "");
+    form.setValue("tagsRFIDTag", "");
   }
   
   // Efecto para manejar eventos del teclado (simulando un lector RFID)
@@ -264,7 +268,7 @@ export default function FormularioUsuario() {
       if (event.key === 'Enter') {
         if (buffer.length >= 8) {
           setRfidValue(buffer);
-          form.setValue("tarjetaRFID", buffer);
+          form.setValue("tagsRFIDTag", buffer);
           setScanningRFID(false);
           toast.success("Tarjeta detectada", {
             description: `Código RFID registrado correctamente`,
@@ -286,18 +290,6 @@ export default function FormularioUsuario() {
     };
   }, [scanningRFID, form]);
 
-  // Agregar esta función en tu componente
-  async function buscarIdPorCodigoRFID(codigo) {
-    try {
-      const respuesta = await axios.get(`http://localhost:8002/api/tags-rfid/buscar-por-codigo/${codigo}`);
-      console.log("Respuesta de búsqueda por código:", respuesta.data);
-      return respuesta.data
-    } catch (error) {
-      console.error("Error al buscar ID de tarjeta RFID:", error);
-      return null;
-    }
-  }
-
   // Función para manejar el envío del formulario
   async function onSubmit(formData) {
     if (!formData.departamento || !formData.rol) {
@@ -317,13 +309,6 @@ export default function FormularioUsuario() {
     return; // No continuar con el envío
   }
     try {
-        // Buscar ID de tarjeta RFID usando la lista local
-        let tagsRFIDIdTagsRFID = null;
-        if (formData.tarjetaRFID) {
-            // Buscar el ID correspondiente al código
-            tagsRFIDIdTagsRFID = await buscarIdPorCodigoRFID(formData.tarjetaRFID);
-            console.log("ID de tarjeta RFID encontrado:", tagsRFIDIdTagsRFID);
-        }
         
         const apiData = {
             nombre: formData.nombres,
@@ -334,7 +319,8 @@ export default function FormularioUsuario() {
             departamentosIddepartamentos: parseInt(formData.departamento),
             rolesIdroles: parseInt(formData.rol),
             fechaNacimiento: formData.fechaNacimiento ? format(formData.fechaNacimiento, 'yyyy-MM-dd') : null,
-            tagsRFIDIdTagsRFID
+            tagsRFIDTag: formData.tagsRFIDTag,
+            tagsRFIDIdTagsRFID: null
         };
 
         if (modoEdicion) {
@@ -351,7 +337,7 @@ export default function FormularioUsuario() {
             console.log("Datos completos a enviar en actualización:", datosCompletos);
             
             // Modo edición: Actualizar usuario existente con todos los campos requeridos
-            await axios.put(`http://localhost:8002/api/usuarios/${id}`, datosCompletos);
+            await api.put(`/usuarios/${id}`, datosCompletos);
             
             toast.success("Usuario actualizado", {
                 description: "Los datos del usuario han sido actualizados exitosamente.",
@@ -371,7 +357,7 @@ export default function FormularioUsuario() {
             };
             
             // Modo registro: Crear nuevo usuario
-            await axios.post("http://localhost:8002/api/usuarios", datosCompletos);
+            await api.post("/usuarios", datosCompletos);
             
             toast.success("Usuario registrado", {
                 description: "El usuario ha sido registrado exitosamente.",
@@ -727,7 +713,7 @@ return (
                   {/* Este elemento se mantiene sin cambios como solicitaste */}
                   <FormField
                     control={form.control}
-                    name="tarjetaRFID"
+                    name="tagsRFIDTag"
                     render={() => (
                       <FormItem className="flex-1 flex flex-col">
                         <FormLabel>Tarjeta RFID</FormLabel>

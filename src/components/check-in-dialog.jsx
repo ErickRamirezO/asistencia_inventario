@@ -54,9 +54,13 @@ export default function CheckInDialog({ onRegister, onTableUpdate }) {
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        toast.error(error.response.data.mensaje);
+        toast.error(error.response.data.mensaje,{
+          richColors: true,
+        });
       } else {
-        toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor." });
+        toast.error("Error al registrar asistencia", { description: "No se pudo conectar con el servidor.", 
+          richColors: true
+        });
       }
     } finally {
       setRfid("");

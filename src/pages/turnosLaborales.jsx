@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
+import api from "@/utils/axios";
 
 import { toast } from "sonner"; // Assuming 'sonner' for toasts
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,8 @@ const timeToMinutes = (timeString) => {
 const FormSchema = z.object({
   shiftName: z.string().min(3, {
     message: "El nombre del turno debe tener al menos 3 caracteres.",
-  }),
+  }).max(30).regex(/^[a-zA-Z0-9-]+$/, {
+    message: "El nombre del turno solo puede contener letras, números y guiones.",}),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: "Debe ser una hora válida en formato HH:mm.",
   }),
@@ -70,6 +72,18 @@ const FormSchema = z.object({
       message: "Debe ser una hora válida en formato HH:mm."
     })
     .optional(),
+})
+.superRefine((data, ctx) => {
+    const startShiftMinutes = timeToMinutes(data.startTime);
+    const endShiftMinutes = timeToMinutes(data.endTime);
+
+    if (startShiftMinutes !== null && endShiftMinutes !== null && endShiftMinutes <= startShiftMinutes) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "La hora de fin no puede ser anterior o igual a la hora de inicio.",
+            path: ["endTime"], // Associate the error with the endTime field
+        });
+    }
 })
 // RN05 (Frontend Refinement): The lunch schedule must be contained within the shift schedule
 .superRefine((data, ctx) => {
@@ -174,7 +188,7 @@ export default function TurnosLaborales() {
 
   async function obtenerHorariosLaborales() {
     try {
-      const response = await axios.get("http://localhost:8002/api/horarios-laborales");
+      const response = await api.get("/horarios-laborales");
       setTurnos(response.data);
     } catch (error) {
       console.error("Error al recuperar los horarios laborales:", error);
@@ -201,7 +215,7 @@ export default function TurnosLaborales() {
         horaFinAlmuerzo: data.endLunchTime,
       };
 
-      const response = await axios.post("http://localhost:8002/api/horarios-laborales", payload);
+      const response = await api.post("/horarios-laborales", payload);
       setTurnos(prevTurnos => [...prevTurnos, response.data]);
       toast.success("Turno creado", {
         description: "El turno laboral se ha registrado correctamente.",

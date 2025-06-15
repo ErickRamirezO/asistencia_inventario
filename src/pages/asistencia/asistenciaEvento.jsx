@@ -1,0 +1,373 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
+import { toast } from "sonner";
+import api from "@/utils/axios";
+
+export default function AsistenciaEvento() {
+  const [rfidTag, setRfidTag] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [availableEvents, setAvailableEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [newEvent, setNewEvent] = useState({ nombre: "", horaIngreso: "07:00", horaSalida: "09:00" });
+  const inputRef = useRef(null);
+  const lastProcessedTag = useRef("");
+  const [showEditHoraFin, setShowEditHoraFin] = useState(false);
+  const [nuevaHoraFin, setNuevaHoraFin] = useState("");
+
+  // Cargar eventos disponibles al montar y después de crear uno nuevo
+  const fetchEvents = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/asistencias/eventos-disponibles");
+      setAvailableEvents(response.data);
+    } catch (error) {
+      toast.error("Error al cargar eventos disponibles.", {
+        description: error.message,
+        richColors: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    if (inputRef.current && selectedEvent && !showCreateEvent) {
+      inputRef.current.focus();
+    }
+  }, [selectedEvent, showCreateEvent]);
+
+  // Crear nuevo evento
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    if (!newEvent.nombre || !newEvent.horaIngreso || !newEvent.horaSalida) {
+      toast.warning("Complete todos los campos para crear el evento.");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      await api.post("/asistencias/crear-evento", {
+        nombre: newEvent.nombre,
+        horaIngreso: newEvent.horaIngreso,
+        horaSalida: newEvent.horaSalida,
+      });
+      toast.success("Evento creado correctamente.",{
+        richColors: true,
+      });
+      setShowCreateEvent(false);
+      setNewEvent({ nombre: "", horaIngreso: "07:00", horaSalida: "09:00" });
+      await fetchEvents();
+    } catch (error) {
+      toast.error("Error al crear evento.", {
+        description: error?.response?.data?.mensaje || error.message,
+        richColors: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Obtener info de usuario
+  const fetchUserInfo = useCallback(async (tag) => {
+    if (processing) return;
+    setProcessing(true);
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/usuarios/tag/${tag}`);
+      setUserInfo(response.data);
+
+      setTimeout(() => {
+        setUserInfo(null);
+        setRfidTag("");
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+        setProcessing(false);
+        lastProcessedTag.current = "";
+      }, 3000);
+    } catch (error) {
+      setUserInfo(null);
+      toast.error("Usuario no encontrado para este Tag", {
+        description: error?.response?.data?.mensaje || "No se pudo conectar con el servidor.",
+        richColors: true,
+      });
+      setTimeout(() => {
+        setRfidTag("");
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+        setProcessing(false);
+        lastProcessedTag.current = "";
+      }, 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [processing]);
+
+  // Registrar asistencia en evento
+  const registerEventAttendance = useCallback(async (tag) => {
+    if (!tag || !selectedEvent) {
+      toast.warning("Seleccione un evento antes de registrar asistencia.", {
+        richColors: true,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.post("/asistencias/registrar-asistencia-evento", { rfid: tag, eventoNombre: selectedEvent });
+      console.log(response.data);
+      if (response.status === 200) {
+        const { mensaje } = response.data;
+        toast.success(mensaje, {
+          richColors: true,
+        });
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        toast.error(error.response.data.mensaje, {
+          richColors: true,
+        });
+      } else {
+        toast.error("Error al registrar asistencia en evento", {
+          description: "No se pudo conectar con el servidor.",
+          richColors: true,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedEvent]);
+
+  // Escaneo de tag
+  const handleTagChange = (e) => {
+    const tag = e.target.value;
+    setRfidTag(tag);
+  };
+
+  useEffect(() => {
+    const handleValidTag = async () => {
+      if (
+        rfidTag &&
+        rfidTag.length === 24 &&
+        rfidTag !== lastProcessedTag.current &&
+        !processing &&
+        selectedEvent &&
+        !showCreateEvent
+      ) {
+        lastProcessedTag.current = rfidTag;
+        await fetchUserInfo(rfidTag);
+        await registerEventAttendance(rfidTag);
+      }
+    };
+    handleValidTag();
+  }, [rfidTag, fetchUserInfo, registerEventAttendance, processing, selectedEvent, showCreateEvent]);
+
+  useEffect(() => {
+    if (rfidTag.length > 24) {
+      setRfidTag(rfidTag.substring(0, 24));
+    }
+  }, [rfidTag]);
+
+    const horaFinActual = availableEvents.find(ev => ev === selectedEvent || ev.nombre === selectedEvent)?.horaSalida || "";
+    const handleEditarHoraFin = async (e) => {
+    e.preventDefault();
+    if (!selectedEvent || !nuevaHoraFin) return;
+    try {
+      setIsLoading(true);
+      await api.put("/asistencias/evento/editar-hora-fin", {
+        eventoNombre: selectedEvent,
+        nuevaHoraFin,
+      });
+      toast.success("Hora de fin actualizada correctamente.", { richColors: true });
+      setShowEditHoraFin(false);
+      setNuevaHoraFin("");
+      await fetchEvents();
+    } catch (error) {
+      toast.error("Error al actualizar hora de fin.", {
+        description: error?.response?.data?.mensaje || error.message,
+        richColors: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //Obtener hora de fin del evento seleccionado
+  const fetchHoraFinEvento = async (eventoNombre) => {
+    try {
+      const response = await api.post("/asistencias/evento/hora-fin", {
+        eventoNombre: eventoNombre
+      });
+      return response.data.horaFin || "";
+    } catch (error) {
+      toast.error("No se pudo obtener la hora de fin del evento.",{
+        description: error?.response?.data?.mensaje || error.message,
+        richColors: true,
+      });
+      setShowEditHoraFin(false);      // Cierra el modal de edición
+      setNuevaHoraFin("");
+      return "";
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center h-full w-full" style={{ height: "80vh" }}>
+      <Card className="w-96">
+        <CardHeader className="flex flex-col items-center">
+          <CardTitle>Registro de Asistencia en Evento</CardTitle>
+          <CardDescription>
+            {selectedEvent
+              ? "Escanee el tag RFID para registrar asistencia en el evento seleccionado."
+              : "Seleccione o cree un evento para iniciar el registro."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+          {/* Botón para crear evento, arriba y centrado */}
+          <div className="w-full flex justify-center mb-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCreateEvent(true)}
+            >
+              Crear nuevo evento
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!selectedEvent}
+              onClick={async () => {
+                setShowEditHoraFin(true);
+                const horaFin = await fetchHoraFinEvento(selectedEvent);
+                setNuevaHoraFin(horaFin || "09:00");
+              }}
+            >
+              Editar hora de fin
+            </Button>
+          </div>
+          {/* Selector de eventos */}
+          <Select value={selectedEvent} onValueChange={setSelectedEvent} disabled={showCreateEvent}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar evento" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableEvents.length === 0 ? (
+                <div className="px-4 py-2 text-muted-foreground text-sm">
+                  No hay eventos disponibles
+                </div>
+              ) : (
+                availableEvents.map((event) => (
+                  <SelectItem key={event} value={event}>
+                    {event}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+          {/* Dialog para crear evento */}
+          <Dialog open={showCreateEvent} onOpenChange={setShowCreateEvent}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Crear nuevo evento</DialogTitle>
+              </DialogHeader>
+              <form className="flex flex-col gap-3" onSubmit={handleCreateEvent}>
+                <Input
+                  placeholder="Nombre del evento"
+                  value={newEvent.nombre}
+                  onChange={(e) => setNewEvent({ ...newEvent, nombre: e.target.value })}
+                  required
+                />
+                <label className="text-sm text-muted-foreground mb-1">
+                    Establezca la hora de inicio y fin del evento
+                </label>
+                <Input
+                  type="time"
+                  placeholder="Hora de ingreso"
+                  value={newEvent.horaIngreso}
+                  onChange={(e) => setNewEvent({ ...newEvent, horaIngreso: e.target.value })}
+                  required
+                />
+                <Input
+                  type="time"
+                  placeholder="Hora de salida"
+                  value={newEvent.horaSalida}
+                  onChange={(e) => setNewEvent({ ...newEvent, horaSalida: e.target.value })}
+                  required
+                />
+                <DialogFooter>
+                  <Button type="button" variant="secondary" onClick={() => setShowCreateEvent(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    Guardar evento
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+          {/* Dialog para editar hora de fin */}
+          <Dialog open={showEditHoraFin} onOpenChange={setShowEditHoraFin}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar hora de fin</DialogTitle>
+              </DialogHeader>
+              <form className="flex flex-col gap-3" onSubmit={handleEditarHoraFin}>
+                <label className="text-sm text-muted-foreground mb-1">
+                  Nueva hora de fin para <b>{selectedEvent}</b>
+                </label>
+                <Input
+                  type="time"
+                  value={nuevaHoraFin}
+                  onChange={e => setNuevaHoraFin(e.target.value)}
+                  required
+                />
+                <DialogFooter>
+                  <Button type="button" variant="secondary" onClick={() => setShowEditHoraFin(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    Guardar
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+          {/* Input para escanear tag */}
+          <Input
+            ref={inputRef}
+            placeholder="Escanear Tag RFID"
+            value={rfidTag}
+            onChange={handleTagChange}
+            disabled={!selectedEvent || showCreateEvent}
+          />
+          {isLoading && <p>Cargando...</p>}
+          {userInfo && (
+            <div className="mt-4 w-full">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">
+                    {userInfo.nombre} {userInfo.apellido}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Cédula: {userInfo.cedula}</p>
+                  <p>Departamento: {userInfo.departamentoNombre}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
