@@ -348,12 +348,13 @@ export default function FormularioUsuario() {
             navigate("/verUsuarios");
         } else {
             // En caso de nuevo registro necesitamos incluir los campos obligatorios
+            const defaultPassword = import.meta.env.VITE_DEFAULT_USER_PASSWORD;
             const datosCompletos = {
-                ...apiData,
-                password: "contraseña123", // Contraseña por defecto para nuevos usuarios
-                user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
-                status: 1, // Activo por defecto
-                horarioLaboralId: 1 // Horario por defecto
+              ...apiData,
+              password: defaultPassword, // Contraseña configurable por .env
+              user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
+              status: 1, // Activo por defecto
+              horarioLaboralId: 1 // Horario por defecto
             };
             
             // Modo registro: Crear nuevo usuario
