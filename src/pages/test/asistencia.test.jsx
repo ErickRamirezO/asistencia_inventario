@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Attendance from './asistencia/asistencia';
+import Attendance from '../asistencia/asistencia'; 
 
 // --- CAMBIOS AQUÍ ---
 
@@ -11,7 +11,7 @@ import Attendance from './asistencia/asistencia';
 //    Elimina: vi.mock('axios', ...);
 
 // 2. Importa directamente tu instancia 'api' desde src/utils/axios.js
-import api from '../utils/axios'; // <--- IMPORTANTE: Asegúrate de que la ruta sea correcta
+import api from '../../utils/axios'; // <--- IMPORTANTE: Asegúrate de que la ruta sea correcta
 import { toast } from 'sonner';
 
 // --- FIN CAMBIOS ---

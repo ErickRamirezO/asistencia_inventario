@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import api from '../utils/axios';
+import api from '../../utils/axios';
 import { format } from 'date-fns';
 
 // Mock de las dependencias
@@ -14,7 +14,7 @@ vi.mock('sonner', () => ({
   },
 }));
 import { toast } from 'sonner';
-import FormularioUsuario from './formularioUsuario';
+import FormularioUsuario from '../formularioUsuario';
 
 const mockDepartamentos = [
   { id: 1, nombreDepartamento: "Recursos Humanos" },

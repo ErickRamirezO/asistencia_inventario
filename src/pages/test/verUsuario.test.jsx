@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
-import VerUsuario from './verUsuario';
+import VerUsuario from '../verUsuario';
 
 // --- CAMBIOS AQUÍ ---
 
@@ -9,7 +9,7 @@ import VerUsuario from './verUsuario';
 //    Elimina: vi.mock('axios');
 
 // 2. Importa directamente tu instancia 'api' desde src/utils/axios.js
-import api from '../utils/axios'; // <--- IMPORTANTE: Asegúrate de que la ruta sea correcta.
+import api from '../../utils/axios'; // <--- IMPORTANTE: Asegúrate de que la ruta sea correcta.
 
 // --- FIN CAMBIOS ---
 
