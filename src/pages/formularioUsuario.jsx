@@ -12,6 +12,7 @@ import axios from "axios";
 import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import bcrypt from "bcryptjs";
 import {
   Form,
   FormControl,
@@ -349,9 +350,10 @@ export default function FormularioUsuario() {
         } else {
             // En caso de nuevo registro necesitamos incluir los campos obligatorios
             const defaultPassword = import.meta.env.VITE_DEFAULT_USER_PASSWORD;
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
             const datosCompletos = {
               ...apiData,
-              password: defaultPassword, // Contraseña configurable por .env
+              password: hashedPassword, // Contraseña configurable por .env
               user: formData.correoElectronico.split('@')[0], // Generar nombre de usuario a partir del correo
               status: 1, // Activo por defecto
               horarioLaboralId: 1 // Horario por defecto
