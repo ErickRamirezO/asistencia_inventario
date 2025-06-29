@@ -68,10 +68,13 @@ Imprimir acta
           </p>
 
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm">
-  <table className="w-full min-w-[800px] table-auto border-collapse text-sm text-gray-700">
+<table className="w-full min-w-[800px] table-auto border-collapse text-sm text-gray-700 print-table">
+
+
+
     <thead className="bg-gray-100 text-gray-700 font-semibold">
       <tr>
-        <th className="px-4 py-2 text-left">Código</th>
+        <th className="px-4 py-2 text-left hidden">Código</th>
         <th className="px-4 py-2 text-left">Bien</th>
         <th className="px-4 py-2 text-left">Modelo</th>
         <th className="px-4 py-2 text-left">Marca</th>
@@ -86,7 +89,7 @@ Imprimir acta
     <tbody>
       {historial.map((h) => (
         <tr key={h.id} className="border-t hover:bg-gray-50">
-          <td className="px-4 py-2">{h.bien?.id || "—"}</td>
+          <td className="px-4 py-2 hidden  ">{h.bien?.id || "—"}</td>
           <td className="px-4 py-2">{h.bien?.nombreBien || "—"}</td>
           <td className="px-4 py-2">{h.bien?.modeloBien || "—"}</td>
           <td className="px-4 py-2">{h.bien?.marcaBien || "—"}</td>
@@ -133,67 +136,81 @@ Imprimir acta
       </Card>
 </div>
       <style>{`
-        @media print {
-          body {
-            margin: 0;
-            padding: 1.5cm;
-            font-size: 11px;
-          }
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 1cm;
+    }
 
-          .no-print {
-            display: none !important;
-          }
+    body {
+      font-size: 12px;
+      padding: 0;
+    }
 
-          .print-container {
-            width: 100%;
-            max-width: 100%;
-            padding: 0;
-          }
-@media print {
+    .no-print {
+      display: none !important;
+    }
+
+    .print-container {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .overflow-x-auto {
+      overflow-x: visible !important;
+    }
+
+    .print-table {
+      width: 100% !important;
+      table-layout: auto !important; /* CAMBIO CLAVE */
+      border-collapse: collapse !important;
+      font-size: 10px !important;
+    }
+
+    .print-table th,
+    .print-table td {
+      border: 1px solid black !important;
+      padding: 4px 0px !important;
+      word-break: break-word !important;
+      white-space: normal !important;
+    }
+
+    .only-print {
+      display: grid !important;
+    }
+  }
+
+  /* Estilo normal para web/móvil */
   .print-table {
-    table-layout: fixed !important;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 12px;
   }
-}
 
-          .print-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            font-size: 10px;
-          }
+  .print-table th,
+  .print-table td {
+    border: 1px solid #ccc;
+    padding: 0px;
+    word-break: break-word;
+  }
 
-          .print-table th,
-          .print-table td {
-            border: 1px solid black;
-            padding: 4px;
-            word-break: break-word;
-          }
-        }
-
-        .print-table {
-          width: 100%;
-          table-layout: fixed;
-          border-collapse: collapse;
-        }
-
-        .print-table th,
-        .print-table td {
-          border: 1px solid #ccc;
-          padding: 6px;
-          font-size: 12px;
-          word-break: break-word;
-        }
-          @media print {
   .only-print {
-    display: grid !important;
+    display: none;
+  }
+    @media print {
+  .print-table {
+    min-width: unset !important; /* ✅ Esto elimina la min-width heredada de Tailwind */
+    width: 100% !important;
+    table-layout: auto !important;
   }
 }
 
-.only-print {
-  display: none;
-}
+`}</style>
 
-      `}</style>
+
+
     </div>
   );
 }

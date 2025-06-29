@@ -113,7 +113,7 @@ export default function Departamentos() {
               <Button
                 size="icon"
                 onClick={() => abrirModal(dep)}
-                className="bg-blue-500 text-blue-700 hover:bg-blue-600"
+                className="bg-blue-200 text-black hover:bg-blue-600"
               >
                 <Pencil className="w-4 h-4" />
               </Button>
