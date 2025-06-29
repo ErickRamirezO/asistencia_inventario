@@ -257,18 +257,18 @@ export default function TurnosLaborales() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Turnos Laborales</h1>
+    <div className="p-2 sm:p-6">
+      <h3 className="text-lg sm:text-2xl font-bold mb-4">Turnos Laborales</h3>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="blue" className="mb-6 text-black">
+          <Button variant="blue" className="mb-6 text-xs sm:text-sm">
             Crear Turno Laboral
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Crear Turno Laboral</DialogTitle>
+            <DialogTitle className="text-sm sm:text-lg">Crear Turno Laboral</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -277,25 +277,25 @@ export default function TurnosLaborales() {
                 name="shiftName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre del Turno</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Nombre del Turno</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ejemplo: Turno Mañana" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Ejemplo: Turno Mañana" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
-              <div className="flex gap-x-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <FormField
                   control={form.control}
                   name="startTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Hora de Inicio</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Hora de Inicio</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" className="text-xs sm:text-sm" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
@@ -304,26 +304,26 @@ export default function TurnosLaborales() {
                   name="endTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Hora de Fin</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Hora de Fin</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" className="text-xs sm:text-sm" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex gap-x-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <FormField
                   control={form.control}
                   name="startLunchTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Inicio de Almuerzo</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Inicio de Almuerzo</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" className="text-xs sm:text-sm" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
@@ -332,17 +332,17 @@ export default function TurnosLaborales() {
                   name="endLunchTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Fin de Almuerzo</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Fin de Almuerzo</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" className="text-xs sm:text-sm" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
               </div>
               <DialogFooter>
-                <Button type="submit" variant="blue" className="text-black">
+                <Button type="submit" variant="blue" className="text-xs sm:text-base">
                   Crear turno
                 </Button>
               </DialogFooter>
@@ -351,39 +351,38 @@ export default function TurnosLaborales() {
         </DialogContent>
       </Dialog>
 
-      <div className="max-h-[450px] overflow-y-auto border rounded-md">
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Nombre del Turno</TableHead>
-        <TableHead>Hora de Inicio</TableHead>
-        <TableHead>Hora de Fin</TableHead>
-        <TableHead>Inicio de Almuerzo</TableHead>
-        <TableHead>Fin de Almuerzo</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {turnos.length > 0 ? (
-        turnos.map((turno, index) => (
-          <TableRow key={index}>
-            <TableCell>{turno.nombreHorario}</TableCell>
-            <TableCell>{turno.horaInicio}</TableCell>
-            <TableCell>{turno.horaFin}</TableCell>
-            <TableCell>{turno.horaInicioAlmuerzo || "—"}</TableCell>
-            <TableCell>{turno.horaFinAlmuerzo || "—"}</TableCell>
-          </TableRow>
-        ))
-      ) : (
-        <TableRow>
-          <TableCell colSpan="5" className="text-center">
-            No hay turnos laborales registrados.
-          </TableCell>
-        </TableRow>
-      )}
-    </TableBody>
-  </Table>
-</div>
-
+      <div className="max-h-[450px] overflow-x-auto border rounded-md">
+        <Table className="min-w-[600px] text-xs sm:text-sm">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs sm:text-sm">Nombre del Turno</TableHead>
+              <TableHead className="text-xs sm:text-sm">Hora de Inicio</TableHead>
+              <TableHead className="text-xs sm:text-sm">Hora de Fin</TableHead>
+              <TableHead className="text-xs sm:text-sm">Inicio de Almuerzo</TableHead>
+              <TableHead className="text-xs sm:text-sm">Fin de Almuerzo</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {turnos.length > 0 ? (
+              turnos.map((turno, index) => (
+                <TableRow key={index}>
+                  <TableCell className="text-xs sm:text-sm">{turno.nombreHorario}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{turno.horaInicio}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{turno.horaFin}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{turno.horaInicioAlmuerzo || "—"}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{turno.horaFinAlmuerzo || "—"}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="5" className="text-center text-xs sm:text-sm">
+                  No hay turnos laborales registrados.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -225,288 +225,287 @@ export default function Asistencia() {
   );
 
   return (
-    <div className="p-6">
-      
-
-      {/* Estadísticas */}
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-10">
-        {[
-          { title: "Total Empleados", value: totalEmployees },
-          { title: "Presentes Hoy", value: presentToday },
-          { title: "Ausentes", value: absentToday },
-          { title: "Hora Actual", value: currentTime, icon: <Clock className="mr-2 h-5 w-5" /> }
-        ].map(({ title, value, icon }, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold flex items-center">
-                {icon} {value}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Filtros en una sola fila */}
-      <div className="flex flex-row gap-4 mb-6 items-center">
-        <div className="flex flex-col w-1/4">
-          <label className="mb-1 text-sm font-medium text-gray-700">Buscar empleado</label>
-          <Input
-            placeholder="Buscar empleado..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
-          />
+    <div className="p-6 sm:p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Título principal de la vista */}
+        <h3 className="sm:text-base font-bold mb-2 text-gray-800">
+          Gestión y Consulta de Asistencia de Empleados
+        </h3>
+        {/* Estadísticas */}
+        <div className="grid gap-2 grid-cols-2 sm:gap-4 sm:grid-cols-4 mb-6">
+          {[
+            { title: "Total Empleados", value: totalEmployees },
+            { title: "Presentes Hoy", value: presentToday },
+            { title: "Ausentes", value: absentToday },
+            {
+              title: "Hora Actual",
+              value: currentTime,
+              icon: (
+                <span className="hidden sm:inline-block mr-2">
+                  <Clock className="h-4 w-4" />
+                </span>
+              ),
+            },
+          ].map(({ title, value, icon }, index) => (
+            <Card key={index} className="p-2 h-full flex flex-col justify-center">
+              <CardHeader className="pb-1 flex-1 flex flex-col justify-center items-center">
+                <CardTitle className="text-sm sm:text-sm font-medium text-center">{title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col justify-center items-center">
+                <div className="text-sm sm:text-2xl font-bold flex items-center justify-center text-center">
+                  {icon} {value}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="flex flex-col w-1/4">
-          <label className="mb-1 text-sm font-medium text-gray-700">Departamento</label>
-          <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
-            <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500">
-              <SelectValue placeholder="Seleccionar Departamento" className="departamento"/>
-            </SelectTrigger>
-            <SelectContent>
-              {Departments.map(dept => (
-                <SelectItem key={dept.value} value={dept.value}>
-                  <span role="img" aria-label={dept.label}></span> {dept.label}
+        {/* Filtros en una sola fila */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 items-stretch sm:items-center">
+          <div className="flex flex-col w-full sm:w-1/4">
+            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Buscar empleado</label>
+            <Input
+              placeholder="Buscar empleado..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full text-xs sm:text-sm"
+            />
+          </div>
+
+          <div className="flex flex-col w-full sm:w-1/4">
+            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Departamento</label>
+            <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
+              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
+                <SelectValue placeholder="Seleccionar Departamento" className="departamento"/>
+              </SelectTrigger>
+              <SelectContent>
+                {Departments.map(dept => (
+                  <SelectItem key={dept.value} value={dept.value} className="text-xs sm:text-sm">
+                    <span role="img" aria-label={dept.label}></span> {dept.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col w-full sm:w-1/4">
+            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Fecha</label>
+            <Select onValueChange={setDateFilter} value={dateFilter}>
+              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
+                <SelectValue placeholder="Seleccionar Fecha" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs sm:text-sm">
+                  <span role="img" aria-label="Todos">📅</span> Todos
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                <SelectItem value="today" className="text-xs sm:text-sm">
+                  <span role="img" aria-label="Hoy">🗓️</span> Hoy
+                </SelectItem>
+                <SelectItem value="thisWeek" className="text-xs sm:text-sm">
+                  <span role="img" aria-label="Esta Semana">📅</span> Esta Semana
+                </SelectItem>
+                <SelectItem value="lastMonth" className="text-xs sm:text-sm">
+                  <span role="img" aria-label="Mes Anterior">📆</span> Mes Anterior
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div className="flex flex-col w-1/4">
-          <label className="mb-1 text-sm font-medium text-gray-700">Fecha</label>
-          <Select onValueChange={setDateFilter} value={dateFilter}>
-            <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500">
-              <SelectValue placeholder="Seleccionar Fecha" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                <span role="img" aria-label="Todos">📅</span> Todos
-              </SelectItem>
-              <SelectItem value="today">
-                <span role="img" aria-label="Hoy">🗓️</span> Hoy
-              </SelectItem>
-              <SelectItem value="thisWeek">
-                <span role="img" aria-label="Esta Semana">📅</span> Esta Semana
-              </SelectItem>
-              <SelectItem value="lastMonth">
-                <span role="img" aria-label="Mes Anterior">📆</span> Mes Anterior
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col w-1/4 sm:w-auto">
-          <label className="mb-1 text-sm font-medium text-gray-700 invisible">Seleccionar una fecha</label>
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Calendar className="mr-2 h-4 w-4" />
-            Seleccionar una fecha
-          </Button>
-        </div>
-      </div>
-
-      {/* Sección de pestañas */}
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="regular">Asistencia Diaria</TabsTrigger>
-          <TabsTrigger value="events">Asistencia en Eventos</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="regular">
-          <Card>
-            <CardHeader>
-              <CardTitle>Registros de Asistencia Diaria</CardTitle>
-              <CardDescription>Ver y gestionar los registros de asistencia de los empleados.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading && <p>Cargando datos...</p>}
-              {error && <p className="text-red-500">{error}</p>}
-              {!isLoading && !error && (
-                <>
-                  {currentRecords.length === 0 ? (
-                    <Alert variant="destructive">
-                      <AlertTitle>No hay registros</AlertTitle>
-                      <AlertDescription>
-                        No se encontraron registros para la búsqueda o filtros seleccionados.
-                      </AlertDescription>
-                    </Alert>
-                  ) : (
-                    <div className="overflow-x-auto">
-  <div className="max-h-[500px] overflow-y-auto">
-    <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Departamento</TableHead>
-                            <TableHead>Entrada</TableHead>
-                            <TableHead>Salida</TableHead>
-                            <TableHead>Estado</TableHead>
-                            <TableHead>Fecha</TableHead>
-                            <TableHead>Observación/Novedad</TableHead>
-                            <TableHead>Acciones</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {currentRecords.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>{item.nombre}</TableCell>
-                            <TableCell>{item.departamento}</TableCell>
-                            <TableCell>
-                              {item.entrada ? formatTimeForDisplay(item.entrada) : "No registra entrada"}
-                            </TableCell>
-                            <TableCell>
-                              {item.salida ? formatTimeForDisplay(item.salida) : "No registra salida"}
-                            </TableCell>
-                            <TableCell>
-                              {item.estado === 1 ? (
-                                <Badge variant="presente">Completo</Badge>
-                              ) : (
-                                <Badge variant="no_asistio">Pendiente</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>{formatDateForDisplay(item.fecha)}</TableCell>
-                            <TableCell>{item.observacion || "No registra novedades"}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm">Editar</Button>
-                                <Button variant="outline" size="sm">Detalles</Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    </div>
-                    
-                  )}
-                </>
-              )}
-
-              {/* Paginación */}
-              {currentRecords.length > 0 && (
-                <Pagination className="mt-4">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                      />
-                    </PaginationItem>
-                    <span className="px-4">Página {currentPage} de {totalPages}</span>
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="events">
-          <Card>
-            <CardHeader>
-              <CardTitle>Asistencia en Eventos</CardTitle>
-              <CardDescription>Registro de asistencia por evento</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold mb-2">Evento:</h3>
-                  <Select 
-                    value={selectedEvent} 
-                    onValueChange={(value) => setSelectedEvent(value)}
-                  >
-                    <SelectTrigger className="w-[250px]">
-                      <SelectValue placeholder="Seleccione el evento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableEvents.length === 0 ? (
-                        <div className="px-4 py-2 text-muted-foreground text-sm">
-                          No hay eventos disponibles
-                        </div>
-                      ) : (
-                        availableEvents.map(event => (
-                          <SelectItem key={event} value={event}>{event}</SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {selectedEvent ? (
-                <>
-                  {isLoading ? (
-                    <div className="text-center p-8">
-                      <div className="h-6 w-6 animate-spin mx-auto mb-2">⟳</div>
-                      <p>Cargando datos...</p>
-                    </div>
-                  ) : eventAttendanceData.length === 0 ? (
-                    <div className="text-center p-8 border rounded-md">
-                      <p className="text-muted-foreground">No hay asistencias registradas para este evento.</p>
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nombre</TableHead>
-                          <TableHead>Departamento</TableHead>
-                          <TableHead>Entrada</TableHead>
-                          <TableHead>Salida</TableHead>
-                          <TableHead>Estado</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {eventAttendanceData.map((attendee) => {
-                          const tieneEntrada = !!attendee.entrada;
-                          const tieneSalida = !!attendee.salida;
-                          let estadoBadge = "no_asistio";
-                          let estadoTexto = "Falta registrar";
-                          if (tieneEntrada && tieneSalida) {
-                            estadoBadge = "presente";
-                            estadoTexto = "Completo";
-                          } else if (tieneEntrada && !tieneSalida) {
-                            estadoBadge = "no_asistio";
-                            estadoTexto = "Incompleto";
-                          }
-                          return (
-                            <TableRow key={attendee.id}>
-                              <TableCell>{attendee.nombre}</TableCell>
-                              <TableCell>{attendee.departamento}</TableCell>
-                              <TableCell>
-                                {attendee.entrada ? formatTimeForDisplay(attendee.entrada) : "Falta registrar"}
-                              </TableCell>
-                              <TableCell>
-                                {attendee.salida ? formatTimeForDisplay(attendee.salida) : "Falta registrar"}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={estadoBadge}>{estadoTexto}</Badge>
-                              </TableCell>
+        {/* Sección de pestañas */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="mb-4 flex flex-wrap gap-2">
+            <TabsTrigger value="regular" className="text-xs sm:text-sm">Asistencia Diaria</TabsTrigger>
+            <TabsTrigger value="events" className="text-xs sm:text-sm">Asistencia en Eventos</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="regular">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Registros de Asistencia Diaria</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Ver y gestionar los registros de asistencia de los empleados.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading && <p className="text-xs">Cargando datos...</p>}
+                {error && <p className="text-red-500 text-xs">{error}</p>}
+                {!isLoading && !error && (
+                  <>
+                    {currentRecords.length === 0 ? (
+                      <Alert variant="destructive">
+                        <AlertTitle>No hay registros</AlertTitle>
+                        <AlertDescription>
+                          No se encontraron registros para la búsqueda o filtros seleccionados.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <div className="max-h-[500px] overflow-y-auto">
+                          <Table className="min-w-[700px] text-xs sm:text-sm">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nombre</TableHead>
+                              <TableHead>Departamento</TableHead>
+                              <TableHead>Entrada</TableHead>
+                              <TableHead>Salida</TableHead>
+                              <TableHead>Estado</TableHead>
+                              <TableHead>Fecha</TableHead>
+                              <TableHead>Observación/Novedad</TableHead>
                             </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  )}
-                </>
-              ) : (
-                <div className="text-center p-8 border rounded-md">
-                  <p className="text-muted-foreground">Selecciona un evento para ver las asistencias</p>
+                          </TableHeader>
+                          <TableBody>
+                          {currentRecords.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell>{item.nombre}</TableCell>
+                              <TableCell>{item.departamento}</TableCell>
+                              <TableCell>
+                                {item.entrada ? formatTimeForDisplay(item.entrada) : "No registra entrada"}
+                              </TableCell>
+                              <TableCell>
+                                {item.salida ? formatTimeForDisplay(item.salida) : "No registra salida"}
+                              </TableCell>
+                              <TableCell>
+                                {item.estado === 1 ? (
+                                  <Badge variant="presente">Completo</Badge>
+                                ) : (
+                                  <Badge variant="no_asistio">Pendiente</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>{formatDateForDisplay(item.fecha)}</TableCell>
+                              <TableCell>{item.observacion || "No registra novedades"}</TableCell>
+                            </TableRow>
+                          ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      </div>
+                      
+                    )}
+                  </>
+                )}
+
+                {/* Paginación */}
+                {currentRecords.length > 0 && (
+                  <Pagination className="mt-4">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                        />
+                      </PaginationItem>
+                      <span className="px-4 text-xs sm:text-sm">Página {currentPage} de {totalPages}</span>
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage === totalPages}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="events">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Asistencia en Eventos</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Registro de asistencia por evento</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold mb-2">Evento:</h3>
+                    <Select 
+                      value={selectedEvent} 
+                      onValueChange={(value) => setSelectedEvent(value)}
+                    >
+                      <SelectTrigger className="text-xs sm:text-sm w-[200px] sm:w-[250px]">
+                        <SelectValue className="text-xs sm:text-sm" placeholder="Seleccione el evento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableEvents.length === 0 ? (
+                          <div className="px-4 py-2 text-muted-foreground text-sm">
+                            No hay eventos disponibles
+                          </div>
+                        ) : (
+                          availableEvents.map(event => (
+                            <SelectItem className="text-xs sm:text-sm" key={event} value={event}>{event}</SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+                {selectedEvent ? (
+                  <>
+                    {isLoading ? (
+                      <div className="text-center p-8">
+                        <div className="h-6 w-6 animate-spin mx-auto mb-2">⟳</div>
+                        <p>Cargando datos...</p>
+                      </div>
+                    ) : eventAttendanceData.length === 0 ? (
+                      <div className="text-center p-8 border rounded-md">
+                        <p className="text-xs sm:text-sm text-muted-foreground">No hay asistencias registradas para este evento.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table className="min-w-[600px] text-xs sm:text-sm">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nombre</TableHead>
+                              <TableHead>Departamento</TableHead>
+                              <TableHead>Entrada</TableHead>
+                              <TableHead>Salida</TableHead>
+                              <TableHead>Estado</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {eventAttendanceData.map((attendee) => {
+                              const tieneEntrada = !!attendee.entrada;
+                              const tieneSalida = !!attendee.salida;
+                              let estadoBadge = "no_asistio";
+                              let estadoTexto = "Falta registrar";
+                              if (tieneEntrada && tieneSalida) {
+                                estadoBadge = "presente";
+                                estadoTexto = "Completo";
+                              } else if (tieneEntrada && !tieneSalida) {
+                                estadoBadge = "no_asistio";
+                                estadoTexto = "Incompleto";
+                              }
+                              return (
+                                <TableRow key={attendee.id}>
+                                  <TableCell>{attendee.nombre}</TableCell>
+                                  <TableCell>{attendee.departamento}</TableCell>
+                                  <TableCell>
+                                    {attendee.entrada ? formatTimeForDisplay(attendee.entrada) : "Falta registrar"}
+                                  </TableCell>
+                                  <TableCell>
+                                    {attendee.salida ? formatTimeForDisplay(attendee.salida) : "Falta registrar"}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant={estadoBadge}>{estadoTexto}</Badge>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center p-8 border rounded-md">
+                    <p className="text-muted-foreground">Selecciona un evento para ver las asistencias</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div> 
     </div>
   );
 }

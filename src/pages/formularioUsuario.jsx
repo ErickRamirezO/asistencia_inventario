@@ -423,7 +423,7 @@ return (
   <div className="w-full max-w-6xl mx-auto overflow-hidden">
     {/* Contenedor externo con overflow-hidden */}
     
-    <div className="px-4 py-6">
+    <div className="px-2 sm:px-4 py-4 sm:py-6">
       {/* Contenedor interno con padding seguro */}
       
       {/* Botón de regreso solo en modo edición */}
@@ -432,7 +432,7 @@ return (
           <Button 
             variant="outline" 
             onClick={() => navigate("/verUsuarios")} 
-            className="flex items-center"
+            className="flex items-center text-xs sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver a Usuarios
@@ -441,12 +441,12 @@ return (
       )}
       
       <Card className="overflow-hidden">
-        <CardHeader className="px-4 sm:px-6">
-          <CardTitle className="text-2xl font-bold">
+        <CardHeader className="px-2 sm:px-6">
+          <CardTitle className="text-sm sm:text-lg font-bold">
             {modoEdicion ? "Editar Usuario" : "Registrar Usuario"}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6">
+        <CardContent className="px-2 sm:px-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -459,11 +459,11 @@ return (
                       name="nombres"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nombres</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Nombres</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ejemplo: Juan Carlos" {...field} />
+                            <Input className="text-xs sm:text-sm" placeholder="Ejemplo: Juan Carlos" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-sm"/>
                         </FormItem>
                       )}
                     />
@@ -473,11 +473,11 @@ return (
                       name="apellidos"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Apellidos</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Apellidos</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ejemplo: Pérez Gómez" {...field} />
+                            <Input className="text-xs sm:text-sm"placeholder="Ejemplo: Pérez Gómez" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-am"/>
                         </FormItem>
                       )}
                     />
@@ -491,11 +491,11 @@ return (
                       min={10}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Cédula</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Cédula</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ejemplo: 1234567890" {...field} />
+                            <Input className="text-xs sm:text-sm" placeholder="Ejemplo: 1234567890" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-sm"/>
                         </FormItem>
                       )}
                     />
@@ -505,11 +505,11 @@ return (
                       name="telefono"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Teléfono</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Teléfono</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ejemplo: 0987654321" {...field} />
+                            <Input className="text-xs sm:text-sm" placeholder="Ejemplo: 0987654321" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-sm" />
                         </FormItem>
                       )}
                     />
@@ -522,11 +522,11 @@ return (
                       name="correoElectronico"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Correo Electrónico</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Correo Electrónico</FormLabel>
                           <FormControl>
-                            <Input placeholder="usuario@correo.com" {...field} />
+                            <Input className="text-xs sm:text-sm" placeholder="usuario@correo.com" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-sm"/>
                         </FormItem>
                       )}
                     />
@@ -536,14 +536,14 @@ return (
                       name="fechaNacimiento"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Fecha de Nacimiento</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Fecha de Nacimiento</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
                                   variant="outline"
                                   className={cn(
-                                    "w-full pl-3 text-left font-normal",
+                                    "w-full pl-3 text-left font-normal text-xs sm:text-sm",
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
@@ -572,7 +572,7 @@ return (
                               />
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-sm"/>
                         </FormItem>
                       )}
                     />
@@ -585,7 +585,7 @@ return (
                       name="departamento"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Departamento</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Departamento</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -593,7 +593,7 @@ return (
                                   variant="outline"
                                   role="combobox"
                                   className={cn(
-                                    "w-full justify-between",
+                                    "w-full justify-between text-xs sm:text-sm",
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
@@ -611,10 +611,10 @@ return (
                               <Command>
                                 <CommandInput
                                   placeholder="Buscar..."
-                                  className="h-9"
+                                  className="h-9 text-xs sm:text-sm"
                                 />
                                 <CommandList>
-                                  <CommandEmpty>No hay resultados.</CommandEmpty>
+                                  <CommandEmpty className="text-xs sm:text-sm">No hay resultados.</CommandEmpty>
                                   <CommandGroup>
                                     {departamentos.map((dept) => (
                                       <CommandItem
@@ -623,6 +623,7 @@ return (
                                         onSelect={() => {
                                           form.setValue("departamento", dept.value);
                                         }}
+                                        className="text-xs sm:text-sm"
                                       >
                                         <Check
                                           className={cn(
@@ -640,7 +641,7 @@ return (
                               </Command>
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-base"/>
                         </FormItem>
                       )}
                     />
@@ -650,7 +651,7 @@ return (
                       name="rol"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Rol</FormLabel>
+                          <FormLabel className="text-xs sm:text-base">Rol</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -658,7 +659,7 @@ return (
                                   variant="outline"
                                   role="combobox"
                                   className={cn(
-                                    "w-full justify-between",
+                                    "w-full justify-between text-xs sm:text-base",
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
@@ -675,10 +676,10 @@ return (
                               <Command>
                                 <CommandInput
                                   placeholder="Buscar rol..."
-                                  className="h-9"
+                                  className="h-9 text-xs sm:text-base"
                                 />
                                 <CommandList>
-                                  <CommandEmpty>No hay resultados.</CommandEmpty>
+                                  <CommandEmpty className="text-xs sm:text-base">No hay resultados.</CommandEmpty>
                                   <CommandGroup>
                                     {roles.map((rol) => (
                                       <CommandItem
@@ -687,6 +688,7 @@ return (
                                         onSelect={() => {
                                           form.setValue("rol", rol.value);
                                         }}
+                                        className="text-xs sm:text-base"
                                       >
                                         <Check
                                           className={cn(
@@ -704,7 +706,7 @@ return (
                               </Command>
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
+                          <FormMessage className="text-xs sm:text-base"/>
                         </FormItem>
                       )}
                     />
@@ -719,21 +721,21 @@ return (
                     name="tagsRFIDTag"
                     render={() => (
                       <FormItem className="flex-1 flex flex-col">
-                        <FormLabel>Tarjeta RFID</FormLabel>
+                        <FormLabel className="text-xs sm:text-base">Tarjeta RFID</FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 flex-1 flex flex-col justify-center">
                           {/* Contenido existente sin cambios */}
                           {rfidValue ? (
                             <div className="flex flex-col items-center justify-center h-full">
-                              <div className="text-green-600 font-medium mb-4 text-lg">
+                              <div className="text-green-600 font-medium mb-4 text-base sm:text-lg">
                                 Tarjeta RFID registrada
                               </div>
-                              <div className="bg-white dark:bg-gray-800 rounded p-4 w-full text-center font-mono text-lg mb-6">
+                              <div className="bg-white dark:bg-gray-800 rounded p-4 w-full text-center font-mono text-base sm:text-lg mb-6">
                                 {rfidValue}
                               </div>
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="mt-3"
+                                className="mt-3 text-xs sm:text-base"
                                 onClick={resetRFID}
                               >
                                 <ScanLine className="h-5 w-5 mr-2" />
@@ -742,7 +744,7 @@ return (
                             </div>
                           ) : (
                             <div className="flex flex-col items-center justify-center h-full">
-                              <div className={`text-center mb-6 text-lg ${scanningRFID ? "text-blue-500 animate-pulse" : "text-gray-600"}`}>
+                              <div className={`text-center mb-6 text-base sm:text-lg ${scanningRFID ? "text-blue-500 animate-pulse" : "text-gray-600"}`}>
                                 {scanningRFID ? "Acerque la tarjeta al lector..." : "No se ha registrado ninguna tarjeta"}
                               </div>
                               {scanningRFID ? (
@@ -750,7 +752,7 @@ return (
                                   type="button"
                                   variant="outline"
                                   size="lg"
-                                  className="flex items-center gap-2"
+                                  className="flex items-center gap-2 text-xs sm:text-base"
                                   onClick={stopRFIDReader}
                                 >
                                   Cancelar escaneo
@@ -760,20 +762,20 @@ return (
                                   type="button"
                                   variant="outline"
                                   size="lg"
-                                  className="flex items-center gap-2"
+                                  className="flex items-center gap-2 text-xs sm:text-base"
                                   onClick={startRFIDReader}
                                 >
                                   <ScanLine className="h-5 w-5" />
                                   Registrar Tarjeta RFID
                                 </Button>
                               )}
-                              <p className="text-sm text-gray-500 mt-6 text-center">
+                              <p className="text-xs sm:text-base text-gray-500 mt-6 text-center">
                                 Al presionar el botón, acerque la tarjeta RFID al lector para registrarla en el sistema.
                               </p>
                             </div>
                           )}
                         </div>
-                        <FormMessage />
+                        <FormMessage className="text-xs sm:text-base"/>
                       </FormItem>
                     )}
                   />
@@ -786,11 +788,12 @@ return (
                     type="button" 
                     variant="outline" 
                     onClick={() => navigate("/verUsuarios")}
+                    className="text-xs sm:text-sm"
                   >
                     Cancelar
                   </Button>
                 )}
-                <Button type="submit" variant="blue" className=" text-blue-700">
+                <Button type="submit" variant="blue" className=" text-xs sm:text-sm">
                   {modoEdicion ? "Guardar Cambios" : "Registrar Usuario"}
                 </Button>
               </div>

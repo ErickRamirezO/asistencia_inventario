@@ -283,12 +283,11 @@ export default function AsistenciaSimple() {
   };
 
   return (
-  <div className="flex items-center justify-center h-full w-full" style={{height: "80vh"}}>
-      {/* Asistencia Normal Card */}
+    <div className="flex items-center justify-center h-full w-full" style={{ height: "80vh" }}>
       <Card className="w-96">
         <CardHeader className="flex flex-col items-center">
-          <CardTitle>Registro de Asistencia</CardTitle>
-          <CardDescription>Ingrese el tag RFID</CardDescription>
+          <CardTitle className="text-base sm:text-lg text-center">Registro de Asistencia</CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-center">Ingrese el tag RFID</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center">
           <Input
@@ -296,17 +295,18 @@ export default function AsistenciaSimple() {
             placeholder="Escanear Tag RFID"
             value={rfidTag}
             onChange={handleTagChange}
+            className="w-full text-xs"
           />
-          {isLoading && <p>Cargando...</p>}
+          {isLoading && <p className="text-xs mt-2">Cargando...</p>}
           {userInfo && (
             <div className="mt-4 w-full">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-center">
+                  <CardTitle className="text-center text-sm">
                     {userInfo.nombre} {userInfo.apellido}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="text-xs">
                   <p>Cédula: {userInfo.cedula}</p>
                   <p>Departamento: {userInfo.departamentoNombre}</p>
                 </CardContent>

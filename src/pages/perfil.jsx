@@ -142,7 +142,7 @@ const ProfilePage = () => {
     <div className="flex justify-center items-center h-full">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Editar Perfil</CardTitle>
+          <CardTitle className="text-base sm:text-xl">Editar Perfil</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -152,11 +152,11 @@ const ProfilePage = () => {
                 name="nombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Nombre</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nombre" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Nombre" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -165,11 +165,11 @@ const ProfilePage = () => {
                 name="apellido"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Apellido</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Apellido</FormLabel>
                     <FormControl>
-                      <Input placeholder="Apellido" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Apellido" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -178,11 +178,11 @@ const ProfilePage = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Correo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Correo" type="email" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Correo" type="email" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -191,11 +191,11 @@ const ProfilePage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nueva Contraseña</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Nueva Contraseña</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nueva Contraseña" type="password" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Nueva Contraseña" type="password" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -204,18 +204,18 @@ const ProfilePage = () => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirmar Contraseña</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Confirmar Contraseña</FormLabel>
                     <FormControl>
-                      <Input placeholder="Confirmar Contraseña" type="password" {...field} />
+                      <Input className="text-xs sm:text-sm" placeholder="Confirmar Contraseña" type="password" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
               {passwordMatchSuccess && (
-                <p className="text-green-500">Las contraseñas coinciden</p>
+                <p className="text-green-500 text-xs sm:text-sm">Las contraseñas coinciden</p>
               )}
-              <Button type="submit">Actualizar Datos</Button>
+              <Button type="submit" className="text-xs sm:text-sm">Actualizar Datos</Button>
             </form>
           </Form>
         </CardContent>

@@ -63,19 +63,19 @@ const Login = () => {
   };
 
   return (
-    <section className="py-32">
+    <section className="py-16 sm:py-32">
       <div className="container">
-        <div className="flex flex-col gap-4">
-          <div className="mx-auto w-full max-w-sm rounded-md p-6 shadow">
+        <div className="flex flex-col gap-8">
+          <div className="mx-auto w-full max-w-sm rounded-md p-8 sm:p-10 shadow">
             <div className="mb-6 flex flex-col items-center">
               <a href="/" className="mb-6 flex items-center gap-2">
                 <img src="/logo.png" className="max-h-20" alt="Logo SmartControl" />
               </a>
-              <h1 className="mb-2 text-2xl font-bold">Iniciar Sesión</h1>
-              <p className="text-muted-foreground">Bienvenido de nuevo</p>
+              <p className="mb-2 text-base sm:text-4xl font-bold">Iniciar Sesión</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Bienvenido de nuevo</p>
               {error && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription className="text-xs sm:text-sm">{error}</AlertDescription>
                 </Alert>
               )}
             </div>
@@ -88,6 +88,7 @@ const Login = () => {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="text-xs sm:text-sm"
                 />
                 <div>
                   <Input
@@ -96,10 +97,11 @@ const Login = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="text-xs sm:text-sm"
                   />
                 </div>
                 
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center gap-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="remember"
@@ -107,17 +109,17 @@ const Login = () => {
                     />
                     <label
                       htmlFor="remember"
-                      className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-xs sm:text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       Recordarme
                     </label>
                   </div>
-                  <Link to="/recuperar-contrasena"  className="text-sm text-primary hover:underline">
+                  <Link to="/recuperar-contrasena" className="text-xs sm:text-sm text-primary hover:underline ml-2">
                     ¿Olvidó su contraseña?
                   </Link>
                 </div>
                 
-                <Button type="submit" className="mt-2 w-full">
+                <Button type="submit" className="mt-2 w-full text-xs sm:text-sm">
                   Iniciar Sesión
                 </Button>
               </div>

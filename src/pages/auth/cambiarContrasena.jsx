@@ -64,16 +64,18 @@ function CambiarContrasena() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Card className="w-[450px]">
+    <div className="flex items-center justify-center h-screen px-2">
+      <Card className="w-full max-w-sm sm:w-[400px]">
         <CardHeader>
-          <CardTitle>Cambiar Contraseña</CardTitle>
-          <CardDescription>Ingresa tu nueva contraseña.</CardDescription>
+          <CardTitle className="text-xs sm:text-xl text-center">Cambiar Contraseña</CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-center">
+            Ingresa tu nueva contraseña.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <div>
-              <Label htmlFor="nuevaContrasena">Nueva Contraseña</Label>
+              <Label htmlFor="nuevaContrasena" className="text-xs sm:text-sm">Nueva Contraseña</Label>
               <Input
                 type="password"
                 id="nuevaContrasena"
@@ -82,10 +84,11 @@ function CambiarContrasena() {
                   setNuevaContrasena(e.target.value);
                 }}
                 required
+                className="text-xs sm:text-sm"
               />
             </div>
             <div>
-              <Label htmlFor="confirmarContrasena">Confirmar Contraseña</Label>
+              <Label htmlFor="confirmarContrasena" className="text-xs sm:text-sm">Confirmar Contraseña</Label>
               <Input
                 type="password"
                 id="confirmarContrasena"
@@ -94,14 +97,17 @@ function CambiarContrasena() {
                   setConfirmarContrasena(e.target.value);
                 }}
                 required
+                className="text-xs sm:text-sm"
               />
             </div>
             {passwordMatchMessage && (
-              <p className={`text-sm ${nuevaContrasena === confirmarContrasena ? "text-green-500" : "text-red-500"}`}>
+              <p className={`text-xs sm:text-sm ${nuevaContrasena === confirmarContrasena ? "text-green-500" : "text-red-500"}`}>
                 {passwordMatchMessage}
               </p>
             )}
-            <Button type="submit">Cambiar Contraseña</Button>
+            <Button type="submit" className="text-xs sm:text-sm">
+              Cambiar Contraseña
+            </Button>
           </form>
         </CardContent>
       </Card>

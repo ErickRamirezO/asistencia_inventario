@@ -40,25 +40,30 @@ function RecuperarContrasena() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Card className="w-[450px]">
+    <div className="flex items-center justify-center h-screen px-2">
+        <Card className="w-full max-w-sm sm:w-[400px]">       
         <CardHeader>
-          <CardTitle>Recuperar Contraseña</CardTitle>
-          <CardDescription>Ingresa tu correo electrónico para recibir un enlace de recuperación.</CardDescription>
+          <CardTitle className="text-xs sm:text-xl text-center">Recuperar Contraseña</CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-center">
+            Ingresa tu correo electrónico para recibir un enlace de recuperación.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <div>
-              <Label htmlFor="email">Correo Electrónico</Label>
+              <Label htmlFor="email" className="text-xs sm:text-sm">Correo Electrónico</Label>
               <Input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="text-xs sm:text-sm"
               />
             </div>
-            <Button type="submit">Enviar Enlace de Recuperación</Button>
+            <Button type="submit" className="text-xs sm:text-sm">
+              Enviar Enlace de Recuperación
+            </Button>
           </form>
         </CardContent>
       </Card>

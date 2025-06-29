@@ -305,21 +305,21 @@ const ReporteAsistencia = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Reporte de Asistencia</h1>
+    <div className="p-6 sm-p-6">
+      <h3 className="text-base sm:text-2xl font-bold mb-4 sm:mb-6">Reporte de Asistencia</h3>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Configuración del Reporte</CardTitle>
+          <CardTitle className="text-base sm:text-xl">Configuración del Reporte</CardTitle>
         </CardHeader>
         
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Columna 1: Selección de usuarios */}
             <div className="space-y-3">
-              <div className="flex items-center mb-3">
+              <div className="flex items-center mb-2 sm:mb-3">
                 <Users className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">Seleccionar Usuarios</h3>
+                <h3 className="font-semibold text-xs sm:text-sm">Seleccionar Usuarios</h3>
               </div>
               
               <Popover open={open} onOpenChange={setOpen}>
@@ -330,7 +330,7 @@ const ReporteAsistencia = () => {
                     aria-expanded={open}
                     className="w-full justify-between"
                   >
-                    <span>Seleccionar usuarios...</span>
+                    <span className="text-xs sm:text-sm">Seleccionar usuarios...</span>
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -340,11 +340,11 @@ const ReporteAsistencia = () => {
                     <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
                     <CommandGroup className="max-h-[200px] overflow-auto">
                       {cargando ? (
-                        <div className="p-2 text-center text-sm text-muted-foreground">
+                        <div className="p-2 text-center text-xs text-muted-foreground">
                           Cargando usuarios...
                         </div>
                       ) : usuariosDisponibles.length === 0 ? (
-                        <div className="p-2 text-center text-sm text-muted-foreground">
+                        <div className="p-2 text-center text-xs text-muted-foreground">
                           Todos los usuarios han sido seleccionados
                         </div>
                       ) : (
@@ -368,19 +368,19 @@ const ReporteAsistencia = () => {
                 </PopoverContent>
               </Popover>
               
-              <div className="text-xs text-muted-foreground mt-2">
+              <div className="text-xs sm:text-sm text-muted-foreground mt-2">
                 {usuariosDisponibles.length} usuarios disponibles para seleccionar
               </div>
             </div>
             
             {/* Columna 2: Usuarios seleccionados */}
             <div className="space-y-3">
-              <div className="flex items-center mb-3">
+              <div className="flex items-center mb-2 sm:mb-3">
                 <UserPlus className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">Usuarios Seleccionados</h3>
+                <h3 className="font-semibold text-xs sm:text-sm">Usuarios Seleccionados</h3>
               </div>
               
-              <div className="border rounded-md p-3 min-h-[200px] max-h-[250px] overflow-y-auto bg-muted/30">
+              <div className="border rounded-md p-2 sm:p-3 min-h-[120px] sm:min-h-[200px] max-h-[180px] sm:max-h-[250px] overflow-y-auto bg-muted/30">
                 {usuariosSeleccionados.length > 0 ? (
                   <div>
                     <p className="text-xs text-muted-foreground mb-2">
@@ -418,12 +418,12 @@ const ReporteAsistencia = () => {
             
             {/* Columna 3: Rango de fechas */}
             <div className="space-y-3">
-              <div className="flex items-center mb-3">
+              <div className="flex items-center mb-2 sm:mb-3">
                 <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">Rango de Fechas</h3>
+                <h3 className="font-semibold text-xs sm:text-sm">Rango de Fechas</h3>
               </div>
               
-              <div className="border rounded-md p-3 min-h-[200px] bg-muted/30">
+              <div className="border rounded-md p-2 sm:p-3 min-h-[120px] sm:min-h-[200px] bg-muted/30">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left">
@@ -435,7 +435,9 @@ const ReporteAsistencia = () => {
                           dateRange.from.toLocaleDateString()
                         )
                       ) : (
-                        "Seleccionar rango de fechas"
+                        <span className="text-xs sm:text-sm">
+                          Seleccionar rango de fechas
+                        </span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -452,10 +454,10 @@ const ReporteAsistencia = () => {
                 <div className="mt-4">
                   {dateRange?.from && dateRange?.to ? (
                     <div className="space-y-1">
-                      <p className="text-sm">
+                      <p className="text-xs sm:text-sm">
                         <span className="font-medium">Desde:</span> {dateRange.from.toLocaleDateString()}
                       </p>
-                      <p className="text-sm">
+                      <p className="text-xs sm:text-sm">
                         <span className="font-medium">Hasta:</span> {dateRange.to.toLocaleDateString()}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">
@@ -463,7 +465,7 @@ const ReporteAsistencia = () => {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground mt-4">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-4">
                       Seleccione un rango de fechas para el reporte
                     </p>
                   )}
@@ -472,20 +474,20 @@ const ReporteAsistencia = () => {
             </div>
           </div>
           {/* Tabla previa de asistencia */}
-          <div className="mt-8">
-            <h3 className="font-semibold mb-2">Vista previa de asistencia</h3>
+          <div className="mt-8 sm:mt-8">
+            <h3 className="font-semibold mb-2 text-sm sm:text-sm">Vista previa de asistencia</h3>
             {cargandoPreview ? (
-              <div>Cargando asistencia...</div>
+              <div className="text-xs sm:text-sm">Cargando asistencia...</div>
             ) : asistenciaPreview.length === 0 ? (
-              <div className="text-muted-foreground text-sm">No hay registros para mostrar.</div>
+              <div className="text-muted-foreground text-xs sm:text-sm">No hay registros para mostrar.</div>
             ) : (
               Object.entries(asistenciaPorUsuario).map(([key, data]) => (
-                <div key={key} className="mb-8">
-                  <div className="font-bold mb-2">
+                <div key={key} className="mb-8 sm:mb-8">
+                  <div className="font-bold mb-2 text-xs sm:text-sm">
                     {data.registros[0].nombreCompletoUsuario} - {data.registros[0].departamentoUsuario}
                   </div>
                   <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="min-w-[700px] text-xs sm:text-sm">
                       <TableCaption>Resumen de Asistencia por Usuario</TableCaption>
                       <TableHeader>
                         <TableRow>
@@ -544,7 +546,7 @@ const ReporteAsistencia = () => {
                           </TableRow>
                         ))}
                         <TableRow>
-                          <TableCell colSpan={6} className="px-2 py-1 font-bold text-right">
+                          <TableCell colSpan={8} className="px-2 py-1 font-bold text-right">
                             Total:
                           </TableCell>
                           <TableCell className="px-2 py-1 font-bold">
@@ -564,13 +566,13 @@ const ReporteAsistencia = () => {
 
         </CardContent>
         
-        <CardFooter className="flex justify-center border-t pt-6 gap-4"> {/* Añadido gap */}
+        <CardFooter className="flex justify-center border-t pt-4 sm:pt-6 gap-4">
           <Button 
             variant={"blue"}
             onClick={() => descargarReporte("pdf")} // Llamada para PDF
             disabled={descargando || !dateRange?.to || usuariosSeleccionados.length === 0}
             size="lg"
-            className="w-full max-w-xs"
+            className="w-full max-w-xs text-xs sm:text-sm"
           >
             <FileText className="mr-2 h-5 w-5" /> 
             {descargando ? "Generando PDF..." : "Descargar Reporte PDF"}

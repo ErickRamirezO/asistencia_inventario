@@ -185,20 +185,20 @@ export default function VerUsuario() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Lista de Usuarios</h1>
+      <h3 className="text-xl sm:text-xl font-bold mb-6">Lista de Usuarios</h3>
       <div className="mb-6 space-y-4">
         {/* Barra de búsqueda */}
         <div className="relative">
           <input
             type="text"
             placeholder="Buscar por nombre o cédula..."
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
             value={terminoBusqueda}
             onChange={(e) => setTerminoBusqueda(e.target.value)}
           />
           {terminoBusqueda && (
             <button 
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
               onClick={() => setTerminoBusqueda("")}
             >
               ×
@@ -207,52 +207,49 @@ export default function VerUsuario() {
         </div>
       </div>
       <div className="rounded-md border max-h-[400px] overflow-y-auto">
-  <Table className="min-w-[900px] table-auto">
-
+        <Table className="min-w-[900px] table-auto text-xs sm:text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Apellido</TableHead>
-              <TableHead>Cédula</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Estado</TableHead>
-              
-              <TableHead>Departamento</TableHead>
-              <TableHead>Horario Laboral</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="text-xs sm:text-sm">Nombre</TableHead>
+              <TableHead className="text-xs sm:text-sm">Apellido</TableHead>
+              <TableHead className="text-xs sm:text-sm">Cédula</TableHead>
+              <TableHead className="text-xs sm:text-sm">Email</TableHead>
+              <TableHead className="text-xs sm:text-sm">Teléfono</TableHead>
+              <TableHead className="text-xs sm:text-sm">Estado</TableHead>
+              <TableHead className="text-xs sm:text-sm">Departamento</TableHead>
+              <TableHead className="text-xs sm:text-sm">Horario Laboral</TableHead>
+              <TableHead className="text-right text-xs sm:text-sm">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {usuariosFiltrados.length > 0 ? (
               usuariosFiltrados.map((usuario) => (
                 <TableRow key={usuario.id}>
-                  <TableCell className="font-medium">{usuario.nombre}</TableCell>
-                  <TableCell>{usuario.apellido}</TableCell>
-                  <TableCell>{usuario.cedula}</TableCell>
-                  <TableCell>{usuario.email}</TableCell>
-                  <TableCell>{usuario.telefono}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-xs sm:text-sm">{usuario.nombre}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{usuario.apellido}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{usuario.cedula}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{usuario.email}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{usuario.telefono}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">
                     <div className="flex items-center space-x-2">
                       <Switch
                         id={`status-${usuario.id}`}
-                        checked={usuario.status === 1} // Usar status en lugar de habilitado
+                        checked={usuario.status === 1}
                         onCheckedChange={() => toggleEstadoUsuario(usuario.id, usuario.status)}
                       />
                       <Label htmlFor={`status-${usuario.id}`} 
-                        className={usuario.status === 1 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                        className={`${usuario.status === 1 ? "text-green-600" : "text-red-600"} font-medium text-xs sm:text-sm`}>
                         {usuario.status === 1 ? "Activo" : "Inactivo"}
                       </Label>
                     </div>
                   </TableCell>
-                  
-                  <TableCell>{usuario.departamentoNombre || "No asignado"}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-xs sm:text-sm">{usuario.departamentoNombre || "No asignado"}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">
                     <Select
                       value={usuario.horarioLaboralId?.toString() || ""}
                       onValueChange={(value) => cambiarHorarioLaboral(usuario.id, parseInt(value))}
                     >
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-[180px] text-xs sm:text-sm">
                         <SelectValue>
                           {usuario.horarioLaboralId 
                             ? (horarios.find(h => h.id === usuario.horarioLaboralId)?.nombreHorario || usuario.horarioLaboralNombre || "Horario no encontrado") 
@@ -261,7 +258,7 @@ export default function VerUsuario() {
                       </SelectTrigger>
                       <SelectContent>
                         {horarios.map((horario) => (
-                          <SelectItem key={horario.id} value={horario.id.toString()}>
+                          <SelectItem key={horario.id} value={horario.id.toString()} className="text-xs sm:text-sm">
                             {horario.nombreHorario} ({horario.horaInicio} - {horario.horaFin})
                           </SelectItem>
                         ))}
@@ -293,7 +290,7 @@ export default function VerUsuario() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} className="text-center">
+                <TableCell colSpan={10} className="text-center text-xs sm:text-sm">
                   No se encontraron usuarios que coincidan con los filtros.
                 </TableCell>
               </TableRow>
@@ -305,8 +302,8 @@ export default function VerUsuario() {
       <Dialog open={dialogoConfirmacionAbierto} onOpenChange={setDialogoConfirmacionAbierto}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar eliminación</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xs sm:text-sm">Confirmar eliminación</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               ¿Está seguro que desea eliminar al usuario {usuarioAEliminar?.nombre} {usuarioAEliminar?.apellido}?
               Esta acción no se puede deshacer.
             </DialogDescription>
@@ -315,12 +312,14 @@ export default function VerUsuario() {
             <Button
               variant="outline"
               onClick={() => setDialogoConfirmacionAbierto(false)}
+              className="text-xs sm:text-sm"
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={confirmarEliminacion}
+              className="text-xs sm:text-sm"
             >
               Eliminar
             </Button>
