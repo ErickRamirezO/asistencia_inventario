@@ -61,73 +61,81 @@ export default function VerBienes() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-5">Bienes Inmuebles Registrados</h1>
+    <div className="p-2 sm:p-6">
+      <h3 className="text-xl sm:text-xl font-bold mb-5 text-center sm:text-left">
+        Bienes Inmuebles Registrados
+      </h3>
       <input
         type="text"
         placeholder="Buscar por nombre..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-4 w-full border p-2 rounded"
+        className="mb-4 w-full border p-2 rounded text-xs sm:text-sm"
       />
       <div className="rounded-md border overflow-x-auto max-w-full">
-  <div className="max-h-[400px] overflow-y-auto">
-    <Table className="min-w-[500px] w-full table-auto">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Ubicación</TableHead>
-              <TableHead>Tag RFID</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bienesFiltrados.length > 0 ? (
-              bienesFiltrados.map((bien) => (
-                <TableRow key={bien.id}>
-                  <TableCell>{bien.nombreBien}</TableCell>
-                  <TableCell>{bien.categoriaNombre || "Sin categoría"}</TableCell>
-                  <TableCell>{bien.ubicacionBien}</TableCell>
-                  <TableCell>
-                    <code>{bien.tagRfidNumero || "No asignado"}</code>
-                  </TableCell>
-                  <TableCell>
-  <div className="flex items-center space-x-2">
-    <Switch
-      id={`status-${bien.id}`}
-      checked={bien.status === 1}
-      onCheckedChange={() => toggleEstadoBien(bien.id)}
-    />
-    <Label
-      htmlFor={`status-${bien.id}`}
-      className={bien.status === 1 ? "text-green-600 font-medium" : "text-red-600 font-medium"}
-    >
-      {bien.status === 1 ? "Activo" : "Inactivo"}
-    </Label>
-  </div>
-</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => navigate(`/bienes/registro/${bien.id}`)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
+        <div className="max-h-[400px] overflow-y-auto">
+          <Table className="min-w-[500px] w-full table-auto text-xs sm:text-sm">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs sm:text-sm">Nombre</TableHead>
+                <TableHead className="text-xs sm:text-sm">Categoría</TableHead>
+                <TableHead className="text-xs sm:text-sm">Ubicación</TableHead>
+                <TableHead className="text-xs sm:text-sm">Tag RFID</TableHead>
+                <TableHead className="text-xs sm:text-sm">Estado</TableHead>
+                <TableHead className="text-right text-xs sm:text-sm">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bienesFiltrados.length > 0 ? (
+                bienesFiltrados.map((bien) => (
+                  <TableRow key={bien.id}>
+                    <TableCell className="text-xs sm:text-sm">{bien.nombreBien}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{bien.categoriaNombre || "Sin categoría"}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{bien.ubicacionBien}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">
+                      <code>{bien.tagRfidNumero || "No asignado"}</code>
+                    </TableCell>
+                    <TableCell className="text-xs sm:text-sm">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id={`status-${bien.id}`}
+                          checked={bien.status === 1}
+                          onCheckedChange={() => toggleEstadoBien(bien.id)}
+                        />
+                        <Label
+                          htmlFor={`status-${bien.id}`}
+                          className={
+                            (bien.status === 1
+                              ? "text-green-600"
+                              : "text-red-600") +
+                            " font-medium text-xs sm:text-sm"
+                          }
+                        >
+                          {bien.status === 1 ? "Activo" : "Inactivo"}
+                        </Label>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => navigate(`/bienes/registro/${bien.id}`)}
+                        className="h-8 w-8"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-xs sm:text-sm">
+                    No se encontraron bienes que coincidan.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  No se encontraron bienes que coincidan.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
