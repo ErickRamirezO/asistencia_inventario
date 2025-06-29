@@ -25,6 +25,8 @@ import AsistenciaEvento from "./pages/asistencia/asistenciaEvento"
 import RecuperarContrasena from "./pages/auth/recuperarContrasena"
 import CambiarContrasena from "./pages/auth/cambiarContrasena"
 import ProfilePage from "./pages/perfil"
+import DocumentosCambioView from "./pages/inventario/DocumentosCambioView"
+import HistorialDocumentoView from "./pages/inventario/HistorialDocumentoView"
 
 function App() {
   return (
@@ -62,6 +64,9 @@ function App() {
               <Route path="/bienes/inventario" element={<Inventarios/>}/>
               <Route path="/inventarios/:id/ver" element={<InventarioDetalle />} />
               <Route path="/inventarios/:id/realizar" element={<RealizarInventario />} />
+              <Route path="/cambio" element={<DocumentosCambioView />} />
+              <Route path="/cambio/historial/:documentoId" element={<HistorialDocumentoView />} />
+
             </Route>          <Route path="/bienes/lista-bienes" element={<VerBienes/>} />
           <Route path="/bienes/registro/:id" element={<RegistroBienes />} />
           <Route path="/bienes/categoria/stock" element={<CategoriaStock />}/>

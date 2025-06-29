@@ -210,8 +210,9 @@ export default function VerUsuario() {
           )}
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border max-h-[400px] overflow-y-auto">
+  <Table className="min-w-[900px] table-auto">
+
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
@@ -220,7 +221,7 @@ export default function VerUsuario() {
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Usuario</TableHead>
+              
               <TableHead>Departamento</TableHead>
               <TableHead>Horario Laboral</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
@@ -248,7 +249,7 @@ export default function VerUsuario() {
                       </Label>
                     </div>
                   </TableCell>
-                  <TableCell>{usuario.user}</TableCell>
+                  
                   <TableCell>{usuario.departamentoNombre || "No asignado"}</TableCell>
                   <TableCell>
                     <Select

@@ -226,9 +226,7 @@ export default function Asistencia() {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-        <p className="text-muted-foreground">Controla la asistencia y horas de trabajo de los empleados</p>
-      </div>
+      
 
       {/* Estadísticas */}
       <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-10">
@@ -338,7 +336,8 @@ export default function Asistencia() {
                     </Alert>
                   ) : (
                     <div className="overflow-x-auto">
-                      <Table>
+  <div className="max-h-[500px] overflow-y-auto">
+    <Table>
                         <TableHeader>
                           <TableRow>
                             <TableHead>Nombre</TableHead>
@@ -382,6 +381,8 @@ export default function Asistencia() {
                         </TableBody>
                       </Table>
                     </div>
+                    </div>
+                    
                   )}
                 </>
               )}

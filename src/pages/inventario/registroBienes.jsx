@@ -82,7 +82,34 @@ export default function RegistrarBien() {
       status: 1,
     },
   });
+useEffect(() => {
+    if (!scanningRFID) return;
 
+    let buffer = "";
+    let lastKeyTime = 0;
+
+    const handleKeyPress = (e) => {
+      const currentTime = new Date().getTime();
+      if (currentTime - lastKeyTime > 100) buffer = "";
+      lastKeyTime = currentTime;
+
+      if (e.key === "Enter") {
+        const tag = buffer.trim();
+        if (tag.length > 0) {
+          setRfidValue(tag);
+          form.setValue("tagRfidNumero", tag);
+          setScanningRFID(false);
+          toast.success("Tag RFID escaneado correctamente");
+        }
+        buffer = "";
+      } else {
+        buffer += e.key;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [scanningRFID]);
   useEffect(() => {
     api.get("/departamentos").then(res => {
       const options = res.data.map(dep => ({
@@ -176,59 +203,23 @@ useEffect(() => {
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-1 md:p-10 pt-0"> {/* <-- pt-0 elimina padding top extra */}
+  <CardHeader className="pb-2 pt-0"> {/* <-- quita padding top del header */}
+    <CardTitle className="text-2xl font-bold mb-0">
+      {id ? "Editar Bien" : "Registrar Bien"}
+    </CardTitle>
+  </CardHeader>
+
       <Card className="w-full">
-        <CardHeader>
-         <CardTitle className="text-2xl font-bold">
-  {id ? "Editar Bien" : "Registrar Bien"}
-</CardTitle>
-
-        </CardHeader>
-        <CardContent className="overflow-x-hidden w-full max-w-full">
-          <div className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
-            {rfidValue ? (
-  <div className="text-center">
-    <p className="text-green-600 text-lg mb-2">Tag RFID escaneado:</p>
-    <p className="bg-white dark:bg-gray-800 text-lg p-2 rounded font-mono">{rfidValue}</p>
-    { !id && ( // ⛔ solo permitir escanear si es nuevo
-      <Button variant="outline" className="mt-4" onClick={() => {
-        setRfidValue("");
-        form.setValue("tagRfidNumero", "");
-        setScanningRFID(true);
-        toast.info("Escaneando nuevo tag RFID...");
-      }}>
-        <ScanLine className="h-4 w-4 mr-2" /> Escanear otro tag
-      </Button>
-    )}
-  </div>
-) : (
-
-              <div className="text-center">
-                <p className={`text-lg ${scanningRFID ? "text-blue-600 animate-pulse" : "text-gray-600"}`}>
-                  {scanningRFID ? "Escanee un tag RFID..." : "No se ha escaneado ningún tag RFID"}
-                </p>
-                {!scanningRFID && (
-                  <Button variant="outline" className="mt-4" onClick={() => {
-                    setScanningRFID(true);
-                    toast.info("Escaneando tag RFID...");
-                  }}>
-                    <ScanLine className="h-4 w-4 mr-2" /> Iniciar escaneo
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-  console.error("❌ Errores de validación:", errors);
-  toast.error("Corrige los errores del formulario");
-})}
-
-  className="w-full max-w-full grid grid-cols-1 md:grid-cols-2 gap-4"
->
-
-              <FormField
+        <CardContent className="overflow-x-hidden w-full max-w-full p-4">
+  <div className="max-h-[420px] overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Sección del formulario */}
+      <div className="md:col-span-2">
+        <Form  {...form}>
+          <form  id="form-bien" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+            {/* Aquí van todos tus <FormField> como ya los tienes */}
+            <FormField
             control={form.control}
             name="nombreBien"
             render={({ field }) => (
@@ -514,18 +505,72 @@ useEffect(() => {
             )}
           />
 
-              <div className="md:col-span-2">
-                <Button type="submit" className="text-black w-full justify-between">
-  {id ? "Actualizar Bien" : "Registrar Bien"}
-</Button>
+           
+          </form>
+        </Form>
+      </div>
 
-              </div>
-            </form>
-          </Form>
-        </CardContent>
+      {/* Panel RFID como Card */}
+      <Card className="h-fit self-start w-full">
+  <CardHeader>
+    <CardTitle className="text-base font-semibold">Tarjeta RFID</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    <div className="text-center">
+      {rfidValue ? (
+        <>
+          <p className="text-green-600 text-sm mb-2">Tag RFID escaneado:</p>
+          <p className="bg-white dark:bg-gray-800 text-sm p-2 rounded font-mono">{rfidValue}</p>
+          {!id && (
+            <Button variant="outline" onClick={() => {
+              setRfidValue("");
+              form.setValue("tagRfidNumero", "");
+              setScanningRFID(true);
+              toast.info("Escaneando nuevo tag RFID...");
+            }}>
+              <ScanLine className="h-4 w-4 mr-2" /> Escanear otro tag
+            </Button>
+          )}
+        </>
+      ) : (
+        <>
+          <p className={`text-sm ${scanningRFID ? "text-blue-600 animate-pulse" : "text-gray-600"}`}>
+            {scanningRFID ? "Escanee un tag RFID..." : "No se ha escaneado ningún tag RFID"}
+          </p>
+          {!scanningRFID && (
+            <Button variant="outline" onClick={() => {
+              setScanningRFID(true);
+              toast.info("Escaneando tag RFID...");
+            }}>
+              <ScanLine className="h-4 w-4 mr-2" /> Iniciar escaneo
+            </Button>
+          )}
+        </>
+      )}
+    </div>
+
+    {/* ✅ Botón de submit aquí, enlazado con el formulario principal */}
+    <Button
+      type="submit"
+      form="form-bien"
+      variant="blue"
+      className="w-full text-black"
+    >
+      {id ? "Actualizar Bien" : "Registrar Bien"}
+    </Button>
+  </CardContent>
+</Card>
+
+      
+    </div>
+    
+  </div>
+</CardContent>
+
       </Card>
     </div>
   );
 }
+
 
 

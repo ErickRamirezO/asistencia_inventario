@@ -23,37 +23,40 @@ export default function CategoriaStock() {
           <CardTitle className="text-2xl font-bold">Stock por Categoría</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto border border-gray-300 dark:border-gray-700">
-              <thead className="bg-gray-100 dark:bg-gray-800">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">Categoría</th>
-                  <th className="px-4 py-2 text-left font-semibold">Cantidad</th>
-                  <th className="px-4 py-2 text-left font-semibold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stockData.length === 0 ? (
-                  <tr>
-                    <td colSpan="3" className="text-center py-6 text-gray-500">No hay datos disponibles.</td>
-                  </tr>
-                ) : (
-                  stockData.map((item, index) => (
-                    <tr key={index} className="border-t dark:border-gray-700">
-                      <td className="px-4 py-2">{item.nombreCategoria}</td>
-                      <td className="px-4 py-2">{item.cantidad}</td>
-                      <td className="px-4 py-2">
-                        <Button variant="outline" disabled>
-                          <Pencil className="h-4 w-4 mr-2" /> Editar
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+  <div className="max-h-80 overflow-y-auto rounded-md border">
+    <table className="min-w-full table-auto border border-gray-300 dark:border-gray-700">
+      <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+        <tr>
+          <th className="px-4 py-2 text-left font-semibold">Categoría</th>
+          <th className="px-4 py-2 text-left font-semibold">Cantidad</th>
+          <th className="px-4 py-2 text-left font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stockData.length === 0 ? (
+          <tr>
+            <td colSpan="3" className="text-center py-6 text-gray-500">
+              No hay datos disponibles.
+            </td>
+          </tr>
+        ) : (
+          stockData.map((item, index) => (
+            <tr key={index} className="border-t dark:border-gray-700">
+              <td className="px-4 py-2">{item.nombreCategoria}</td>
+              <td className="px-4 py-2">{item.cantidad}</td>
+              <td className="px-4 py-2">
+                <Button variant="outline" disabled>
+                  <Pencil className="h-4 w-4 mr-2" /> Editar
+                </Button>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</CardContent>
+
       </Card>
     </div>
   );

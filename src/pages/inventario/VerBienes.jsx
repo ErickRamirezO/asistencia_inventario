@@ -62,7 +62,7 @@ export default function VerBienes() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Bienes Inmuebles Registrados</h1>
+      <h1 className="text-2xl font-bold mb-5">Bienes Inmuebles Registrados</h1>
       <input
         type="text"
         placeholder="Buscar por nombre..."
@@ -70,8 +70,9 @@ export default function VerBienes() {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 w-full border p-2 rounded"
       />
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto max-w-full">
+  <div className="max-h-[400px] overflow-y-auto">
+    <Table className="min-w-[500px] w-full table-auto">
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
@@ -127,6 +128,7 @@ export default function VerBienes() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

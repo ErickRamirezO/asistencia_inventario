@@ -9,6 +9,8 @@ import { Pencil, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScanLine } from "lucide-react";
 import api from "@/utils/axios";
+import { getUserIdFromToken } from "@/pages/auth/auth";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,10 +105,12 @@ export default function Inventarios() {
   };
 
   const onSubmit = async (data) => {
-    const payload = {
-      ...data,
-      usuariosId: 1,
-    };
+  const userId = getUserIdFromToken();
+
+  const payload = {
+    ...data,
+    usuariosId: userId,
+  };
 
     try {
       if (modoEdicion) {
@@ -227,7 +231,9 @@ export default function Inventarios() {
           </Button>
         </CardHeader>
         <CardContent>
-          <table className="w-full text-sm border">
+  <div className="overflow-x-auto max-w-full">
+    <div className="max-h-[500px] overflow-y-auto">
+      <table className="min-w-[400px] w-full text-sm border">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-2 text-left hidden">ID</th>
@@ -268,8 +274,11 @@ export default function Inventarios() {
               ))}
             </tbody>
           </table>
+          </div>
+          </div>
         </CardContent>
       </Card>
     </div>
+    
   );
 }

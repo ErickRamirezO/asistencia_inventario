@@ -91,6 +91,12 @@ export default function InventarioDetalle() {
       console.error("Error actualizando descripción:", err);
     }
   };
+  const [searchTerm, setSearchTerm] = useState("");
+
+const historialFiltrado = historial.filter(h =>
+  h.nombreBien.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 
   return (
     <div className="p-6 space-y-6">
@@ -117,7 +123,16 @@ export default function InventarioDetalle() {
         </Card>
       </div>
 
-      <div className="bg-white rounded shadow mt-6 overflow-x-auto">
+      <div className="mt-6 space-y-4">
+  <Input
+    placeholder="Buscar bien por nombre..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="max-w-sm"
+  />
+  <div className="bg-white rounded shadow overflow-x-auto">
+    <div className="max-h-[300px] overflow-y-auto">
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -131,7 +146,8 @@ export default function InventarioDetalle() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {historial.map((h) => (
+            {historialFiltrado.map((h) => (
+
               <TableRow key={h.id}>
                 <TableCell>{h.nombreBien}</TableCell>
                 <TableCell>{h.descripcionBien}</TableCell>
@@ -173,6 +189,8 @@ export default function InventarioDetalle() {
           </TableBody>
         </Table>
       </div>
+       </div>
+        </div>
 
       <Dialog open={!!bienEditar} onOpenChange={() => setBienEditar(null)}>
         <DialogContent className="sm:max-w-md">

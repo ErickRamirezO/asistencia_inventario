@@ -351,36 +351,39 @@ export default function TurnosLaborales() {
         </DialogContent>
       </Dialog>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre del Turno</TableHead>
-            <TableHead>Hora de Inicio</TableHead>
-            <TableHead>Hora de Fin</TableHead>
-            <TableHead>Inicio de Almuerzo</TableHead>
-            <TableHead>Fin de Almuerzo</TableHead>
+      <div className="max-h-[450px] overflow-y-auto border rounded-md">
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Nombre del Turno</TableHead>
+        <TableHead>Hora de Inicio</TableHead>
+        <TableHead>Hora de Fin</TableHead>
+        <TableHead>Inicio de Almuerzo</TableHead>
+        <TableHead>Fin de Almuerzo</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {turnos.length > 0 ? (
+        turnos.map((turno, index) => (
+          <TableRow key={index}>
+            <TableCell>{turno.nombreHorario}</TableCell>
+            <TableCell>{turno.horaInicio}</TableCell>
+            <TableCell>{turno.horaFin}</TableCell>
+            <TableCell>{turno.horaInicioAlmuerzo || "—"}</TableCell>
+            <TableCell>{turno.horaFinAlmuerzo || "—"}</TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {turnos.length > 0 ? (
-            turnos.map((turno, index) => (
-              <TableRow key={index}>
-                <TableCell>{turno.nombreHorario}</TableCell>
-                <TableCell>{turno.horaInicio}</TableCell>
-                <TableCell>{turno.horaFin}</TableCell>
-                <TableCell>{turno.horaInicioAlmuerzo}</TableCell>
-                <TableCell>{turno.horaFinAlmuerzo}</TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan="5" className="text-center">
-                No hay turnos laborales registrados.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan="5" className="text-center">
+            No hay turnos laborales registrados.
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
+</div>
+
     </div>
   );
 }

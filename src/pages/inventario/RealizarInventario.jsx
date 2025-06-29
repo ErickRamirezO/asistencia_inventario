@@ -7,12 +7,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import api from "@/utils/axios";
+import { getUserIdFromToken } from "@/pages/auth/auth";
 
 export default function RealizarInventario() {
   const { id: inventarioId } = useParams();
   const [tag, setTag] = useState("");
   const [bien, setBien] = useState(null);
-  const usuarioId = 1; // Quemado por ahora
+  const usuarioId = getUserIdFromToken(); // Quemado por ahora
 
   useEffect(() => {
     const interval = setInterval(() => {

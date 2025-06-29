@@ -225,7 +225,7 @@ export default function Layout() {
                       </SidebarMenuSubItem>
                        <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/cambio-encargado">
+                          <Link to="/cambio">
                             <Box className="h-5 w-5" />
                             <span>Cambio de encargado</span>
                           </Link>

@@ -114,7 +114,8 @@ export default function MonitoreoLista() {
           className="w-full md:w-1/2"
         />
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[230px] overflow-y-auto border rounded">
+
           <Table>
             <TableHeader>
               <TableRow>

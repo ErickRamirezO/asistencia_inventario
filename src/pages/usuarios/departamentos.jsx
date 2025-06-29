@@ -96,35 +96,36 @@ export default function Departamentos() {
         </CardHeader>
 
         <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="text-left p-2 hidden">ID</th>
-                  <th className="text-left p-2">Nombre</th>
-                  <th className="text-right p-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {departamentos.map((dep) => (
-                  <tr key={dep.id} className="border-t">
-                    <td className="p-2 hidden">{dep.id}</td>
-                    <td className="p-2">{dep.nombreDepartamento}</td>
-                    <td className="p-2 text-right">
-                      <Button
-                        size="icon"
-                        onClick={() => abrirModal(dep)}
-                        className="bg-blue-500 text-blue-700 hover:bg-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+  <div className="rounded-md border overflow-hidden max-h-110 overflow-y-auto">
+    <table className="w-full text-sm">
+      <thead className="bg-gray-100 sticky top-0 z-10">
+        <tr>
+          <th className="text-left p-2 hidden">ID</th>
+          <th className="text-left p-2">Nombre</th>
+          <th className="text-right p-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {departamentos.map((dep) => (
+          <tr key={dep.id} className="border-t">
+            <td className="p-2 hidden">{dep.id}</td>
+            <td className="p-2">{dep.nombreDepartamento}</td>
+            <td className="p-2 text-right">
+              <Button
+                size="icon"
+                onClick={() => abrirModal(dep)}
+                className="bg-blue-500 text-blue-700 hover:bg-blue-600"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</CardContent>
+
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
