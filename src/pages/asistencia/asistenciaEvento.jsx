@@ -156,26 +156,8 @@ export default function AsistenciaEvento() {
   };
 
   useEffect(() => {
-    const handleValidTag = async () => {
-      if (
-        rfidTag &&
-        rfidTag.length <50 &&
-        rfidTag !== lastProcessedTag.current &&
-        !processing &&
-        selectedEvent &&
-        !showCreateEvent
-      ) {
-        lastProcessedTag.current = rfidTag;
-        await fetchUserInfo(rfidTag);
-        await registerEventAttendance(rfidTag);
-      }
-    };
-    handleValidTag();
-  }, [rfidTag, fetchUserInfo, registerEventAttendance, processing, selectedEvent, showCreateEvent]);
-
-  useEffect(() => {
-    if (rfidTag.length > 24) {
-      setRfidTag(rfidTag.substring(0, 24));
+    if (rfidTag.length < 50) {
+      setRfidTag(rfidTag.substring(0, 50));
     }
   }, [rfidTag]);
 
@@ -348,6 +330,16 @@ export default function AsistenciaEvento() {
             placeholder="Escanear Tag RFID"
             value={rfidTag}
             onChange={handleTagChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (rfidTag.length > 0 && !processing && selectedEvent && !showCreateEvent) {
+                  fetchUserInfo(rfidTag);
+                  registerEventAttendance(rfidTag);
+                  setRfidTag(""); // Limpia el input después de procesar
+                }
+              }
+            }}
             disabled={!selectedEvent || showCreateEvent}
           />
           {isLoading && <p>Cargando...</p>}

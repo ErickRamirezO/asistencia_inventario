@@ -144,28 +144,10 @@ export default function AsistenciaSimple() {
     console.log("RFID Tag changed:", tag);
   };
 
-  // Single effect to handle both fetch and registration
-  useEffect(() => {
-    const handleValidTag = async () => {
-      if (rfidTag && rfidTag.length <50 && rfidTag !== lastProcessedTag.current && !processing) {
-        // Set the last processed tag immediately to prevent duplicate processing
-        lastProcessedTag.current = rfidTag;
-
-        // First fetch user info
-        await fetchUserInfo(rfidTag);
-
-        // Then register attendance
-        await registerAttendance(rfidTag);
-      }
-    };
-
-    handleValidTag();
-  }, [rfidTag, fetchUserInfo, registerAttendance, processing]);
-
   // Handle too long tags
   useEffect(() => {
     if (rfidTag.length < 50) {
-      setRfidTag(rfidTag.substring(0, 10));
+      setRfidTag(rfidTag.substring(0, 50));
     }
   }, [rfidTag]);
 
@@ -295,6 +277,17 @@ export default function AsistenciaSimple() {
             placeholder="Escanear Tag RFID"
             value={rfidTag}
             onChange={handleTagChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (rfidTag.length > 0 && !processing) {
+                  // Procesa el tag solo cuando se presiona Enter
+                  fetchUserInfo(rfidTag);
+                  registerAttendance(rfidTag);
+                  setRfidTag(""); // Limpia el input después de procesar
+                }
+              }
+            }}
             className="w-full text-xs"
           />
           {isLoading && <p className="text-xs mt-2">Cargando...</p>}

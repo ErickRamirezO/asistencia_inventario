@@ -306,14 +306,6 @@ export default function Layout() {
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/new-feature">
-                            <CalendarClock className="h-5 w-5" />
-                            <span>Crear turnos laborales</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
@@ -357,6 +349,7 @@ export default function Layout() {
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background  md:px-6">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
+<<<<<<< HEAD
               <h2 className="text-lg font-semibold">
                 {location.pathname === "/" && "Dashboard"}
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
@@ -365,6 +358,8 @@ export default function Layout() {
                 {location.pathname === "/bienes/registro" && "Gestión de Inventario"}
                 {location.pathname === "/attendance" && "Control de Asistencia"}
               </h2>
+=======
+>>>>>>> a9f6e3b60ae6ee42d2b9e2ea33a99978b8b0fbd4
             </div>
 
             <div className="flex items-center gap-4 md:hidden">

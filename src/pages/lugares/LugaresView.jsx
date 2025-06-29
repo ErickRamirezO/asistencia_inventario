@@ -80,20 +80,20 @@ export default function LugaresView() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
       <Card>
-        <CardHeader className="flex flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold">Lugares</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-center gap-2">
+          <CardTitle className="text-base sm:text-2xl font-bold text-center sm:text-left">Lugares</CardTitle>
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 text-black hover:bg-blue-700 font-semibold"
+            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-full sm:w-auto"
           >
             Agregar Lugar
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="rounded-md border overflow-x-auto">
+            <table className="min-w-[400px] w-full text-xs sm:text-sm">
               <thead className="bg-gray-100">
                 <tr>
                   <th className="text-left p-2">Nombre</th>
@@ -128,7 +128,7 @@ export default function LugaresView() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xs sm:text-lg">
               {modoEdicion ? "Editar Lugar" : "Nuevo Lugar"}
             </DialogTitle>
           </DialogHeader>
@@ -139,25 +139,25 @@ export default function LugaresView() {
                 name="nombreLugar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre del Lugar</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Nombre del Lugar</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ejemplo: Laboratorio B" {...field} />
+                      <Input placeholder="Ejemplo: Laboratorio B" className="text-xs sm:text-sm" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <Button
                   type="button"
                   onClick={() => setDialogOpen(false)}
-                  className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-sm"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 text-black hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                 >
                   {modoEdicion ? "Actualizar" : "Crear"}
                 </Button>
