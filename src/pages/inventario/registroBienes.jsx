@@ -204,15 +204,13 @@ useEffect(() => {
 
   return (
     <div className="p-1 md:p-10 pt-0"> {/* <-- pt-0 elimina padding top extra */}
-  <CardHeader className="pb-2 pt-0"> {/* <-- quita padding top del header */}
-    <CardTitle className="text-2xl font-bold mb-0">
-      {id ? "Editar Bien" : "Registrar Bien"}
-    </CardTitle>
-  </CardHeader>
+  
 
       <Card className="w-full">
+        
         <CardContent className="overflow-x-hidden w-full max-w-full p-4">
-  <div className="max-h-[420px] overflow-y-auto pr-1">
+<div className="md:max-h-[460px] md:overflow-y-auto md:pr-1">
+
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Sección del formulario */}
       <div className="md:col-span-2">

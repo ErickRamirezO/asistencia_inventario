@@ -357,14 +357,14 @@ export default function Layout() {
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background  md:px-6">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h1 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold">
                 {location.pathname === "/" && "Dashboard"}
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
                 {location.pathname === "/departamentos" && "Gestión de Departamentos"}
                 {location.pathname === "/empleados" && "Gestión de Empleados"}
-                {location.pathname === "/inventory" && "Gestión de Inventario"}
+                {location.pathname === "/bienes/registro" && "Gestión de Inventario"}
                 {location.pathname === "/attendance" && "Control de Asistencia"}
-              </h1>
+              </h2>
             </div>
 
             <div className="flex items-center gap-4 md:hidden">

@@ -81,10 +81,11 @@
       <div className="p-6 max-w-4xl mx-auto">
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
-            <CardTitle className="text-2xl font-bold">Categorías y Stock</CardTitle>
+            <CardTitle className="text-sm sm:text-lg font-bold">Categorías y Stock</CardTitle>
             <Button
               onClick={() => abrirModal()}
-              className="bg-blue-600 text-black hover:bg-blue-700 font-semibold"
+              className="bg-blue-600 text-white  hover:bg-blue-700 font-semibold px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm"
+
             >
               Agregar Categoría
             </Button>
@@ -112,7 +113,7 @@
                         <Button
                           size="icon"
                           onClick={() => abrirModal(categoria)}
-                          className="bg-blue-500 text-blue-700 hover:bg-blue-600"
+                          className="bg-blue-300 text-black hover:bg-blue-600"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>

@@ -86,7 +86,6 @@ export default function Departamentos() {
     <div className="p-6 max-w-3xl mx-auto">
       <Card>
         <CardHeader className="flex flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold">Departamentos</CardTitle>
           <Button
             onClick={() => abrirModal()}
             className="bg-blue-600 text-black hover:bg-blue-700 font-semibold"
