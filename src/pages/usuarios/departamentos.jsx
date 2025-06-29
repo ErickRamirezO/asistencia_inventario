@@ -88,14 +88,14 @@ export default function Departamentos() {
         <CardHeader className="flex flex-row justify-between items-center">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 text-black hover:bg-blue-700 font-semibold"
+            className="bg-blue-600 text-white hover:bg-blue-700 font-semibold"
           >
             Agregar Departamento
           </Button>
         </CardHeader>
 
         <CardContent>
-  <div className="rounded-md border overflow-hidden max-h-110 overflow-y-auto">
+<div className="rounded-md border md:max-h-[440px] md:overflow-y-auto">
     <table className="w-full text-sm">
       <thead className="bg-gray-100 sticky top-0 z-10">
         <tr>

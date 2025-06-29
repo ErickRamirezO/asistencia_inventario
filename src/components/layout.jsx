@@ -349,17 +349,29 @@ export default function Layout() {
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background  md:px-6">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-<<<<<<< HEAD
               <h2 className="text-lg font-semibold">
                 {location.pathname === "/" && "Dashboard"}
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
                 {location.pathname === "/departamentos" && "Gestión de Departamentos"}
                 {location.pathname === "/empleados" && "Gestión de Empleados"}
                 {location.pathname === "/bienes/registro" && "Gestión de Inventario"}
-                {location.pathname === "/attendance" && "Control de Asistencia"}
+                {location.pathname === "/asistencia-dashboard" && "Control de Asistencia"}
+                {location.pathname === "/asistencia" && "Toma de Asistencia"}
+                {location.pathname === "/asistencia-evento" && "Gestión de eventos"}
+                {location.pathname === "/cambio-encargado" && "Cambio de encargado"}
+                {location.pathname === "/cambio" && "Cambio de encargado"}
+                {location.pathname === "/bienes/categoria" && "Categoria"}
+                 {location.pathname === "/cambio/historial/:documentoId" && "Acta de Cambio"}
+                  {location.pathname === "/turnosLaborales" && "Turnos Laborales"}
+                {location.pathname === "/bienes/inventario" && "Inventario"}
+                {location.pathname === "/usuarios/registrar" && "Gestión Usuario"}
+                {location.pathname === "/lista-monitoreo" && "Gestión de Monitoreo"}
+                {location.pathname === "/monitoreo-tag" && "Monitoreo"}
+                 {location.pathname === "/reporteAsistencia" && "Reporte de Asistencia"}
+                 {location.pathname === "/verUsuarios" && "Lista de Usuarios"}
+                 {location.pathname === "/bienes/lista-bienes" && "Bienes Inmuebles Registrados"}
+                 {location.pathname === "/lugar" && "Lugares"}
               </h2>
-=======
->>>>>>> a9f6e3b60ae6ee42d2b9e2ea33a99978b8b0fbd4
             </div>
 
             <div className="flex items-center gap-4 md:hidden">

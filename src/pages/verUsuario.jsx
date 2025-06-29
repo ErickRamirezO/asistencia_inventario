@@ -185,7 +185,7 @@ export default function VerUsuario() {
 
   return (
     <div className="p-6">
-      <h3 className="text-xl sm:text-xl font-bold mb-6">Lista de Usuarios</h3>
+
       <div className="mb-6 space-y-4">
         {/* Barra de búsqueda */}
         <div className="relative">
@@ -206,7 +206,8 @@ export default function VerUsuario() {
           )}
         </div>
       </div>
-      <div className="rounded-md border max-h-[400px] overflow-y-auto">
+      <div className="rounded-md border md:max-h-[400px] md:overflow-y-auto">
+
         <Table className="min-w-[900px] table-auto text-xs sm:text-sm">
           <TableHeader>
             <TableRow>

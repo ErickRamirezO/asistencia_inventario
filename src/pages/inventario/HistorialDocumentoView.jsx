@@ -39,22 +39,22 @@ export default function HistorialDocumentoView() {
       <div className="flex justify-between items-center mb-4 no-print">
   <Button
     onClick={() => navigate("/cambio")}
-    className="bg-gray-200 hover:bg-gray-300"
+    className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto"
   >
 Volver a documentos
   </Button>
   <Button
     onClick={() => window.print()}
-    className="bg-blue-600 text-white hover:bg-blue-700"
+    className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-auto"
   >
 Imprimir acta
   </Button>
 </div>
 
-<div className="border rounded-md max-h-[500px] overflow-y-auto p-2 print:overflow-visible print:max-h-none">
+<div className="p-2 print:overflow-visible print:max-h-none">
 
   
-      <Card>
+      <Card className="md:max-h-[490px] md:overflow-y-auto border rounded-md">
         <CardHeader>
           <CardTitle>ACTA DE ENTREGA-RECEPCIÓN DE BIENES – Documento #{documentoId}</CardTitle>
         </CardHeader>
@@ -67,42 +67,42 @@ Imprimir acta
             Al efecto, con la presencia de las personas mencionadas anteriormente, se procede a la entrega-recepción de los bienes clasificados como <strong>Propiedad Planta y Equipo</strong> y <strong>Bienes de Control Administrativo</strong>, de acuerdo al siguiente detalle:
           </p>
 
-          <div className="overflow-x-auto">
-            <table className="print-table">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th>Código</th>
-                  <th>Bien</th>
-                  <th>Modelo</th>
-                  <th>Marca</th>
-                  <th>Material</th>
-                  <th>Color</th>
-                  <th>Dimensiones</th>
-                  <th>Condición</th>
-                  <th>Ubicación</th>
-                  <th>Encargado Anterior</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historial.map((h) => (
-                  <tr key={h.id}>
-                    <td>{h.bien?.id || "—"}</td>
-                    <td>{h.bien?.nombreBien || "—"}</td>
-                    <td>{h.bien?.modeloBien || "—"}</td>
-                    <td>{h.bien?.marcaBien || "—"}</td>
-                    <td>{h.bien?.materialBien || "—"}</td>
-                    <td>—</td>
-                    <td>{h.bien?.dimensionesBien || "—"}</td>
-                    <td>{h.bien?.status === 1 ? "BUENO" : "REGULAR"}</td>
-                    <td>{h.bien?.ubicacionBien || "—"}</td>
-                    <td>
-                      {h.usuarioAnterior?.nombre} {h.usuarioAnterior?.apellido}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm">
+  <table className="w-full min-w-[800px] table-auto border-collapse text-sm text-gray-700">
+    <thead className="bg-gray-100 text-gray-700 font-semibold">
+      <tr>
+        <th className="px-4 py-2 text-left">Código</th>
+        <th className="px-4 py-2 text-left">Bien</th>
+        <th className="px-4 py-2 text-left">Modelo</th>
+        <th className="px-4 py-2 text-left">Marca</th>
+        <th className="px-4 py-2 text-left">Material</th>
+        <th className="px-4 py-2 text-left">Color</th>
+        <th className="px-4 py-2 text-left">Dimensiones</th>
+        <th className="px-4 py-2 text-left">Condición</th>
+        <th className="px-4 py-2 text-left">Ubicación</th>
+        <th className="px-4 py-2 text-left">Encargado Anterior</th>
+      </tr>
+    </thead>
+    <tbody>
+      {historial.map((h) => (
+        <tr key={h.id} className="border-t hover:bg-gray-50">
+          <td className="px-4 py-2">{h.bien?.id || "—"}</td>
+          <td className="px-4 py-2">{h.bien?.nombreBien || "—"}</td>
+          <td className="px-4 py-2">{h.bien?.modeloBien || "—"}</td>
+          <td className="px-4 py-2">{h.bien?.marcaBien || "—"}</td>
+          <td className="px-4 py-2">{h.bien?.materialBien || "—"}</td>
+          <td className="px-4 py-2">—</td>
+          <td className="px-4 py-2">{h.bien?.dimensionesBien || "—"}</td>
+          <td className="px-4 py-2">{h.bien?.status === 1 ? "BUENO" : "REGULAR"}</td>
+          <td className="px-4 py-2">{h.bien?.ubicacionBien || "—"}</td>
+          <td className="px-4 py-2">
+            {h.usuarioAnterior?.nombre} {h.usuarioAnterior?.apellido}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
           <p className="text-justify leading-relaxed mt-6">
             Se deja constancia que el custodio que recibe los bienes, señor Ing. <strong>{nuevoCustodio}</strong>, se encargará de velar por: el buen uso, la conservación, la administración y utilización, así también los custodios saliente y entrante certifican y garantizan que los bienes están siendo usados para fines Institucionales, sus condiciones son adecuadas y no se encuentran en riesgo de deterioro, de acuerdo con lo que estipulan los Arts. 7, 20, 44 y 47 del Reglamento General Sustitutivo para la Administración, Utilización, Manejo y Control de los Bienes e Inventarios del Sector Público y con las Normas de Control Interno 406-07 y 406-08.
@@ -149,6 +149,11 @@ Imprimir acta
             max-width: 100%;
             padding: 0;
           }
+@media print {
+  .print-table {
+    table-layout: fixed !important;
+  }
+}
 
           .print-table {
             width: 100%;

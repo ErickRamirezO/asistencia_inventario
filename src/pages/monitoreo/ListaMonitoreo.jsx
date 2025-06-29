@@ -57,7 +57,8 @@ export default function MonitoreoLista() {
 
   return (
     <div className="px-6 py-10 space-y-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 grid-rows-2 sm:grid-cols-2 sm:grid-rows-1 lg:grid-cols-4 gap-4">
+
         <Card
           className={clsx("cursor-pointer", filtro === "TODOS" && "ring-2 ring-blue-500")}
           onClick={() => setFiltro("TODOS")}
@@ -114,7 +115,8 @@ export default function MonitoreoLista() {
           className="w-full md:w-1/2"
         />
 
-        <div className="overflow-x-auto max-h-[230px] overflow-y-auto border rounded">
+        <div className="overflow-x-auto md:max-h-[230px] overflow-y-auto md:overflow-y-auto max-h-none">
+
 
           <Table>
             <TableHeader>

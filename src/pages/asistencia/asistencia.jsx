@@ -228,9 +228,7 @@ export default function Asistencia() {
     <div className="p-6 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Título principal de la vista */}
-        <h3 className="sm:text-base font-bold mb-2 text-gray-800">
-          Gestión y Consulta de Asistencia de Empleados
-        </h3>
+        
         {/* Estadísticas */}
         <div className="grid gap-2 grid-cols-2 sm:gap-4 sm:grid-cols-4 mb-6">
           {[

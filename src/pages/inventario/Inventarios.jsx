@@ -224,16 +224,21 @@ export default function Inventarios() {
       </Dialog>
 
       <Card>
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle className="text-2xl">Inventarios</CardTitle>
-          <Button className="bg-blue-600 text-white" onClick={() => abrirFormulario()}>
-            Agregar Inventario
-          </Button>
-        </CardHeader>
+        <CardHeader className="flex justify-end items-center">
+  <Button
+    className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-8 sm:h-auto"
+    onClick={() => abrirFormulario()}
+  >
+    Agregar Inventario
+  </Button>
+</CardHeader>
+
         <CardContent>
   <div className="overflow-x-auto max-w-full">
-    <div className="max-h-[500px] overflow-y-auto">
-      <table className="min-w-[400px] w-full text-sm border">
+    <div className="md:max-h-[500px] md:overflow-y-auto">
+
+      <table className="w-full text-sm border table-auto">
+
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-2 text-left hidden">ID</th>

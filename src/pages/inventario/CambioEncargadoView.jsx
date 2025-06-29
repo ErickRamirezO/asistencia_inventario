@@ -88,7 +88,14 @@
 
     return (
       <div className="p-6 space-y-4">
-        <h2 className="text-2xl font-bold">Cambio de Encargado</h2>
+ <div className="flex justify-between items-center mb-4">
+  <Button
+    onClick={() => navigate("/cambio")}
+    className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto"
+  >
+    Volver a documentos
+  </Button>
+</div>
 
         <Card>
           <CardHeader>

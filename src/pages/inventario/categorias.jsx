@@ -81,7 +81,7 @@
       <div className="p-6 max-w-4xl mx-auto">
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
-            <CardTitle className="text-sm sm:text-lg font-bold">Categorías y Stock</CardTitle>
+            
             <Button
               onClick={() => abrirModal()}
               className="bg-blue-600 text-white  hover:bg-blue-700 font-semibold px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm"

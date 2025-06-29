@@ -103,12 +103,13 @@ const historialFiltrado = historial.filter(h =>
 
   return (
     <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold">Detalle de Inventario #{id}</h2>
-<Button variant="outline" onClick={() => navigate(-1)}>
+      
+<Button className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto" variant="outline" onClick={() => navigate(-1)}>
 Regresar
 </Button>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
         <Card>
           <CardHeader><CardTitle>Total Bienes</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold">{total}</p></CardContent>
@@ -137,7 +138,7 @@ Regresar
     className="max-w-sm"
   />
   <div className="bg-white rounded shadow overflow-x-auto">
-    <div className="max-h-[300px] overflow-y-auto">
+   <div className="overflow-y-auto md:max-h-[300px] max-h-none">
 
         <Table>
           <TableHeader>

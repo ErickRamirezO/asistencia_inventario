@@ -62,9 +62,7 @@ export default function VerBienes() {
 
   return (
     <div className="p-2 sm:p-6">
-      <h3 className="text-xl sm:text-xl font-bold mb-5 text-center sm:text-left">
-        Bienes Inmuebles Registrados
-      </h3>
+      
       <input
         type="text"
         placeholder="Buscar por nombre..."
@@ -73,11 +71,11 @@ export default function VerBienes() {
         className="mb-4 w-full border p-2 rounded text-xs sm:text-sm"
       />
       <div className="rounded-md border overflow-x-auto max-w-full">
-        <div className="max-h-[400px] overflow-y-auto">
-          <Table className="min-w-[500px] w-full table-auto text-xs sm:text-sm">
+  <Table className="min-w-[500px] w-full table-auto text-xs sm:text-sm">
+
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs sm:text-sm">Nombre</TableHead>
+                <TableHead className="text-xs sm:text-sm">Nombres</TableHead>
                 <TableHead className="text-xs sm:text-sm">Categoría</TableHead>
                 <TableHead className="text-xs sm:text-sm">Ubicación</TableHead>
                 <TableHead className="text-xs sm:text-sm">Tag RFID</TableHead>
@@ -138,6 +136,6 @@ export default function VerBienes() {
           </Table>
         </div>
       </div>
-    </div>
+   
   );
 }

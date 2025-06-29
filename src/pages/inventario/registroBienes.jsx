@@ -552,7 +552,7 @@ useEffect(() => {
       type="submit"
       form="form-bien"
       variant="blue"
-      className="w-full text-black"
+      className="w-full text-white"
     >
       {id ? "Actualizar Bien" : "Registrar Bien"}
     </Button>

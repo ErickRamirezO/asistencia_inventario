@@ -82,47 +82,48 @@ export default function LugaresView() {
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between items-center gap-2">
-          <CardTitle className="text-base sm:text-2xl font-bold text-center sm:text-left">Lugares</CardTitle>
+        <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-full sm:w-auto"
+            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-auto ml-auto"
+
           >
             Agregar Lugar
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <table className="min-w-[400px] w-full text-xs sm:text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="text-left p-2">Nombre</th>
-                  <th className="text-left p-2">Estado</th>
-                  <th className="text-right p-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lugares.map((lugar) => (
-                  <tr key={lugar.id} className="border-t">
-                    <td className="p-2">{lugar.nombreLugar}</td>
-                    <td className="p-2">
-                      {lugar.activo ? "Activo" : "Inactivo"}
-                    </td>
-                    <td className="p-2 text-right">
-                      <Button
-                        size="icon"
-                        onClick={() => abrirModal(lugar)}
-                        className="bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+  <div className="w-full overflow-x-auto sm:overflow-x-visible">
+    <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="text-left p-2">Nombre</th>
+          <th className="text-left p-2">Estado</th>
+          <th className="text-right p-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {lugares.map((lugar) => (
+          <tr key={lugar.id} className="border-t">
+            <td className="p-2">{lugar.nombreLugar}</td>
+            <td className="p-2">
+              {lugar.activo ? "Activo" : "Inactivo"}
+            </td>
+            <td className="p-2 text-right">
+              <Button
+                size="icon"
+                onClick={() => abrirModal(lugar)}
+                className="bg-blue-500 text-white hover:bg-blue-600"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</CardContent>
+
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

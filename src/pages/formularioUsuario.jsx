@@ -441,11 +441,7 @@ return (
       )}
       
       <Card className="overflow-hidden">
-        <CardHeader className="px-2 sm:px-6">
-          <CardTitle className="text-sm sm:text-lg font-bold">
-            {modoEdicion ? "Editar Usuario" : "Registrar Usuario"}
-          </CardTitle>
-        </CardHeader>
+        
         <CardContent className="px-2 sm:px-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

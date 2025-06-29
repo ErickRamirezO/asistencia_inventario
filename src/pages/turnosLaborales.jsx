@@ -258,14 +258,19 @@ export default function TurnosLaborales() {
 
   return (
     <div className="p-2 sm:p-6">
-      <h3 className="text-lg sm:text-2xl font-bold mb-4">Turnos Laborales</h3>
-
+      
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="blue" className="mb-6 text-xs sm:text-sm">
-            Crear Turno Laboral
-          </Button>
-        </DialogTrigger>
+        <div className="flex justify-end mb-4">
+  <DialogTrigger asChild>
+    <Button
+      variant="blue"
+      className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-auto"
+    >
+      Crear Turno Laboral
+    </Button>
+  </DialogTrigger>
+</div>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-lg">Crear Turno Laboral</DialogTitle>
@@ -351,7 +356,8 @@ export default function TurnosLaborales() {
         </DialogContent>
       </Dialog>
 
-      <div className="max-h-[450px] overflow-x-auto border rounded-md">
+      <div className="md:max-h-[450px] md:overflow-y-auto overflow-x-auto border rounded-md">
+
         <Table className="min-w-[600px] text-xs sm:text-sm">
           <TableHeader>
             <TableRow>
