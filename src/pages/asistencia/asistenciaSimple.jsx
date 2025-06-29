@@ -164,7 +164,7 @@ export default function AsistenciaSimple() {
 
   // Handle too long tags
   useEffect(() => {
-    if (rfidTag.length > 24) {
+    if (rfidTag.length < 50) {
       setRfidTag(rfidTag.substring(0, 10));
     }
   }, [rfidTag]);
