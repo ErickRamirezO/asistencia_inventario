@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
-import { Package, Users, LogOut, LayoutDashboard, Clipboard, Settings, Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin} from "lucide-react"
+import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, Boxes,LocateFixed} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import {
@@ -107,17 +107,8 @@ export default function Layout() {
           
           <SidebarContent>
             <SidebarMenu>
-              {user?.rol === "Administrador" && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/")}>
-                    <Link to="/">
-                      <LayoutDashboard className="h-5 w-5" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
-
+              
+               {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega") && (
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/")}>
                   <Link to="/bienes/inventario">
@@ -126,7 +117,7 @@ export default function Layout() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+              )}
              {(user?.rol === "Administrador" || user?.rol === "Usuario") && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
@@ -142,8 +133,8 @@ export default function Layout() {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")}>
                       <Link to="/asistencia-evento">
-                        <Clipboard className="h-5 w-5" />
-                        <span>Registrar Asistencia Evento</span>
+                        <Bookmark className="h-5 w-5" />
+                        <span>Eventos</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -157,7 +148,7 @@ export default function Layout() {
                   </SidebarMenuItem>
                 </>
               )}
-
+{user?.rol === "Administrador" && (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
@@ -196,12 +187,13 @@ export default function Layout() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-
+)}
+{(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
-                      <Building className="h-5 w-5" />
+                      <Boxes className="h-5 w-5" />
                       <span>Bienes</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -226,7 +218,7 @@ export default function Layout() {
                        <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/cambio">
-                            <Box className="h-5 w-5" />
+                            <Users className="h-5 w-5" />
                             <span>Cambio de encargado</span>
                           </Link>
                         </SidebarMenuButton>
@@ -243,7 +235,8 @@ export default function Layout() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-
+)}
+{(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
@@ -254,18 +247,20 @@ export default function Layout() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
+                      {(user?.rol === "Administrador" )&& (
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/departamentos">
-                            <Archive className="h-5 w-5" />
+                            <Shapes className="h-5 w-5" />
                             <span>Departamentos</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
+                      )}
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/lugar">
-                            <Archive className="h-5 w-5" />
+                            <MapPinHouse className="h-5 w-5" />
                             <span>Lugares de Monitoreo</span>
                           </Link>
                         </SidebarMenuButton>
@@ -275,13 +270,13 @@ export default function Layout() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-
-
+)}
+ {(user?.rol === "Administrador" )&& (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
-                      <FileText className="h-5 w-5" />
+                      <LocateFixed className="h-5 w-5" />
                       <span>Reportes</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -306,7 +301,7 @@ export default function Layout() {
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/lista-monitoreo">
-                            <MapPin className="h-5 w-5" />
+                            <ClipboardPlus className="h-5 w-5" />
                             <span>Reporte Monitoreo</span>
                           </Link>
                         </SidebarMenuButton>
@@ -323,7 +318,7 @@ export default function Layout() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-
+)}
             </SidebarMenu>
             
           </SidebarContent>

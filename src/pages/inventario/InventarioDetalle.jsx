@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "@/utils/axios";
+import { useNavigate } from "react-router-dom";
 
 import {
   Card,
@@ -37,6 +38,8 @@ export default function InventarioDetalle() {
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
   const [bienEditar, setBienEditar] = useState(null);
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -101,6 +104,9 @@ const historialFiltrado = historial.filter(h =>
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-2xl font-bold">Detalle de Inventario #{id}</h2>
+<Button variant="outline" onClick={() => navigate(-1)}>
+Regresar
+</Button>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>

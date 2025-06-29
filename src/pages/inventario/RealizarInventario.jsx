@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import api from "@/utils/axios";
 import { getUserIdFromToken } from "@/pages/auth/auth";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button"; // asegúrate de tener esto también
 
 export default function RealizarInventario() {
   const { id: inventarioId } = useParams();
   const [tag, setTag] = useState("");
   const [bien, setBien] = useState(null);
   const usuarioId = getUserIdFromToken(); // Quemado por ahora
+const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,6 +47,9 @@ export default function RealizarInventario() {
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
+       <Button variant="outline" onClick={() => navigate(-1)}>
+      Regresar
+    </Button>
       <Card>
         <CardHeader>
           <CardTitle>Escanear Tag RFID</CardTitle>

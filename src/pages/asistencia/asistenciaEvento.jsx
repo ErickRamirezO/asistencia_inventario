@@ -159,7 +159,7 @@ export default function AsistenciaEvento() {
     const handleValidTag = async () => {
       if (
         rfidTag &&
-        rfidTag.length === 24 &&
+        rfidTag.length <50 &&
         rfidTag !== lastProcessedTag.current &&
         !processing &&
         selectedEvent &&

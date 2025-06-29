@@ -147,7 +147,7 @@ export default function AsistenciaSimple() {
   // Single effect to handle both fetch and registration
   useEffect(() => {
     const handleValidTag = async () => {
-      if (rfidTag && rfidTag.length === 24 && rfidTag !== lastProcessedTag.current && !processing) {
+      if (rfidTag && rfidTag.length <50 && rfidTag !== lastProcessedTag.current && !processing) {
         // Set the last processed tag immediately to prevent duplicate processing
         lastProcessedTag.current = rfidTag;
 
