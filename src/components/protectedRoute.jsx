@@ -18,11 +18,6 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const isAuthenticated = token && isTokenValid(token);
   const { user } = useUser();
 
-  console.log("TOKEN:", token);
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("user:", user);
-  console.log("allowedRoles:", allowedRoles);
-
   // Mostrar loader mientras el usuario se inicializa si hay token válido
   if (isAuthenticated && user === null) {
     return <div>Cargando...</div>;
@@ -30,16 +25,16 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    console.log("No autenticado, redirigiendo a /login");
+    // console.log("No autenticado, redirigiendo a /login");
     localStorage.removeItem("token");
     return <Navigate to="/login" replace />;
   }
 
   // Si hay roles permitidos y el usuario no tiene el rol adecuado, redirigir
   if (allowedRoles && user) {
-    console.log("user.rol:", user.rol);
+    // console.log("user.rol:", user.rol);
     if (!allowedRoles.includes(user.rol)) {
-      console.log("Rol no permitido, redirigiendo a /no-autorizado");
+      // console.log("Rol no permitido, redirigiendo a /no-autorizado");
       return <Navigate to="/no-autorizado" replace />;
     }
   }

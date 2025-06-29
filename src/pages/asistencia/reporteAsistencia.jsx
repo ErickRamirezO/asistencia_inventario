@@ -508,14 +508,24 @@ const ReporteAsistencia = () => {
                             <TableCell className="px-2 py-1">{a.horaEntradaFormatted}</TableCell>
                             <TableCell className="px-2 py-1">{a.horaSalidaFormatted}</TableCell>
                             <TableCell className="px-2 py-1">
-                              <Badge className={getAlmuerzoBadgeColor(a.horaInicioAlmuerzoFormatted ? a.horaInicioAlmuerzoFormatted : "Pendiente")}>
-                                {a.horaInicioAlmuerzoFormatted || "Pendiente"}
-                              </Badge>
+                              {a.eventoNombre !== "Asistencia Normal"
+                                ? "----"
+                                : (
+                                  <Badge className={getAlmuerzoBadgeColor(a.horaInicioAlmuerzoFormatted ? a.horaInicioAlmuerzoFormatted : "Pendiente")}>
+                                    {a.horaInicioAlmuerzoFormatted || "Pendiente"}
+                                  </Badge>
+                                )
+                              }
                             </TableCell>
                             <TableCell className="px-2 py-1">
-                              <Badge className={getAlmuerzoBadgeColor(a.horaFinAlmuerzoFormatted ? a.horaFinAlmuerzoFormatted : "Pendiente")}>
-                                {a.horaFinAlmuerzoFormatted ? a.horaFinAlmuerzoFormatted : "Pendiente"}
-                              </Badge>
+                              {a.eventoNombre !== "Asistencia Normal"
+                                ? "----"
+                                : (
+                                  <Badge className={getAlmuerzoBadgeColor(a.horaFinAlmuerzoFormatted ? a.horaFinAlmuerzoFormatted : "Pendiente")}>
+                                    {a.horaFinAlmuerzoFormatted || "Pendiente"}
+                                  </Badge>
+                                )
+                              }
                             </TableCell>
                             <TableCell className="px-2 py-1">{a.eventoNombre}</TableCell>
                             <TableCell className="px-2 py-1">{a.observacionDisplay}</TableCell>
@@ -525,7 +535,12 @@ const ReporteAsistencia = () => {
                               </Badge>
                             </TableCell>
                             <TableCell className="px-2 py-1">{a.horasLaboradasDisplay}</TableCell>
-                            <TableCell className="px-2 py-1">{a.horasExtrasDisplay}</TableCell>
+                            <TableCell className="px-2 py-1">
+                              {a.eventoNombre !== "Asistencia Normal"
+                                ? "----"
+                                : a.horasExtrasDisplay
+                              }
+                            </TableCell>
                           </TableRow>
                         ))}
                         <TableRow>

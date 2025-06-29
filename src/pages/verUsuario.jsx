@@ -183,10 +183,6 @@ export default function VerUsuario() {
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Cargando usuarios...</div>;
-  }
-
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Lista de Usuarios</h1>
