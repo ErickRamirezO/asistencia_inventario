@@ -206,8 +206,8 @@ export default function AsistenciaEvento() {
   return (
 
     
-   <div className="min-h-screen w-full flex items-center justify-center px-6 sm:px-0">
-  <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg ">
+   <div className=" w-full flex items-center justify-center px-1 sm:px-0 mt-20 ">
+  <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg mt-0  mt-0">
 
         <CardHeader className="flex flex-col items-center">
           <CardTitle>Registro de Asistencia en Evento</CardTitle>

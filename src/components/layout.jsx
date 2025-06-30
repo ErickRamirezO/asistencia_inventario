@@ -175,7 +175,7 @@ useEffect(() => {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Users className="h-5 w-5" />
-                      <span>Control de usuarios</span>
+                      <span>Control de Usuarios</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -184,7 +184,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/usuarios/registrar">
                             <UserPlus className="h-5 w-5" />
-                            <span>Registrar usuarios</span>
+                            <span>Registrar Usuarios</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -192,7 +192,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/verUsuarios">
                             <Eye className="h-5 w-5" />
-                            <span>Ver usuarios</span>
+                            <span>Ver Usuarios</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -224,7 +224,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/bienes/registro">
                             <Archive className="h-5 w-5" />
-                            <span>Registrar bienes de la empresa</span>
+                            <span>Registrar Bienes</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -232,7 +232,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/bienes/lista-bienes">
                             <Box className="h-5 w-5" />
-                            <span>Bienes empresariales</span>
+                            <span>Bienes Empresariales</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -240,7 +240,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/cambio">
                             <Users className="h-5 w-5" />
-                            <span>Cambio de encargado</span>
+                            <span>Cambio de Encargado</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -248,7 +248,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/bienes/categoria">
                             <Tag className="h-5 w-5" />
-                            <span>Categoría de Bienes empresariales</span>
+                            <span>Categoría de Bienes</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -307,7 +307,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/reporteAsistencia">
                             <ClipboardCheck className="h-5 w-5" />
-                            <span>Reporte de asistencia</span>
+                            <span>Reporte de Asistencia</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
