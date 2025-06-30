@@ -204,8 +204,11 @@ export default function AsistenciaEvento() {
   };
 
   return (
-    <div className="flex items-center justify-center h-full w-full" style={{ height: "80vh" }}>
-      <Card className="w-96">
+
+    
+   <div className="min-h-screen w-full flex items-center justify-center px-6 sm:px-0">
+  <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg ">
+
         <CardHeader className="flex flex-col items-center">
           <CardTitle>Registro de Asistencia en Evento</CardTitle>
           <CardDescription>
@@ -216,7 +219,7 @@ export default function AsistenciaEvento() {
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
           {/* Botón para crear evento, arriba y centrado */}
-          <div className="w-full flex justify-center mb-2 gap-2">
+          <div className="w-full flex justify-center mb-2  gap-2">
             <Button
               type="button"
               variant="outline"

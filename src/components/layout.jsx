@@ -5,6 +5,7 @@ import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
 import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, Boxes,LocateFixed} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { getUserIdFromToken } from "@/pages/auth/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +41,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const [defaultOpen, setDefaultOpen] = useState(true)
   const { user, setUser } = useUser();
+const [userInitials, setUserInitials] = useState("AD");
 
   const handleLogout = useCallback(async (event) => {
     event.stopPropagation(); // Evita la propagación del evento
@@ -92,13 +94,32 @@ export default function Layout() {
   const isActive = (path) => {
     return location.pathname === path
   }
+useEffect(() => {
+  const fetchUserInfo = async () => {
+    const userId = getUserIdFromToken();
+    if (!userId) return;
+
+    try {
+      const res = await api.get(`/usuarios/${userId}`);
+      const { nombre, apellido } = res.data;
+      if (nombre && apellido) {
+        const initials = `${nombre[0]}${apellido[0]}`.toUpperCase();
+        setUserInitials(initials);
+      }
+    } catch (error) {
+      console.error("Error al obtener datos del usuario:", error);
+    }
+  };
+
+  fetchUserInfo();
+}, []);
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <div className="flex min-h-screen w-screen ">
         <Sidebar>
           <SidebarHeader>
-  <div className="flex justify-center gap-2 p-4">
+  <div className="flex justify-center gap-2 p-4b">
     <img src={logo} alt="Logo" className="h-20 w-auto" />
 
   </div>
@@ -319,9 +340,11 @@ export default function Layout() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start">
-                  <Avatar className="h-6 w-6 mr-2">
+                 <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-sm text-black font-semibold justify-center items-center flex">
+
                     <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback>AD</AvatarFallback>
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+
                   </Avatar>
                   <span>Mi Cuenta</span>
                 </Button>
@@ -346,7 +369,8 @@ export default function Layout() {
         {/* Main content */}
         <div className="flex-1 flex-col flex w-full ">
           {/* Header */}
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background  md:px-6">
+          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-900 text-white md:bg-background md:text-black md:px-6">
+
             <div className="flex items-center gap-2">
               <SidebarTrigger />
               <h2 className="text-lg font-semibold">
@@ -378,10 +402,11 @@ export default function Layout() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar>
-                      <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
+                   <Avatar className="h-8 w-8 mr-8 rounded-full bg-gray-900 text-black flex items-center justify-center text-xs font-semibold">
+                  <AvatarImage src="/placeholder.svg" />
+                  <AvatarFallback className="text-black">{userInitials}</AvatarFallback>
+                </Avatar>
+
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

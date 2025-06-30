@@ -201,7 +201,7 @@ Imprimir acta
   }
     @media print {
   .print-table {
-    min-width: unset !important; /* ✅ Esto elimina la min-width heredada de Tailwind */
+    min-width: unset !important; /*  Esto elimina la min-width heredada de Tailwind */
     width: 100% !important;
     table-layout: auto !important;
   }

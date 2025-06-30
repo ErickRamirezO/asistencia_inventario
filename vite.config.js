@@ -80,6 +80,8 @@ export default defineConfig({
   server: {
      host: '0.0.0.0',
      port: 5173,
+     allowedHosts: ['smartcontrol.eastus.cloudapp.azure.com'], //  Agregado aquí
+    
     proxy: {
       '/api': {
        target: 'http://52.224.111.106:8002',
