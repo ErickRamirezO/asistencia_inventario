@@ -17,13 +17,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from 'sonner';
 
+const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+
 const profileFormSchema = z.object({
-  nombre: z.string().min(2, {
-    message: "El nombre debe tener al menos 2 caracteres.",
-  }),
-  apellido: z.string().min(2, {
-    message: "El apellido debe tener al menos 2 caracteres.",
-  }),
+  nombre: z.string()
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+    .regex(nameRegex, { message: "El nombre solo debe contener letras y espacios." }),
+  apellido: z.string()
+    .min(2, { message: "El apellido debe tener al menos 2 caracteres." })
+    .regex(nameRegex, { message: "El apellido solo debe contener letras y espacios." }),
   email: z.string().email({
     message: "Por favor, introduce un correo electrónico válido.",
   }),

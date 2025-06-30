@@ -432,7 +432,7 @@ useEffect(() => {
 
           {/* Page content */}
           <main className="flex-1 flex-col flex w-full">
-            <div className="w-full max-w-6xl">
+            <div className="w-full">
               <Outlet />
             </div>
           </main>

@@ -77,8 +77,7 @@ function validarCedulaEcuatoriana(cedula) {
   return resultado === digitoVerificador;
 }
 
-const nameRegex = /^[A-Za-z]+$/;
-
+const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 
 const FormSchema = z.object({
   nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres." }).regex(nameRegex, { message: "Los nombres solo deben contener letras." }).max(30),
@@ -136,6 +135,8 @@ export default function FormularioUsuario() {
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
+    mode: "onChange", // Validar en cada cambio
+    reValidateMode: "onChange", // Revalidar en cada cambio
     defaultValues: {
       nombres: "",
       apellidos: "",

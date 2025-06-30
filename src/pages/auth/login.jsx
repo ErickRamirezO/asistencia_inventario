@@ -7,6 +7,7 @@ import api from "@/utils/axios";
 import { jwtDecode } from "jwt-decode";
 import { useUser } from "../../utils/UserContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Eye, EyeOff } from "lucide-react"; // Agrega esto arriba
 
 const Login = () => {
 
@@ -16,6 +17,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { setUser } = useUser();
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const roleBasedRedirects = {
     Administrador: "/verUsuarios",
@@ -90,16 +92,25 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="text-xs sm:text-sm"
                 />
-                <div>
+                <div className="relative">
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Ingrese su contraseña"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="text-xs sm:text-sm"
+                    className="text-xs sm:text-sm pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
+                
                 
                 <div className="flex justify-between items-center gap-2">
                   <div className="flex items-center space-x-2">
