@@ -45,8 +45,12 @@ const timeToMinutes = (timeString) => {
 const FormSchema = z.object({
   shiftName: z.string().min(3, {
     message: "El nombre del turno debe tener al menos 3 caracteres.",
-  }).max(30).regex(/^[a-zA-Z0-9-]+$/, {
-    message: "El nombre del turno solo puede contener letras, números y guiones.",}),
+  }).max(30).regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s-]+$/, {
+    message: "El nombre del turno solo puede contener letras, números y guiones.",
+  })
+  .refine(val => !/<.*?>/.test(val), {
+    message: "No se permiten etiquetas HTML.",
+  }),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: "Debe ser una hora válida en formato HH:mm.",
   }),
@@ -177,6 +181,8 @@ export default function TurnosLaborales() {
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       shiftName: "",
       startTime: "",
@@ -275,6 +281,9 @@ export default function TurnosLaborales() {
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-lg">Crear Turno Laboral</DialogTitle>
           </DialogHeader>
+          <p className="text-xs sm:text-sm text-gray-500 mb-2">
+            El formato de hora es de 24 horas (ejemplo: 08:00, 13:30, 21:45).
+          </p>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

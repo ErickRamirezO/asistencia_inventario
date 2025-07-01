@@ -35,8 +35,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Datos de respaldo en caso de fallo en la API
 const departamentosRespaldo = [
@@ -80,8 +86,16 @@ function validarCedulaEcuatoriana(cedula) {
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 
 const FormSchema = z.object({
-  nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres." }).regex(nameRegex, { message: "Los nombres solo deben contener letras." }).max(30),
-  apellidos: z.string().min(2, { message: "Los apellidos deben tener al menos 2 caracteres." }).regex(nameRegex, { message: "Los apellidos solo deben contener letras." }).max(30),
+  nombres: z.string()
+  .min(2, { message: "Los nombres deben tener al menos 2 caracteres." })
+  .regex(nameRegex, { message: "Los nombres solo deben contener letras." })
+  .max(30)
+  .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
+  apellidos: z.string()
+  .min(2, { message: "Los apellidos deben tener al menos 2 caracteres." })
+  .regex(nameRegex, { message: "Los apellidos solo deben contener letras." })
+  .max(30)
+  .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
   telefono: z
     .string()
     .regex(/^\d{10}$/, { message: "El teléfono debe tener 10 dígitos." }),
@@ -95,7 +109,7 @@ const FormSchema = z.object({
   correoElectronico: z
     .string()
     .email({ message: "Debe ser un correo electrónico válido." }),
-  departamento: z.string({
+  departamentoId: z.string({
     required_error: "Debe seleccionar un departamento.",
   }),
   rol: z.string({
@@ -119,6 +133,10 @@ const FormSchema = z.object({
 
 });
 
+  const FormSchemaDepartamento = z.object({
+    nombreDepartamento: z.string().min(2),
+  });
+
 export default function FormularioUsuario() {
   const { id } = useParams(); // Obtenemos el ID si existe (modo edición)
   const navigate = useNavigate();
@@ -129,9 +147,51 @@ export default function FormularioUsuario() {
   const [roles, setRoles] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [usuario, setUsuario] = useState(null);
-  const modoEdicion = !!id; // Si hay ID, estamos en modo edición
-  
+  const modoEdicion = !!id;
+  const [openDepartamento, setOpenDepartamento] = useState(false);
+  const [openRol, setOpenRol] = useState(false);
+  const [openFechaNacimiento, setOpenFechaNacimiento] = useState(false);
 
+  const formDepartamento = useForm({
+    resolver: zodResolver(FormSchemaDepartamento),
+    defaultValues: { nombreDepartamento: "" },
+  });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  // const [modoEdicion, setModoEdicion] = useState(false);
+
+  // Abrir modal para agregar un nuevo departamento
+  const abrirModal = () => {
+    formDepartamento.reset();
+    setDialogOpen(true);
+  };
+ const onSubmitDepartamento = async (data) => {
+    try {
+      await api.post("/departamentos", data); // Aquí guardas el nuevo departamento
+      toast.success("Departamento creado correctamente",{
+        richColors: true,
+      });
+      setDialogOpen(false);
+      cargarDepartamentos(); // Recargar departamentos después de agregar uno nuevo
+    } catch {
+      toast.error("Error al guardar departamento",{
+        richColors: true,
+      });
+    }
+  };
+
+  // Cargar departamentos, categorías y usuarios
+  const cargarDepartamentos = async () => {
+    try {
+      const res = await api.get("/departamentos");
+      const options = res.data.map((dep) => ({
+        label: dep.nombreDepartamento,
+        value: dep.id.toString(),
+      }));
+      setDepartamentos(options);
+    } catch {
+      toast.error("Error al cargar departamentos");
+    }
+  };
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -201,7 +261,7 @@ export default function FormularioUsuario() {
             telefono: datosUsuario.telefono,
             cedula: datosUsuario.cedula,
             correoElectronico: datosUsuario.email,
-            departamento: departamentoEncontrado ? departamentoEncontrado.value : "", 
+            departamentoId: departamentoEncontrado ? departamentoEncontrado.value : "", 
             rol: rolEncontrado ? rolEncontrado.value : "", 
             tagsRFIDTag: tarjetaEncontrada ? tarjetaEncontrada.tag : "",
             fechaNacimiento: datosUsuario.fechaNacimiento ? new Date(datosUsuario.fechaNacimiento) : undefined,
@@ -294,22 +354,17 @@ export default function FormularioUsuario() {
 
   // Función para manejar el envío del formulario
   async function onSubmit(formData) {
-    if (!formData.departamento || !formData.rol) {
-    // Mostrar toasts de error
-    if (!formData.departamento) {
-      toast.error("Error", {
-        description: "Debe seleccionar un departamento",
-        richColors: true,
-      });
+    let error = false;
+    if (!formData.departamentoId) {
+      toast.error("Debe seleccionar un departamento", { richColors: true });
+      error = true;
     }
     if (!formData.rol) {
-      toast.error("Error", {
-        description: "Debe seleccionar un rol",
-        richColors: true,
-      });
+      toast.error("Debe seleccionar un rol", { richColors: true });
+      error = true;
     }
-    return; // No continuar con el envío
-  }
+    if (error) return; // Detener el envío si falta alguno
+
     try {
         
         const apiData = {
@@ -318,7 +373,7 @@ export default function FormularioUsuario() {
             telefono: formData.telefono,
             cedula: formData.cedula,
             email: formData.correoElectronico,
-            departamentosIddepartamentos: parseInt(formData.departamento),
+            departamentosIddepartamentos: parseInt(formData.departamentoId),
             rolesIdroles: parseInt(formData.rol),
             fechaNacimiento: formData.fechaNacimiento ? format(formData.fechaNacimiento, 'yyyy-MM-dd') : null,
             tagsRFIDTag: formData.tagsRFIDTag,
@@ -474,7 +529,7 @@ return (
                           <FormControl>
                             <Input className="text-xs sm:text-sm"placeholder="Ejemplo: Pérez Gómez" {...field} />
                           </FormControl>
-                          <FormMessage className="text-xs sm:text-am"/>
+                          <FormMessage className="text-xs sm:text-sm"/>
                         </FormItem>
                       )}
                     />
@@ -534,7 +589,7 @@ return (
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs sm:text-sm">Fecha de Nacimiento</FormLabel>
-                          <Popover>
+                          <Popover open={openFechaNacimiento} onOpenChange={setOpenFechaNacimiento}>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
@@ -560,7 +615,10 @@ return (
                                 captionLayout="dropdown"
                                 navLayout="around"
                                 selected={field.value}
-                                onSelect={field.onChange}
+                                onSelect={(date) => {
+                                  field.onChange(date);
+                                  setOpenFechaNacimiento(false);
+                                }}
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
                                 }
@@ -577,68 +635,53 @@ return (
                   
                   {/* Cuarta fila - 2 campos */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+
                     <FormField
                       control={form.control}
-                      name="departamento"
+                      name="departamentoId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs sm:text-sm">Departamento</FormLabel>
+                          <FormLabel>Departamento</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
                                   variant="outline"
                                   role="combobox"
-                                  className={cn(
-                                    "w-full justify-between text-xs sm:text-sm",
-                                    !field.value && "text-muted-foreground"
-                                  )}
+                                  className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
                                 >
                                   {field.value
-                                    ? departamentos.find(
-                                        (dept) => dept.value === field.value
-                                      )?.label?.substring(0, 20) + 
-                                      (departamentos.find((dept) => dept.value === field.value)?.label?.length > 20 ? "..." : "")
+                                    ? departamentos.find(dep => dep.value === field.value)?.label
                                     : "Seleccionar departamento"}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[220px] p-0">
+                            <PopoverContent className="w-full max-w-full">
                               <Command>
-                                <CommandInput
-                                  placeholder="Buscar..."
-                                  className="h-9 text-xs sm:text-sm"
-                                />
+                                <CommandInput placeholder="Buscar departamento..." className="h-9" />
                                 <CommandList>
-                                  <CommandEmpty className="text-xs sm:text-sm">No hay resultados.</CommandEmpty>
+                                  <CommandEmpty>No se encontraron departamentos.</CommandEmpty>
                                   <CommandGroup>
-                                    {departamentos.map((dept) => (
-                                      <CommandItem
-                                        value={dept.label}
-                                        key={dept.value}
-                                        onSelect={() => {
-                                          form.setValue("departamento", dept.value);
-                                        }}
-                                        className="text-xs sm:text-sm"
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            dept.value === field.value
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                        {dept.label}
+                                    {departamentos.map((dep) => (
+                                      <CommandItem value={dep.label} key={dep.value} onSelect={() => form.setValue("departamentoId", dep.value)}>
+                                        <Check className={cn("mr-2 h-4 w-4", dep.value === field.value ? "opacity-100" : "opacity-0")} />
+                                        {dep.label}
                                       </CommandItem>
                                     ))}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
+                              <Button
+                                onClick={() => abrirModal()} // Abre el modal para agregar un nuevo departamento
+                                className="mt-2 w-full bg-gray-200 text-black hover:bg-gray-300 hover:text-white"
+                              >
+                                Agregar Nuevo Departamento
+                              </Button>
                             </PopoverContent>
                           </Popover>
-                          <FormMessage className="text-xs sm:text-base"/>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -649,7 +692,7 @@ return (
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs sm:text-base">Rol</FormLabel>
-                          <Popover>
+                          <Popover open={openRol} onOpenChange={setOpenRol}>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
@@ -684,6 +727,7 @@ return (
                                         key={rol.value}
                                         onSelect={() => {
                                           form.setValue("rol", rol.value);
+                                          setOpenRol(false);
                                         }}
                                         className="text-xs sm:text-base"
                                       >
@@ -798,6 +842,46 @@ return (
           </Form>
         </CardContent>
       </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo Departamento</DialogTitle>
+          </DialogHeader>
+          <Form {...formDepartamento}>
+            <form onSubmit={formDepartamento.handleSubmit(onSubmitDepartamento)} className="space-y-4 mt-4">
+              <FormField
+                control={formDepartamento.control}
+                name="nombreDepartamento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre del Departamento</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ejemplo: Contabilidad" className="w-full" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  onClick={() => setDialogOpen(false)}
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 text-black hover:bg-blue-700"
+                >
+                  Crear Departamento
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   </div>
 );

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react"
+import { PanelLeftIcon, Menu as MenuIcon, ChevronLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -39,6 +39,13 @@ function useSidebar() {
   }
 
   return context
+}
+
+function useSidebarCloseOnClick() {
+  const { isMobile, setOpenMobile } = useSidebar();
+  return React.useCallback(() => {
+    if (isMobile) setOpenMobile(false);
+  }, [isMobile, setOpenMobile]);
 }
 
 function SidebarProvider({
@@ -188,31 +195,34 @@ function Sidebar({
       <div
         data-slot="sidebar-gap"
         className={cn(
-          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
-          "group-data-[collapsible=offcanvas]:w-0",
-          "group-data-[side=right]:rotate-180",
-          variant === "floating" || variant === "inset"
-            ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
-        )} />
+          "relative bg-transparent transition-all duration-500 ease-in-out",
+          state === "collapsed"
+            ? "w-0"
+            : "w-[var(--sidebar-width)]",
+          "group-data-[side=right]:rotate-180"
+        )}
+      />
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-10 hidden h-svh transition-all duration-300 ease-in-out md:flex",
           side === "left"
-            ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-            : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-          // Adjust the padding for floating and inset variants.
-          variant === "floating" || variant === "inset"
-            ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
+            ? state === "collapsed"
+              ? "left-[-16rem] w-0"
+              : "left-0 w-[var(--sidebar-width)]"
+            : state === "collapsed"
+              ? "right-[-16rem] w-0"
+              : "right-0 w-[var(--sidebar-width)]",
+          // ...resto de clases...
           className
         )}
-        {...props}>
+        {...props}
+      >
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm">
+          className="bg-sidebar flex h-full w-full flex-col"
+        >
           {children}
         </div>
       </div>
@@ -225,23 +235,40 @@ function SidebarTrigger({
   onClick,
   ...props
 }) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, open, isMobile, openMobile } = useSidebar()
+  const isOpen = isMobile ? openMobile : open
 
   return (
-    (<Button
-      data-sidebar="trigger"
-      data-slot="sidebar-trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("size-7", className)}
-      onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
-      }}
-      {...props}>
-      <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>)
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            data-sidebar="trigger"
+            data-slot="sidebar-trigger"
+            variant="ghost"
+            size="icon"
+            className={cn("size-7", className)}
+            onClick={(event) => {
+              onClick?.(event)
+              toggleSidebar()
+            }}
+            {...props}
+          >
+            {isOpen ? (
+              <ChevronLeft className={cn("h-6 w-6", isMobile ? "text-white" : "text-black")} />
+            ) : (
+              <MenuIcon className={cn("h-6 w-6", isMobile ? "text-white" : "text-black")} />
+            )}
+            <span className="sr-only">
+              {isOpen ? "Cerrar menú" : "Abrir menú"}
+            </span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {isOpen ? "Cerrar menú" : "Abrir menú"}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -479,10 +506,17 @@ function SidebarMenuButton({
   size = "default",
   tooltip,
   className,
+  onClick,
   ...props
 }) {
   const Comp = asChild ? Slot : "button"
   const { isMobile, state } = useSidebar()
+  const closeSidebar = useSidebarCloseOnClick();
+
+  const handleClick = (e) => {
+    onClick?.(e);
+    closeSidebar();
+  };
 
   const button = (
     <Comp
@@ -491,6 +525,7 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      onClick={handleClick}
       {...props} />
   )
 

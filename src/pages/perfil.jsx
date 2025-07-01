@@ -16,16 +16,19 @@ import api from "@/utils/axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from 'sonner';
+import { Eye, EyeOff } from "lucide-react";
 
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 
 const profileFormSchema = z.object({
   nombre: z.string()
     .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
-    .regex(nameRegex, { message: "El nombre solo debe contener letras y espacios." }),
+    .regex(nameRegex, { message: "El nombre solo debe contener letras y espacios." })
+    .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
   apellido: z.string()
     .min(2, { message: "El apellido debe tener al menos 2 caracteres." })
-    .regex(nameRegex, { message: "El apellido solo debe contener letras y espacios." }),
+    .regex(nameRegex, { message: "El apellido solo debe contener letras y espacios." })
+    .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
   email: z.string().email({
     message: "Por favor, introduce un correo electrónico válido.",
   }),
@@ -39,16 +42,14 @@ const profileFormSchema = z.object({
 }, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
-}).superRefine((data, ctx) => {
-  if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
-    console.log("Passwords match!"); // For debugging
-  }
 });
 
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [passwordMatchSuccess, setPasswordMatchSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
 
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
@@ -60,6 +61,7 @@ const ProfilePage = () => {
       confirmPassword: '',
     },
     mode: "onChange", // Validate on change
+    reValidateMode: "onChange", // Re-validate on change
   });
 
   const { handleSubmit, setValue } = form;
@@ -141,7 +143,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="flex justify-center items-center h-full">
+    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] py-8">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-base sm:text-xl">Editar Perfil</CardTitle>
@@ -195,7 +197,26 @@ const ProfilePage = () => {
                   <FormItem>
                     <FormLabel className="text-xs sm:text-sm">Nueva Contraseña</FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Nueva Contraseña" type="password" {...field} />
+                      <div className="relative">
+                        <Input
+                          className="text-xs sm:text-sm pr-10"
+                          placeholder="Nueva Contraseña"
+                          type={showPassword ? "text" : "password"}
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
@@ -208,7 +229,26 @@ const ProfilePage = () => {
                   <FormItem>
                     <FormLabel className="text-xs sm:text-sm">Confirmar Contraseña</FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Confirmar Contraseña" type="password" {...field} />
+                      <div className="relative">
+                        <Input
+                          className="text-xs sm:text-sm pr-10"
+                          placeholder="Confirmar Contraseña"
+                          type={showConfirmPassword ? "text" : "password"}
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          onClick={() => setShowConfirmPassword((v) => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>

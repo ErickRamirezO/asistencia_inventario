@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
-import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, FileText, CalendarClock, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, Boxes,LocateFixed} from "lucide-react"
+import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, Boxes,LocateFixed} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { getUserIdFromToken } from "@/pages/auth/auth";
@@ -119,57 +119,140 @@ useEffect(() => {
       <div className="flex min-h-screen w-screen ">
         <Sidebar>
           <SidebarHeader>
-  <div className="flex justify-center gap-2 p-4b">
-    <img src={logo} alt="Logo" className="h-20 w-auto" />
+            <div className="flex justify-center gap-2 p-4b">
+              <img src={logo} alt="Logo" className="h-20 w-auto" />
 
-  </div>
-</SidebarHeader>
-
-          
+            </div>
+          </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
-              
-               {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega") && (
+              {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega") && (
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/")}>
-                  <Link to="/bienes/inventario">
-                    <Package className="h-5 w-5" />
-                    <span>Inventario</span>
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Package className="h-5 w-5" />
+                      <span>Gestión de Inventario</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/")}>
+                          <Link to="/bienes/inventario">
+                            <Package className="h-5 w-5" />
+                            <span>Inventario</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/bienes/registro">
+                            <Archive className="h-5 w-5" />
+                            <span>Registrar Bienes</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/bienes/lista-bienes">
+                            <Box className="h-5 w-5" />
+                            <span>Bienes Empresariales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/cambio">
+                            <Users className="h-5 w-5" />
+                            <span>Cambio de Encargado</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/bienes/categoria">
+                            <Tag className="h-5 w-5" />
+                            <span>Categoría de Bienes</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/monitoreo-tag">
+                            <MapPin className="h-5 w-5" />
+                            <span>Monitoreo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+                
               </SidebarMenuItem>
               )}
-             {(user?.rol === "Administrador" || user?.rol === "Usuario") && (
+              {(user?.rol === "Administrador" || user?.rol === "Usuario") && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
-                    <Link to="/asistencia">
-                      <Clipboard className="h-5 w-5" />
-                      <span>Registrar Asistencia</span>
-                    </Link>
-                  </SidebarMenuButton>
+                  
                 </SidebarMenuItem>
               )}
               {user?.rol === "Administrador" && (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")}>
-                      <Link to="/asistencia-evento">
-                        <Bookmark className="h-5 w-5" />
-                        <span>Eventos</span>
-                      </Link>
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Clipboard className="h-5 w-5" />
+                      <span>Gestión de Asistencia</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")}>
-                      <Link to="/asistencia-dashboard">
-                        <LayoutDashboard className="h-5 w-5" />
-                        <span>Asistencia</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
-              )}
-{user?.rol === "Administrador" && (
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
+                          <Link to="/asistencia">
+                            <Clipboard className="h-5 w-5" />
+                            <span>Registrar Asistencia</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")}>
+                          <Link to="/asistencia-dashboard">
+                            <LayoutDashboard className="h-5 w-5" />
+                            <span>Ver Asistencias</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/turnosLaborales">
+                            <Calendar className="h-5 w-5" />
+                            <span>Crear turnos laborales</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")}>
+                          <Link to="/asistencia-evento">
+                            <Bookmark className="h-5 w-5" />
+                            <span>Eventos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/monitoreo-tag">
+                            <MapPin className="h-5 w-5" />
+                            <span>Monitoreo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+            )}
+            {user?.rol === "Administrador" && (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
@@ -196,68 +279,12 @@ useEffect(() => {
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/turnosLaborales">
-                            <Calendar className="h-5 w-5" />
-                            <span>Crear turnos laborales</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-)}
-{(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
-              <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <Boxes className="h-5 w-5" />
-                      <span>Bienes</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/bienes/registro">
-                            <Archive className="h-5 w-5" />
-                            <span>Registrar Bienes</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/bienes/lista-bienes">
-                            <Box className="h-5 w-5" />
-                            <span>Bienes Empresariales</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/cambio">
-                            <Users className="h-5 w-5" />
-                            <span>Cambio de Encargado</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/bienes/categoria">
-                            <Tag className="h-5 w-5" />
-                            <span>Categoría de Bienes</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-)}
-{(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
+            )}
+            {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
@@ -291,8 +318,8 @@ useEffect(() => {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-)}
- {(user?.rol === "Administrador" )&& (
+            )}
+            {(user?.rol === "Administrador" )&& (
               <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
@@ -313,14 +340,6 @@ useEffect(() => {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/monitoreo-tag">
-                            <MapPin className="h-5 w-5" />
-                            <span>Monitoreo</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
                           <Link to="/lista-monitoreo">
                             <ClipboardPlus className="h-5 w-5" />
                             <span>Reporte Monitoreo</span>
@@ -331,20 +350,16 @@ useEffect(() => {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-)}
+            )}
             </SidebarMenu>
-            
           </SidebarContent>
-
           <SidebarFooter className="p-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start">
-                 <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-sm text-black font-semibold justify-center items-center flex">
-
+                <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-sm text-black font-semibold justify-center items-center flex">
                     <AvatarImage src="/placeholder.svg" />
                     <AvatarFallback>{userInitials}</AvatarFallback>
-
                   </Avatar>
                   <span>Mi Cuenta</span>
                 </Button>
@@ -365,12 +380,10 @@ useEffect(() => {
             </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
-
         {/* Main content */}
         <div className="flex-1 flex-col flex w-full ">
           {/* Header */}
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-900 text-white md:bg-background md:text-black md:px-6">
-
             <div className="flex items-center gap-2">
               <SidebarTrigger />
               <h2 className="text-lg font-semibold">
@@ -385,16 +398,16 @@ useEffect(() => {
                 {location.pathname === "/cambio-encargado" && "Cambio de encargado"}
                 {location.pathname === "/cambio" && "Cambio de encargado"}
                 {location.pathname === "/bienes/categoria" && "Categoria"}
-                 {location.pathname === "/cambio/historial/:documentoId" && "Acta de Cambio"}
-                  {location.pathname === "/turnosLaborales" && "Turnos Laborales"}
+                {location.pathname === "/cambio/historial/:documentoId" && "Acta de Cambio"}
+                {location.pathname === "/turnosLaborales" && "Turnos Laborales"}
                 {location.pathname === "/bienes/inventario" && "Inventario"}
                 {location.pathname === "/usuarios/registrar" && "Gestión Usuario"}
                 {location.pathname === "/lista-monitoreo" && "Gestión de Monitoreo"}
                 {location.pathname === "/monitoreo-tag" && "Monitoreo"}
-                 {location.pathname === "/reporteAsistencia" && "Reporte de Asistencia"}
-                 {location.pathname === "/verUsuarios" && "Lista de Usuarios"}
-                 {location.pathname === "/bienes/lista-bienes" && "Bienes Inmuebles Registrados"}
-                 {location.pathname === "/lugar" && "Lugares"}
+                {location.pathname === "/reporteAsistencia" && "Reporte de Asistencia"}
+                {location.pathname === "/verUsuarios" && "Lista de Usuarios"}
+                {location.pathname === "/bienes/lista-bienes" && "Bienes Inmuebles Registrados"}
+                {location.pathname === "/lugar" && "Lugares"}
               </h2>
             </div>
 
@@ -402,7 +415,7 @@ useEffect(() => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                   <Avatar className="h-8 w-8 mr-8 rounded-full bg-gray-900 text-black flex items-center justify-center text-xs font-semibold">
+                  <Avatar className="h-8 w-8 mr-8 rounded-full bg-gray-900 text-black flex items-center justify-center text-xs font-semibold">
                   <AvatarImage src="/placeholder.svg" />
                   <AvatarFallback className="text-black">{userInitials}</AvatarFallback>
                 </Avatar>
