@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
-import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, Boxes,LocateFixed} from "lucide-react"
+import { Package, Users,Shapes ,LogOut,MapPinHouse, LayoutDashboard, Clipboard, Settings,ClipboardPlus ,Bookmark,Building, UserPlus, Eye, Calendar, Archive, Box, Tag, ClipboardCheck, MapPin, FileText,LocateFixed} from "lucide-react"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { getUserIdFromToken } from "@/pages/auth/auth";
@@ -35,13 +35,14 @@ import {
 import logo from "../assets/LogoName.png"
 import api from "@/utils/axios";
 import { useUser } from "@/utils/UserContext";
+import { ModeToggle } from "@/components/mode-toogle";
 
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [defaultOpen, setDefaultOpen] = useState(true)
   const { user, setUser } = useUser();
-const [userInitials, setUserInitials] = useState("AD");
+  const [userInitials, setUserInitials] = useState("AD");
 
   const handleLogout = useCallback(async (event) => {
     event.stopPropagation(); // Evita la propagación del evento
@@ -121,7 +122,6 @@ useEffect(() => {
           <SidebarHeader>
             <div className="flex justify-center gap-2 p-4b">
               <img src={logo} alt="Logo" className="h-20 w-auto" />
-
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -177,24 +177,10 @@ useEffect(() => {
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/monitoreo-tag">
-                            <MapPin className="h-5 w-5" />
-                            <span>Monitoreo</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
-                
               </SidebarMenuItem>
-              )}
-              {(user?.rol === "Administrador" || user?.rol === "Usuario") && (
-                <SidebarMenuItem>
-                  
-                </SidebarMenuItem>
               )}
               {user?.rol === "Administrador" && (
               <SidebarMenuItem>
@@ -207,14 +193,6 @@ useEffect(() => {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
-                          <Link to="/asistencia">
-                            <Clipboard className="h-5 w-5" />
-                            <span>Registrar Asistencia</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")}>
                           <Link to="/asistencia-dashboard">
@@ -236,14 +214,6 @@ useEffect(() => {
                           <Link to="/asistencia-evento">
                             <Bookmark className="h-5 w-5" />
                             <span>Eventos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
-                          <Link to="/monitoreo-tag">
-                            <MapPin className="h-5 w-5" />
-                            <span>Monitoreo</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -309,7 +279,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/inventory")}>
                           <Link to="/lugar">
                             <MapPinHouse className="h-5 w-5" />
-                            <span>Lugares de Monitoreo</span>
+                            <span>Gestión de lugares</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -324,17 +294,17 @@ useEffect(() => {
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
-                      <LocateFixed className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
                       <span>Reportes</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/reporteAsistencia">
-                            <ClipboardCheck className="h-5 w-5" />
-                            <span>Reporte de Asistencia</span>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
+                          <Link to="/asistencia">
+                            <Clipboard className="h-5 w-5" />
+                            <span>Registrar Asistencia</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -351,6 +321,38 @@ useEffect(() => {
                 </Collapsible>
               </SidebarMenuItem>
             )}
+            {(user?.rol === "Administrador" )&& (
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <LocateFixed className="h-5 w-5" />
+                      <span>Monitoreos</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/reporteAsistencia">
+                            <ClipboardCheck className="h-5 w-5" />
+                            <span>Reporte de Asistencia</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                          <Link to="/monitoreo-tag">
+                            <MapPin className="h-5 w-5" />
+                            <span>Configurar monitoreo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+            )}
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="p-4">
@@ -359,7 +361,9 @@ useEffect(() => {
                 <Button variant="ghost" className="w-full justify-start">
                 <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-sm text-black font-semibold justify-center items-center flex">
                     <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback>{userInitials}</AvatarFallback>
+                    <AvatarFallback className="bg-neutral-200 dark:bg-neutral-100 text-black">
+                      {userInitials}
+                    </AvatarFallback>
                   </Avatar>
                   <span>Mi Cuenta</span>
                 </Button>
@@ -386,7 +390,7 @@ useEffect(() => {
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-900 text-white md:bg-background md:text-black md:px-6">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold text-black dark:text-white">
                 {location.pathname === "/" && "Dashboard"}
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
                 {location.pathname === "/departamentos" && "Gestión de Departamentos"}
@@ -410,36 +414,37 @@ useEffect(() => {
                 {location.pathname === "/lugar" && "Lugares"}
               </h2>
             </div>
-
-            <div className="flex items-center gap-4 md:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar className="h-8 w-8 mr-8 rounded-full bg-gray-900 text-black flex items-center justify-center text-xs font-semibold">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="text-black">{userInitials}</AvatarFallback>
-                </Avatar>
-
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Users className="mr-2 h-4 w-4" />
-                    <span>Perfil</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Configuración</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar Sesión</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex items-center gap-4">
+              <ModeToggle />
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Avatar className="h-8 w-8 mr-8 rounded-full bg-gray-900 text-black flex items-center justify-center text-xs font-semibold">
+                    <AvatarImage src="/placeholder.svg" />
+                    <AvatarFallback className="text-black">{userInitials}</AvatarFallback>
+                  </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Perfil</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Configuración</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Cerrar Sesión</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </header>
 

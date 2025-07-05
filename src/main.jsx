@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { registerSW } from "virtual:pwa-register";
 import { UserProvider } from "./utils/UserContext";
 import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider"; // <-- importa tu ThemeProvider
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -19,10 +20,12 @@ const updateSW = registerSW({
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <UserProvider>
-        <App />
-      </UserProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <BrowserRouter>
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </StrictMode>,
 )
