@@ -104,7 +104,7 @@ export default function Asistencia() {
     const fetchEvents = async () => {
       try {
         setIsLoadingEvents(true);
-        const response = await api.get("/asistencias/eventos-disponibles");
+        const response = await api.get("/asistencias/eventos-disponibles-todos");
         setAvailableEvents(response.data);
       } catch (error) {
         console.error("Error al cargar eventos:", error);
@@ -261,7 +261,7 @@ export default function Asistencia() {
         {/* Filtros en una sola fila */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-stretch sm:items-center">
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Buscar empleado</label>
+            <label className="mb-1 text-xs sm:text-sm font-medium">Buscar empleado</label>
             <Input
               placeholder="Buscar empleado..."
               value={searchQuery}
@@ -271,7 +271,7 @@ export default function Asistencia() {
           </div>
 
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Departamento</label>
+            <label className="mb-1 text-xs sm:text-sm font-medium">Departamento</label>
             <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
               <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
                 <SelectValue placeholder="Seleccionar Departamento" className="departamento"/>
@@ -287,7 +287,7 @@ export default function Asistencia() {
           </div>
 
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium text-gray-700">Fecha</label>
+            <label className="mb-1 text-xs sm:text-sm font-medium">Fecha</label>
             <Select onValueChange={setDateFilter} value={dateFilter}>
               <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
                 <SelectValue placeholder="Seleccionar Fecha" />

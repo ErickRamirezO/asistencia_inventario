@@ -70,7 +70,7 @@ export default function VerBienes() {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 w-full border p-2 rounded text-xs sm:text-sm"
       />
-     <div className="rounded-md border bg-white shadow-sm">
+     <div className="rounded-md bordershadow-sm">
   <div className="max-h-none overflow-y-visible sm:max-h-[500px] sm:overflow-y-auto">
     <Table className="min-w-full w-full table-auto text-xs sm:text-sm">
             <TableHeader>

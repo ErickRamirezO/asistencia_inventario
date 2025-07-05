@@ -120,7 +120,7 @@ export default function LugaresView() {
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-auto ml-auto"
+            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-auto ml-auto text-white"
           >
             Agregar Lugar
           </Button>
@@ -136,7 +136,7 @@ export default function LugaresView() {
             style={isDesktop ? { maxHeight: availableHeight } : {}}
           >
             <table className="w-full min-w-0 sm:min-w-[400px] table-auto text-xs sm:text-sm">
-              <thead className="bg-gray-100">
+              <thead>
                 <tr>
                   <th className="text-left p-2">Nombre</th>
                   <th className="text-left p-2">Estado</th>

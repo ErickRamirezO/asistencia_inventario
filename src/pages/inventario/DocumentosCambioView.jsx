@@ -52,7 +52,7 @@ export default function DocumentosCambioView() {
           <div className="md:max-h-[450px] md:overflow-y-auto border rounded-md overflow-x-auto">
 
             <table className="min-w-[600px] w-full text-xs sm:text-sm">
-              <thead className="bg-gray-100">
+              <thead>
                 <tr>
                   <th className="p-2 text-left">Fecha</th>
                   <th className="p-2 text-left">Nuevo Custodio</th>

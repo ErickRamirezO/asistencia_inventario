@@ -239,7 +239,7 @@ export default function Inventarios() {
 
       <table className="w-full text-sm border table-auto">
 
-            <thead className="bg-gray-100">
+            <thead>
               <tr>
                 <th className="p-2 text-left hidden">ID</th>
                 <th className="p-2 text-left">Nombre</th>
