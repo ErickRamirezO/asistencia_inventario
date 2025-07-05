@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/utils/axios";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +27,13 @@ import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 
 const FormSchema = z.object({
-  nombreLugar: z.string().min(2, { message: "Debe tener al menos 2 caracteres" }),
+  nombreLugar: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres" })
+    .max(30, { message: "No debe superar los 30 caracteres" })
+    .regex(/^[A-Za-z0-9 ]+$/, {
+      message: "No se permiten caracteres especiales",
+    }),
 });
 
 export default function LugaresView() {
@@ -35,8 +42,11 @@ export default function LugaresView() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [lugarActual, setLugarActual] = useState(null);
 
+  // Validación en tiempo real: onChange
   const form = useForm({
     resolver: zodResolver(FormSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { nombreLugar: "" },
   });
 
@@ -79,6 +89,8 @@ export default function LugaresView() {
     }
   };
 
+  const { formState } = form;
+
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
       <Card>
@@ -86,44 +98,50 @@ export default function LugaresView() {
           <Button
             onClick={() => abrirModal()}
             className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-auto ml-auto"
-
           >
             Agregar Lugar
           </Button>
         </CardHeader>
         <CardContent>
-  <div className="w-full overflow-x-auto sm:overflow-x-visible">
-    <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="text-left p-2">Nombre</th>
-          <th className="text-left p-2">Estado</th>
-          <th className="text-right p-2">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {lugares.map((lugar) => (
-          <tr key={lugar.id} className="border-t">
-            <td className="p-2">{lugar.nombreLugar}</td>
-            <td className="p-2">
-              {lugar.activo ? "Activo" : "Inactivo"}
-            </td>
-            <td className="p-2 text-right">
-              <Button
-                size="icon"
-                onClick={() => abrirModal(lugar)}
-                className="bg-blue-500 text-white hover:bg-blue-600"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</CardContent>
-
+          {/* Contenedor con altura máxima y scroll vertical en escritorio, sin scroll vertical en móvil */}
+          <div
+            className="
+              w-full
+              overflow-x-auto sm:overflow-x-visible
+              overflow-y-visible sm:overflow-y-auto
+              sm:max-h-[400px]
+            "
+          >
+            <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="text-left p-2">Nombre</th>
+                  <th className="text-left p-2">Estado</th>
+                  <th className="text-right p-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lugares.map((lugar) => (
+                  <tr key={lugar.id} className="border-t">
+                    <td className="p-2">{lugar.nombreLugar}</td>
+                    <td className="p-2">
+                      {lugar.activo ? "Activo" : "Inactivo"}
+                    </td>
+                    <td className="p-2 text-right">
+                      <Button
+                        size="icon"
+                        onClick={() => abrirModal(lugar)}
+                        className="bg-blue-500 text-white hover:bg-blue-600"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -134,20 +152,30 @@ export default function LugaresView() {
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 mt-4"
+            >
               <FormField
                 control={form.control}
                 name="nombreLugar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Nombre del Lugar</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">
+                      Nombre del Lugar
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Ejemplo: Laboratorio B" className="text-xs sm:text-sm" {...field} />
+                      <Input
+                        placeholder="Ejemplo: Laboratorio B"
+                        className="text-xs sm:text-sm"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
+
               <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <Button
                   type="button"
@@ -158,7 +186,8 @@ export default function LugaresView() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
+                  disabled={!formState.isValid}
+                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm disabled:opacity-50"
                 >
                   {modoEdicion ? "Actualizar" : "Crear"}
                 </Button>
