@@ -39,6 +39,22 @@ export default function InventarioDetalle() {
   const [bienEditar, setBienEditar] = useState(null);
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const navigate = useNavigate();
+    const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 150 // ajusta 200px según header + paddings
+    : undefined;
+
+
 
 
   useEffect(() => {
@@ -102,13 +118,17 @@ const historialFiltrado = historial.filter(h =>
 
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 "  style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }>
       
 <Button className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto" variant="outline" onClick={() => navigate(-1)}>
 Regresar
 </Button>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4" >
 
         <Card>
           <CardHeader><CardTitle>Total Bienes</CardTitle></CardHeader>
@@ -138,7 +158,7 @@ Regresar
     className="max-w-sm"
   />
   <div className="bg-white rounded shadow overflow-x-auto">
-   <div className="overflow-y-auto md:max-h-[300px] max-h-none">
+   <div className="overflow-y-auto  max-h-none">
 
         <Table>
           <TableHeader>

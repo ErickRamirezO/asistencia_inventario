@@ -11,6 +11,22 @@ export default function HistorialDocumentoView() {
   const { documentoId } = useParams();
   const [historial, setHistorial] = useState([]);
   const navigate = useNavigate();
+    const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 180 // ajusta 200px según header + paddings
+    : undefined;
+
+
 
   useEffect(() => {
     const fetchHistorial = async () => {
@@ -51,14 +67,19 @@ Imprimir acta
   </Button>
 </div>
 
-<div className="p-2 print:overflow-visible print:max-h-none">
+<div className="p-2 print:overflow-visible print:max-h-none" style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }
+>
 
   
       <Card className="md:max-h-[490px] md:overflow-y-auto border rounded-md">
         <CardHeader>
           <CardTitle>ACTA DE ENTREGA-RECEPCIÓN DE BIENES – Documento #{documentoId}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4" >
           <p className="text-justify leading-relaxed">
             En la ciudad de <strong>Sangolquí</strong>, a <strong>{fechaActa}</strong>, los suscritos señor/a <strong>{responsable}</strong>, quien entrega los bienes, y el/la señor/a <strong>{nuevoCustodio}</strong>, quien los recibe, en conocimiento de la dirección de la empresa <strong>X Empresa Tecnológica S.A.</strong>, y en presencia del personal delegado de la unidad de bienes institucionales, se constituyeron en las instalaciones para realizar la diligencia de constatación física y entrega-recepción correspondiente.
           </p>

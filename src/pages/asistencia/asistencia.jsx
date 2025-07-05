@@ -37,6 +37,21 @@ export default function Asistencia() {
 
   const recordsPerPage = 10;
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+    const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 170 // ajusta 200px según header + paddings
+    : undefined;
+
 
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return "--";
@@ -226,7 +241,12 @@ export default function Asistencia() {
 
   return (
     <div className="p-6 sm:p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto" style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }
+>
         {/* Título principal de la vista */}
         
         {/* Estadísticas */}

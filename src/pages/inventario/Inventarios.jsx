@@ -62,6 +62,20 @@ export default function Inventarios() {
   const [formVisible, setFormVisible] = useState(false);
   const [inventarioActual, setInventarioActual] = useState(null);
   const navigate = useNavigate();
+    const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 280 // ajusta 200px según header + paddings
+    : undefined;
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -233,9 +247,14 @@ export default function Inventarios() {
   </Button>
 </CardHeader>
 
-        <CardContent>
+        <CardContent style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }
+>
   <div className="overflow-x-auto max-w-full">
-    <div className="md:max-h-[500px] md:overflow-y-auto">
+    <div className=" md:overflow-y-auto">
 
       <table className="w-full text-sm border table-auto">
 

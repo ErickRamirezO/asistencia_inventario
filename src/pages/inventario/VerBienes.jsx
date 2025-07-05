@@ -20,6 +20,21 @@ export default function VerBienes() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+    const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 220 // ajusta 200px según header + paddings
+    : undefined;
+
 
   useEffect(() => {
     const fetchBienes = async () => {
@@ -61,7 +76,7 @@ export default function VerBienes() {
   }
 
   return (
-    <div className="p-2 sm:p-6">
+    <div className="p-2 sm:p-6"  >
       
       <input
         type="text"
@@ -70,8 +85,13 @@ export default function VerBienes() {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 w-full border p-2 rounded text-xs sm:text-sm"
       />
-     <div className="rounded-md bordershadow-sm">
-  <div className="max-h-none overflow-y-visible sm:max-h-[500px] sm:overflow-y-auto">
+     <div className="rounded-md bordershadow-sm" 
+>
+  <div className="max-h-none overflow-y-visible  sm:overflow-y-auto" style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }>
     <Table className="min-w-full w-full table-auto text-xs sm:text-sm">
             <TableHeader>
               <TableRow>
