@@ -117,7 +117,7 @@ export default function Departamentos() {
             "
           >
             <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
-              <thead className="bg-gray-100">
+              <thead>
                 <tr>
                   <th className="text-left p-2">Nombre</th>
                   <th className="text-right p-2">Acciones</th>

@@ -105,7 +105,7 @@ export default function MonitoreoLista() {
         </Card>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow space-y-4">
+      <div className="p-6 rounded-lg shadow space-y-4">
         <h2 className="text-xl font-semibold">Registros de Monitoreo</h2>
 
         <Input

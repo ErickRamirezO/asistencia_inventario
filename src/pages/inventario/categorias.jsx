@@ -115,7 +115,7 @@ export default function Categorias() {
             "
           >
             <table className="w-full min-w-0 sm:min-w-[500px] text-xs sm:text-sm table-auto">
-              <thead className="bg-gray-100">
+              <thead>
                 <tr>
                   <th className="text-left p-2 hidden">ID</th>
                   <th className="text-left p-2">Nombre</th>

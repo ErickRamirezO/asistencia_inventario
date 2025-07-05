@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "@/utils/axios"; // Importa tu cliente Axios
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
+
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
 
 function CambiarContrasena() {
   const [nuevaContrasena, setNuevaContrasena] = useState("");
   const [confirmarContrasena, setConfirmarContrasena] = useState("");
+  const [passwordMatchMessage, setPasswordMatchMessage] = useState("");
+  const [passwordValidMessage, setPasswordValidMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [passwordMatchMessage, setPasswordMatchMessage] = useState("");
 
   // Obtener el token de la URL
   const searchParams = new URLSearchParams(location.search);
@@ -26,10 +32,26 @@ function CambiarContrasena() {
     } else {
       setPasswordMatchMessage("Las contraseñas no coinciden");
     }
+    // Validación en tiempo real de seguridad
+    if (nuevaContrasena.length === 0) {
+      setPasswordValidMessage("");
+    } else if (!passwordRegex.test(nuevaContrasena)) {
+      setPasswordValidMessage("Debe tener mínimo 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");    } else {
+      setPasswordValidMessage("");
+    }
   }, [nuevaContrasena, confirmarContrasena]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!passwordRegex.test(nuevaContrasena)) {
+      toast.error("La contraseña no cumple con los requisitos de seguridad.", {
+        duration: 5000,
+        position: "top-right",
+        richColors: true,
+      });
+      return;
+    }
 
     if (nuevaContrasena !== confirmarContrasena) {
       toast.error("Las contraseñas no coinciden",{
@@ -76,29 +98,59 @@ function CambiarContrasena() {
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <div>
               <Label htmlFor="nuevaContrasena" className="text-xs sm:text-sm">Nueva Contraseña</Label>
-              <Input
-                type="password"
-                id="nuevaContrasena"
-                value={nuevaContrasena}
-                onChange={(e) => {
-                  setNuevaContrasena(e.target.value);
-                }}
-                required
-                className="text-xs sm:text-sm"
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  id="nuevaContrasena"
+                  value={nuevaContrasena}
+                  onChange={(e) => setNuevaContrasena(e.target.value)}
+                  required
+                  className="text-xs sm:text-sm pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                Mínimo 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+              </span>
+              {passwordValidMessage && (
+                <p className="text-xs sm:text-sm text-red-500">{passwordValidMessage}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="confirmarContrasena" className="text-xs sm:text-sm">Confirmar Contraseña</Label>
-              <Input
-                type="password"
-                id="confirmarContrasena"
-                value={confirmarContrasena}
-                onChange={(e) => {
-                  setConfirmarContrasena(e.target.value);
-                }}
-                required
-                className="text-xs sm:text-sm"
-              />
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmarContrasena"
+                  value={confirmarContrasena}
+                  onChange={(e) => setConfirmarContrasena(e.target.value)}
+                  required
+                  className="text-xs sm:text-sm pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
             {passwordMatchMessage && (
               <p className={`text-xs sm:text-sm ${nuevaContrasena === confirmarContrasena ? "text-green-500" : "text-red-500"}`}>
