@@ -255,9 +255,19 @@ function SidebarTrigger({
             {...props}
           >
             {isOpen ? (
-              <ChevronLeft className="h-6 w-6 text-black dark:text-white" />
+              <ChevronLeft
+                className={cn(
+                  "h-6 w-6",
+                  isMobile ? "text-white" : "text-black dark:text-white"
+                )}
+              />
             ) : (
-              <MenuIcon className="h-6 w-6 text-black dark:text-white" />
+              <MenuIcon
+                className={cn(
+                  "h-6 w-6",
+                  isMobile ? "text-white" : "text-black dark:text-white"
+                )}
+              />
             )}
             <span className="sr-only">
               {isOpen ? "Cerrar menú" : "Abrir menú"}
