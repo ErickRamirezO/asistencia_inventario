@@ -104,7 +104,7 @@ const historialFiltrado = historial.filter(h =>
   return (
     <div className="p-6 space-y-6">
       
-<Button className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto" variant="outline" onClick={() => navigate(-1)}>
+<Button className="bg-gray-200 hover:bg-gray-200 text-xs px-3 py-1 h-auto" variant="outline" onClick={() => navigate(-1)}>
 Regresar
 </Button>
 
@@ -137,7 +137,7 @@ Regresar
     onChange={(e) => setSearchTerm(e.target.value)}
     className="max-w-sm"
   />
-  <div className="bg-white rounded shadow overflow-x-auto">
+  <div className="rounded shadow overflow-x-auto">
    <div className="overflow-y-auto md:max-h-[300px] max-h-none">
 
         <Table>
