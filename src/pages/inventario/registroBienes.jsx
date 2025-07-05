@@ -128,6 +128,20 @@ export default function RegistrarBien() {
   const [usuarios, setUsuarios] = useState([]);
   const navigate = useNavigate();
   const { id } = useParams();
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 280 // ajusta 200px según header + paddings
+    : undefined;
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -393,7 +407,11 @@ useEffect(() => {
 
       <Card className="w-full">
         
-        <CardContent className="overflow-x-hidden w-full max-w-full p-4">
+        <CardContent className="overflow-x-hidden w-full max-w-full p-4" style={
+            isDesktop
+              ? { maxHeight: availableHeight, overflowY: 'auto' }
+              : {}
+          }>
 <div className="md:max-h-[460px] md:overflow-y-auto md:pr-1">
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

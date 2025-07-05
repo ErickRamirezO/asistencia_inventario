@@ -151,6 +151,21 @@ export default function FormularioUsuario() {
   const [openDepartamento, setOpenDepartamento] = useState(false);
   const [openRol, setOpenRol] = useState(false);
   const [openFechaNacimiento, setOpenFechaNacimiento] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 250 // ajusta 200px según header + paddings
+    : undefined;
+
 
   const formDepartamento = useForm({
     resolver: zodResolver(FormSchemaDepartamento),
@@ -498,10 +513,14 @@ return (
       
       <Card className="overflow-hidden">
         
-        <CardContent className="px-2 sm:px-6">
+        <CardContent className="px-2 sm:px-6" >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={
+    isDesktop
+      ? { maxHeight: availableHeight, overflowY: 'auto' }
+      : {}
+  }>
                 {/* Columna izquierda - Reorganizada en 4x2 */}
                 <div className="space-y-6">
                   {/* Primera fila - 2 campos */}
