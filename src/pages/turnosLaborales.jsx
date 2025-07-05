@@ -45,11 +45,11 @@ const timeToMinutes = (timeString) => {
 const FormSchema = z.object({
   shiftName: z.string().min(3, {
     message: "El nombre del turno debe tener al menos 3 caracteres.",
-  }).max(30).regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s-]+$/, {
+  }).max(30).regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/, {
     message: "El nombre del turno solo puede contener letras, números y guiones.",
   })
-  .refine(val => !/<.*?>/.test(val), {
-    message: "No se permiten etiquetas HTML.",
+  .refine(val => !/[<>{}[\];:"'`~!@#$%^&*()_=+\\|/?.,]/.test(val) === false, {
+    message: "No se permiten caracteres especiales en el nombre del turno.",
   }),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: "Debe ser una hora válida en formato HH:mm.",
@@ -114,28 +114,35 @@ const FormSchema = z.object({
             return; // Stop further lunch validations if fields are missing
         }
 
-        // Validate lunch time sequence
+        // El inicio de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
+        if (
+            startLunchMinutes <= startShiftMinutes ||
+            startLunchMinutes >= endShiftMinutes
+        ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El inicio de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
+                path: ["startLunchTime"],
+            });
+        }
+
+        // El fin de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
+        if (
+            endLunchMinutes <= startShiftMinutes ||
+            endLunchMinutes >= endShiftMinutes
+        ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El fin de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
+                path: ["endLunchTime"],
+            });
+        }
+
+        // El inicio de almuerzo debe ser antes que el fin de almuerzo
         if (startLunchMinutes !== null && endLunchMinutes !== null && startLunchMinutes >= endLunchMinutes) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "La hora de inicio del almuerzo no puede ser igual o posterior a la hora de fin del almuerzo.",
-                path: ["endLunchTime"],
-            });
-            return;
-        }
-
-        // Validate lunch time range (12:00 to 15:00)
-        const minLunchMinutes = timeToMinutes("12:00");
-        const maxLunchMinutes = timeToMinutes("15:00");
-        if (startLunchMinutes < minLunchMinutes || endLunchMinutes > maxLunchMinutes) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El horario de almuerzo debe estar entre las 12:00 y las 15:00 horas.",
-                path: ["startLunchTime"],
-            });
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El horario de almuerzo debe estar entre las 12:00 y las 15:00 horas.",
+                message: "La hora de fin del almuerzo no puede ser igual o posterior a la hora de fin del almuerzo.",
                 path: ["endLunchTime"],
             });
             return;
@@ -143,16 +150,20 @@ const FormSchema = z.object({
 
         // Validate lunch contained within shift
         if (startLunchMinutes < startShiftMinutes || endLunchMinutes > endShiftMinutes) {
+          if (startLunchMinutes < startShiftMinutes || startLunchMinutes >= endShiftMinutes) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "El horario de almuerzo debe estar contenido dentro del horario del turno laboral.",
+                message: "El inicio de almuerzo debe estar dentro del horario del turno laboral.",
                 path: ["startLunchTime"],
             });
+          }
+          if (endLunchMinutes > endShiftMinutes || endLunchMinutes <= startShiftMinutes) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "El horario de almuerzo debe estar contenido dentro del horario del turno laboral.",
+                message: "El fin de almuerzo debe estar dentro del horario del turno laboral.",
                 path: ["endLunchTime"],
             });
+          }
         }
     } else { // If lunch is optional, ensure no values are provided
         if (data.startLunchTime !== "" || data.endLunchTime !== "") {
@@ -167,8 +178,6 @@ const FormSchema = z.object({
                 path: ["endLunchTime"],
             });
         }
-        // IMPORTANT: Clear the form values for optional lunch if they were entered
-        // This ensures they are not sent to the backend if the rule makes them optional.
         if (data.startLunchTime !== "") data.startLunchTime = "";
         if (data.endLunchTime !== "") data.endLunchTime = "";
     }
@@ -198,7 +207,9 @@ export default function TurnosLaborales() {
       setTurnos(response.data);
     } catch (error) {
       console.error("Error al recuperar los horarios laborales:", error);
-      toast.error("Error al cargar turnos laborales.");
+      toast.error("Error al cargar turnos laborales.",{
+        richColors: true,
+      });
     }
   }
 
@@ -225,6 +236,7 @@ export default function TurnosLaborales() {
       setTurnos(prevTurnos => [...prevTurnos, response.data]);
       toast.success("Turno creado", {
         description: "El turno laboral se ha registrado correctamente.",
+        richColors: true,
       });
       form.reset();
       setIsDialogOpen(false);

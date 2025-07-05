@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff } from "lucide-react";
 
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
 
 const profileFormSchema = z.object({
   nombre: z.string()
@@ -32,8 +33,15 @@ const profileFormSchema = z.object({
   email: z.string().email({
     message: "Por favor, introduce un correo electrónico válido.",
   }),
-  password: z.string().optional(),
-  confirmPassword: z.string().optional(),
+  password: z.string()
+    .regex(passwordRegex, {
+      message: "La contraseña debe tener al menos 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.",
+    })
+    .optional()
+    .or(z.literal("")),
+  confirmPassword: z.string()
+    .optional()
+    .or(z.literal("")),
 }).refine((data) => {
   if (data.password || data.confirmPassword) {
     return data.password === data.confirmPassword;
@@ -47,7 +55,6 @@ const profileFormSchema = z.object({
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [passwordMatchSuccess, setPasswordMatchSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false); 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
 
@@ -60,11 +67,16 @@ const ProfilePage = () => {
       password: '',
       confirmPassword: '',
     },
-    mode: "onChange", // Validate on change
-    reValidateMode: "onChange", // Re-validate on change
+    mode: "onChange", 
+    reValidateMode: "onChange", 
   });
 
-  const { handleSubmit, setValue } = form;
+  const { handleSubmit, setValue, watch } = form;
+
+    const password = watch("password");
+    const confirmPassword = watch("confirmPassword");
+    const showPasswordMatch = password && confirmPassword;
+    const passwordsMatch = password === confirmPassword && password.length > 0;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -218,6 +230,9 @@ const ProfilePage = () => {
                         </button>
                       </div>
                     </FormControl>
+                    <span className="text-[11px] text-muted-foreground">
+                      Mínimo 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+                    </span>
                     <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
@@ -250,12 +265,14 @@ const ProfilePage = () => {
                         </button>
                       </div>
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
-              {passwordMatchSuccess && (
-                <p className="text-green-500 text-xs sm:text-sm">Las contraseñas coinciden</p>
+              {/* Mensaje en tiempo real */}
+              {showPasswordMatch && (
+                <p className={`text-xs sm:text-sm ${passwordsMatch ? "text-green-500" : "text-red-500"}`}>
+                  {passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
+                </p>
               )}
               <Button type="submit" className="text-xs sm:text-sm">Actualizar Datos</Button>
             </form>

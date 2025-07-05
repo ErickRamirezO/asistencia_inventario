@@ -7,6 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import api from "@/utils/axios";
 
+const nombreEventoValido = (nombre) =>
+  /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/.test(nombre);
+
 export default function AsistenciaEvento() {
   const [rfidTag, setRfidTag] = useState("");
   const [userInfo, setUserInfo] = useState(null);
@@ -20,6 +23,26 @@ export default function AsistenciaEvento() {
   const lastProcessedTag = useRef("");
   const [showEditHoraFin, setShowEditHoraFin] = useState(false);
   const [nuevaHoraFin, setNuevaHoraFin] = useState("");
+  const [nombreError, setNombreError] = useState("");
+  const [horaError, setHoraError] = useState("");
+
+  useEffect(() => {
+    if (newEvent.nombre && !nombreEventoValido(newEvent.nombre)) {
+      setNombreError("El nombre solo puede contener letras, números, espacios y guiones.");
+    } else {
+      setNombreError("");
+    }
+
+    if (newEvent.horaIngreso && newEvent.horaSalida) {
+      if (newEvent.horaSalida <= newEvent.horaIngreso) {
+        setHoraError("La hora de fin debe ser mayor a la hora de inicio.");
+      } else {
+        setHoraError("");
+      }
+    } else {
+      setHoraError("");
+    }
+  }, [newEvent.nombre, newEvent.horaIngreso, newEvent.horaSalida]);
 
   // Cargar eventos disponibles al montar y después de crear uno nuevo
   const fetchEvents = async () => {
@@ -53,6 +76,12 @@ export default function AsistenciaEvento() {
     if (!newEvent.nombre || !newEvent.horaIngreso || !newEvent.horaSalida) {
       toast.warning("Complete todos los campos para crear el evento.");
       return;
+    }
+    if (!nombreEventoValido(newEvent.nombre)) {
+      setNombreError("El nombre solo puede contener letras, números, espacios y guiones.");
+      return;
+    } else {
+      setNombreError("");
     }
     try {
       setIsLoading(true);
@@ -272,6 +301,9 @@ export default function AsistenciaEvento() {
                   onChange={(e) => setNewEvent({ ...newEvent, nombre: e.target.value })}
                   required
                 />
+                {nombreError && (
+                  <span className="text-xs text-red-500">{nombreError}</span>
+                )}
                 <label className="text-sm text-muted-foreground mb-1">
                     Establezca la hora de inicio y fin del evento
                 </label>
@@ -289,11 +321,17 @@ export default function AsistenciaEvento() {
                   onChange={(e) => setNewEvent({ ...newEvent, horaSalida: e.target.value })}
                   required
                 />
+                {horaError && ( 
+                  <span className="text-xs text-red-500">{horaError}</span>
+                )}
                 <DialogFooter>
                   <Button type="button" variant="secondary" onClick={() => setShowCreateEvent(false)}>
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading || !!nombreError || !!horaError}
+                  >
                     Guardar evento
                   </Button>
                 </DialogFooter>

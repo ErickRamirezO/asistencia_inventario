@@ -251,7 +251,7 @@ export default function VerUsuario() {
                       onValueChange={(value) => cambiarHorarioLaboral(usuario.id, parseInt(value))}
                     >
                       <SelectTrigger className="w-[180px] text-xs sm:text-sm">
-                        <SelectValue>
+                        <SelectValue placeholder="Seleccione horario">
                           {usuario.horarioLaboralId 
                             ? (horarios.find(h => h.id === usuario.horarioLaboralId)?.nombreHorario || usuario.horarioLaboralNombre || "Horario no encontrado") 
                             : "Seleccionar horario"}
