@@ -206,9 +206,9 @@ export default function VerUsuario() {
           )}
         </div>
       </div>
-      <div className="rounded-md border md:max-h-[400px] md:overflow-y-auto">
-
-        <Table className="min-w-[900px] table-auto text-xs sm:text-sm">
+     <div className="rounded-md border md:max-h-[500px] md:overflow-y-auto">
+ 
+        <Table className="min-w-[100px] table-auto text-xs sm:text-sm">
           <TableHeader>
             <TableRow>
               <TableHead className="text-xs sm:text-sm">Nombre</TableHead>

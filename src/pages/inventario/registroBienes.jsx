@@ -35,23 +35,90 @@ import { Check, ChevronsUpDown, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+
 const FormSchema = z.object({
-  nombreBien: z.string().min(2),
-  descripcion: z.string().min(2),
-  precio: z.coerce.number().positive(),
-  serieBien: z.string().min(2),
-  modeloBien: z.string().min(2),
-  marcaBien: z.string().min(2),
-  materialBien: z.string().min(2),
-  dimensionesBien: z.string().min(2),
+  nombreBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "El nombre debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  descripcion: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "La descripción debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  precio: z
+  .coerce
+  .number({ invalid_type_error: "El precio debe ser un número válido." })
+  .min(0.01, { message: "El precio debe ser mayor que cero." })
+  .max(1000000, { message: "El precio debe ser menor que un millón." }),
+
+  serieBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "La serie debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  modeloBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "El modelo debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  marcaBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "La marca debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  materialBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "El material debe tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
+  dimensionesBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "Las dimensiones deben tener un máximo de 100 caracteres." })
+.regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
   observacionBien: z.string().optional(),
-  ubicacionBien: z.string().min(2),
+
+  ubicacionBien: z
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres." })
+    .max(100, { message: "La ubicación debe tener un máximo de 100 caracteres." })
+ .regex(/^[^\[\]\{\}\(\)<>]*$/, { message: "El nombre no puede contener caracteres especiales." }),
+
   categoriaId: z.string(),
   departamentoId: z.string(),
   tagRfidNumero: z.string(),
   usuarioId: z.string().optional(),
   status: z.coerce.number().optional().default(1),
 });
+
+const FormSchemaDepartamento = z.object({
+  nombreDepartamento: z.string().min(2),
+});
+
+const FormSchemaLugar = z.object({
+  nombreLugar: z.string().min(2),  // Validación de nombre del lugar
+});
+
+const FormSchemaCategoria = z.object({
+  nombreCategoria: z.string().min(2),  // Validación para el nombre de la categoría
+});
+
 
 export default function RegistrarBien() {
   const [scanningRFID, setScanningRFID] = useState(false);
@@ -64,6 +131,8 @@ export default function RegistrarBien() {
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
+    mode: "onChange", // Validar en cada cambio
+    reValidateMode: "onChange", // Revalidar en cada cambio
     defaultValues: {
       nombreBien: "",
       descripcion: "",
@@ -82,6 +151,122 @@ export default function RegistrarBien() {
       status: 1,
     },
   });
+
+  const formDepartamento = useForm({
+    resolver: zodResolver(FormSchemaDepartamento),
+    defaultValues: { nombreDepartamento: "" },
+  });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+const [dialogOpenLugar, setDialogOpenLugar] = useState(false); // Estado para el modal del lugar
+
+const formLugar = useForm({
+  resolver: zodResolver(FormSchemaLugar),
+  defaultValues: { nombreLugar: "" },
+});
+
+const abrirModalLugar = () => {
+  formLugar.reset(); // Limpiar campos del formulario al abrir
+  setDialogOpenLugar(true); // Mostrar modal
+};
+
+const onSubmitLugar = async (data) => {
+  try {
+    await api.post("/lugares", data); // Endpoint para guardar el nuevo lugar
+    toast.success("Lugar creado correctamente");
+    setDialogOpenLugar(false);
+    cargarLugares(); // Recargar los lugares después de agregar uno nuevo
+  } catch {
+    toast.error("Error al guardar lugar");
+  }
+};
+const cargarLugares = async () => {
+  try {
+    const res = await api.get("/lugares"); // Endpoint para cargar los lugares
+    const options = res.data.map((lugar) => ({
+      label: lugar.nombreLugar,
+      value: lugar.id.toString(),
+    }));
+    setLugares(options);
+  } catch {
+    toast.error("Error al cargar lugares");
+  }
+};
+
+useEffect(() => {
+  cargarLugares(); // Cargar lugares cuando se monta el componente
+}, []);
+
+  // Abrir modal para agregar un nuevo departamento
+  const abrirModal = () => {
+    setModoEdicion(false);
+    formDepartamento.reset();
+    setDialogOpen(true);
+  };
+ const onSubmitDepartamento = async (data) => {
+    try {
+      await api.post("/departamentos", data); // Aquí guardas el nuevo departamento
+      toast.success("Departamento creado correctamente");
+      setDialogOpen(false);
+      cargarDepartamentos(); // Recargar departamentos después de agregar uno nuevo
+    } catch {
+      toast.error("Error al guardar departamento");
+    }
+  };
+
+  // Cargar departamentos, categorías y usuarios
+  const cargarDepartamentos = async () => {
+    try {
+      const res = await api.get("/departamentos");
+      const options = res.data.map((dep) => ({
+        label: dep.nombreDepartamento,
+        value: dep.id.toString(),
+      }));
+      setDepartamentos(options);
+    } catch {
+      toast.error("Error al cargar departamentos");
+    }
+  };
+  const [dialogOpenCategoria, setDialogOpenCategoria] = useState(false); // Estado para el modal de categoría
+
+const formCategoria = useForm({
+  resolver: zodResolver(FormSchemaCategoria),
+  defaultValues: { nombreCategoria: "" },
+});
+
+const abrirModalCategoria = () => {
+  formCategoria.reset(); // Limpiar campos del formulario al abrir
+  setDialogOpenCategoria(true); // Mostrar modal
+};
+
+const onSubmitCategoria = async (data) => {
+  try {
+    await api.post("/categorias", data); // Endpoint para guardar la nueva categoría
+    toast.success("Categoría creada correctamente");
+    setDialogOpenCategoria(false);
+    cargarCategorias(); // Recargar las categorías después de agregar una nueva
+  } catch {
+    toast.error("Error al guardar categoría");
+  }
+};
+
+const cargarCategorias = async () => {
+  try {
+    const res = await api.get("/categorias"); // Endpoint para cargar las categorías
+    const options = res.data.map((categoria) => ({
+      label: categoria.nombreCategoria,
+      value: categoria.id.toString(),
+    }));
+    setCategorias(options);
+  } catch {
+    toast.error("Error al cargar categorías");
+  }
+};
+
+useEffect(() => {
+  cargarCategorias(); // Cargar categorías cuando se monta el componente
+}, []);
+
 useEffect(() => {
     if (!scanningRFID) return;
 
@@ -386,7 +571,7 @@ useEffect(() => {
             )}
           />
           
-         <FormField
+        <FormField
   control={form.control}
   name="ubicacionBien"
   render={({ field }) => (
@@ -395,8 +580,14 @@ useEffect(() => {
       <Popover>
         <PopoverTrigger asChild>
           <FormControl>
-            <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
-              {field.value ? lugares.find(l => l.value === field.value)?.label : "Seleccionar lugar"}
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+            >
+              {field.value
+                ? lugares.find(l => l.value === field.value)?.label
+                : "Seleccionar lugar"}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </FormControl>
@@ -413,13 +604,73 @@ useEffect(() => {
                     value={lugar.label}
                     onSelect={() => form.setValue("ubicacionBien", lugar.value)}
                   >
-                    <Check className={cn("mr-2 h-4 w-4", lugar.value === field.value ? "opacity-100" : "opacity-0")} />
+                    <Check
+                      className={cn("mr-2 h-4 w-4", lugar.value === field.value ? "opacity-100" : "opacity-0")}
+                    />
                     {lugar.label}
                   </CommandItem>
                 ))}
               </CommandGroup>
             </CommandList>
           </Command>
+          <Button
+            type="button"
+            onClick={() => abrirModalLugar()} // Abre el modal para agregar un nuevo lugar
+            className="mt-2 w-full bg-gray-200 text-black hover:bg-gray-300 hover:text-white"
+          >
+            Agregar Nuevo Lugar
+          </Button>
+        </PopoverContent>
+      </Popover>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+     
+
+
+<FormField
+  control={form.control}
+  name="departamentoId"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Departamento</FormLabel>
+      <Popover>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+            >
+              {field.value
+                ? departamentos.find(dep => dep.value === field.value)?.label
+                : "Seleccionar departamento"}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-full max-w-full">
+          <Command>
+            <CommandInput placeholder="Buscar departamento..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No se encontraron departamentos.</CommandEmpty>
+              <CommandGroup>
+                {departamentos.map((dep) => (
+                  <CommandItem value={dep.label} key={dep.value} onSelect={() => form.setValue("departamentoId", dep.value)}>
+                    <Check className={cn("mr-2 h-4 w-4", dep.value === field.value ? "opacity-100" : "opacity-0")} />
+                    {dep.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+          <Button
+            onClick={() => abrirModal()} // Abre el modal para agregar un nuevo departamento
+            className="mt-2 w-full bg-gray-200 text-black hover:bg-gray-300 hover:text-white"
+          >
+            Agregar Nuevo Departamento
+          </Button>
         </PopoverContent>
       </Popover>
       <FormMessage />
@@ -427,81 +678,62 @@ useEffect(() => {
   )}
 />
 
-          
-          
-          
-          
           <FormField
-            control={form.control}
-            name="departamentoId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Departamento</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>{
-                        field.value ? departamentos.find(dep => dep.value === field.value)?.label : "Seleccionar departamento"
-                      }<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full max-w-full">
-                    <Command>
-                      <CommandInput placeholder="Buscar departamento..." className="h-9" />
-                      <CommandList>
-                        <CommandEmpty>No se encontraron departamentos.</CommandEmpty>
-                        <CommandGroup>
-                          {departamentos.map((dep) => (
-                            <CommandItem value={dep.label} key={dep.value} onSelect={() => form.setValue("departamentoId", dep.value)}>
-                              <Check className={cn("mr-2 h-4 w-4", dep.value === field.value ? "opacity-100" : "opacity-0")} />
-                              {dep.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  control={form.control}
+  name="categoriaId"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Categoría</FormLabel>
+      <Popover>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+            >
+              {field.value
+                ? categorias.find(cat => cat.value === field.value)?.label
+                : "Seleccionar categoría"}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-full max-w-full">
+          <Command>
+            <CommandInput placeholder="Buscar categoría..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No se encontraron categorías.</CommandEmpty>
+              <CommandGroup>
+                {categorias.map((cat) => (
+                  <CommandItem
+                    key={cat.value}
+                    value={cat.label}
+                    onSelect={() => form.setValue("categoriaId", cat.value)}
+                  >
+                    <Check
+                      className={cn("mr-2 h-4 w-4", cat.value === field.value ? "opacity-100" : "opacity-0")}
+                    />
+                    {cat.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+          <Button
+            type="button"
+            onClick={() => abrirModalCategoria()} // Abre el modal para agregar una nueva categoría
+            className="mt-2 w-full bg-gray-200 text-black hover:bg-gray-300 hover:text-white"
+          >
+            Agregar Nueva Categoría
+          </Button>
+        </PopoverContent>
+      </Popover>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
-          <FormField
-            control={form.control}
-            name="categoriaId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoría</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>{
-                        field.value ? categorias.find(cat => cat.value === field.value)?.label : "Seleccionar categoría"
-                      }<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full max-w-full">
-                    <Command>
-                      <CommandInput placeholder="Buscar categoría..." className="h-9" />
-                      <CommandList>
-                        <CommandEmpty>No se encontraron categorías.</CommandEmpty>
-                        <CommandGroup>
-                          {categorias.map((cat) => (
-                            <CommandItem value={cat.label} key={cat.value} onSelect={() => form.setValue("categoriaId", cat.value)}>
-                              <Check className={cn("mr-2 h-4 w-4", cat.value === field.value ? "opacity-100" : "opacity-0")} />
-                              {cat.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
            
           </form>
@@ -566,6 +798,126 @@ useEffect(() => {
 </CardContent>
 
       </Card>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Nuevo Departamento</DialogTitle>
+    </DialogHeader>
+    <Form {...formDepartamento}>
+      <form onSubmit={formDepartamento.handleSubmit(onSubmitDepartamento)} className="space-y-4 mt-4">
+        <FormField
+          control={formDepartamento.control}
+          name="nombreDepartamento"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Departamento</FormLabel>
+              <FormControl>
+                <Input placeholder="Ejemplo: Contabilidad" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            onClick={() => setDialogOpen(false)}
+            className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="bg-blue-600 text-black hover:bg-blue-700"
+          >
+            Crear Departamento
+          </Button>
+        </div>
+      </form>
+    </Form>
+  </DialogContent>
+</Dialog>
+<Dialog open={dialogOpenLugar} onOpenChange={setDialogOpenLugar}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Nuevo Lugar</DialogTitle>
+    </DialogHeader>
+    <Form {...formLugar}>
+      <form onSubmit={formLugar.handleSubmit(onSubmitLugar)} className="space-y-4 mt-4">
+        <FormField
+          control={formLugar.control}
+          name="nombreLugar"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Lugar</FormLabel>
+              <FormControl>
+                <Input placeholder="Ejemplo: Oficina Central" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            onClick={() => setDialogOpenLugar(false)} // Cerrar el modal
+            className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit" // Enviar el formulario de lugar
+            className="bg-blue-600 text-black hover:bg-blue-700"
+          >
+            Crear Lugar
+          </Button>
+        </div>
+      </form>
+    </Form>
+  </DialogContent>
+</Dialog>
+
+<Dialog open={dialogOpenCategoria} onOpenChange={setDialogOpenCategoria}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Nuevo Lugar</DialogTitle>
+    </DialogHeader>
+    <Form {...formCategoria}>
+      <form onSubmit={formCategoria.handleSubmit(onSubmitCategoria)} className="space-y-4 mt-4">
+        <FormField
+          control={formCategoria.control}
+          name="nombreCategoria"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre de la Categoría</FormLabel>
+              <FormControl>
+                <Input placeholder="Ejemplo: Electrónica" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            onClick={() => setDialogOpenCategoria(false)} // Cerrar el modal
+            className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit" // Enviar el formulario de categoría
+            className="bg-blue-600 text-black hover:bg-blue-700"
+          >
+            Crear Categoría
+          </Button>
+        </div>
+      </form>
+    </Form>
+  </DialogContent>
+</Dialog>
+
+
     </div>
   );
 }
