@@ -387,10 +387,9 @@ useEffect(() => {
         {/* Main content */}
         <div className="flex-1 flex-col flex w-full ">
           {/* Header */}
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-900 text-white md:bg-background md:text-black md:px-6">
-            <div className="flex items-center gap-2">
+            <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-900 text-white md:bg-background md:text-black md:px-6">            <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h2 className="text-lg font-semibold text-black dark:text-white">
+              <h2 className="text-lg font-semibold text-white md:text-black md:dark:text-white">
                 {location.pathname === "/" && "Dashboard"}
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
                 {location.pathname === "/departamentos" && "Gestión de Departamentos"}
