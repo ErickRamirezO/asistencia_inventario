@@ -37,12 +37,35 @@ const FormSchema = z.object({
 });
 
 export default function LugaresView() {
+  // Estado para tamaño de ventana
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Detectar si estamos en escritorio según breakpoint Tailwind 'sm' (640px)
+  const isDesktop = windowSize.width >= 640;
+  // Calcular altura disponible restando altura del header/nav (ajusta 100px según tu layout)
+  const availableHeight = isDesktop
+    ? windowSize.height - 300
+    : undefined;
+
   const [lugares, setLugares] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [lugarActual, setLugarActual] = useState(null);
 
-  // Validación en tiempo real: onChange
   const form = useForm({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
@@ -102,17 +125,17 @@ export default function LugaresView() {
             Agregar Lugar
           </Button>
         </CardHeader>
+
         <CardContent>
-          {/* Contenedor con altura máxima y scroll vertical en escritorio, sin scroll vertical en móvil */}
           <div
-            className="
+            className={`
               w-full
               overflow-x-auto sm:overflow-x-visible
-              overflow-y-visible sm:overflow-y-auto
-              sm:max-h-[400px]
-            "
+              ${isDesktop ? "overflow-y-auto" : "overflow-y-visible"}
+            `}
+            style={isDesktop ? { maxHeight: availableHeight } : {}}
           >
-            <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
+            <table className="w-full min-w-0 sm:min-w-[400px] table-auto text-xs sm:text-sm">
               <thead className="bg-gray-100">
                 <tr>
                   <th className="text-left p-2">Nombre</th>
