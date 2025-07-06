@@ -301,10 +301,10 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
-                          <Link to="/asistencia">
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                          <Link to="/reporteAsistencia">
                             <Clipboard className="h-5 w-5" />
-                            <span>Registrar Asistencia</span>
+                            <span>Reporte de Asistencia</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -333,10 +333,10 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
-                          <Link to="/reporteAsistencia">
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
+                          <Link to="/asistencia">
                             <ClipboardCheck className="h-5 w-5" />
-                            <span>Reporte de Asistencia</span>
+                            <span>Registrar Asistencia</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
