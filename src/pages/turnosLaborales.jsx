@@ -48,7 +48,7 @@ const FormSchema = z.object({
   }).max(30).regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/, {
     message: "El nombre del turno solo puede contener letras, números y guiones.",
   })
-  .refine(val => !/[<>{}[\];:"'`~!@#$%^&*()_=+\\|/?.,]/.test(val) === false, {
+  .refine(val => !/[<>{}[\];:"'`~!@#$%^&*()_=+\\|/?.,]/.test(val), {
     message: "No se permiten caracteres especiales en el nombre del turno.",
   }),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
