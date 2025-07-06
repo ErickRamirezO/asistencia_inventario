@@ -387,6 +387,7 @@ export default function FormularioUsuario() {
             apellido: formData.apellidos,
             telefono: formData.telefono,
             cedula: formData.cedula,
+            user: formData.correoElectronico.split('@')[0],
             email: formData.correoElectronico,
             departamentosIddepartamentos: parseInt(formData.departamentoId),
             rolesIdroles: parseInt(formData.rol),
@@ -401,8 +402,7 @@ export default function FormularioUsuario() {
                 ...apiData,
                 // Conservar datos existentes del usuario que no se editan en el formulario
                 password: usuario.password,
-                user: usuario.user,
-                status: usuario.status || 1,
+                status: usuario.status !== undefined ? usuario.status : 1,
                 horarioLaboralId: usuario.horarioLaboralId || 1
             };
 
