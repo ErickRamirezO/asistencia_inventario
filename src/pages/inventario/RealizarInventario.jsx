@@ -16,27 +16,35 @@ export default function RealizarInventario() {
   const [tag, setTag] = useState("");
   const [bien, setBien] = useState(null);
   const usuarioId = getUserIdFromToken(); // Quemado por ahora
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (tag.trim() !== "") {
         api
-  .put("/historial-inventarios/actualizar-estado", null, {
-    params: {
-      tag,
-      usuarioId,
-      inventarioId,
-    },
-  })
+          .put("/historial-inventarios/actualizar-estado", null, {
+            params: {
+              tag,
+              usuarioId,
+              inventarioId,
+            },
+          })
 
           .then((res) => {
             setBien(res.data);
-            toast.success("Inventario actualizado con tag " + tag);
+            toast.success("Inventario actualizado con tag " + tag, {
+              richColors: true,
+            });
             setTag("");
           })
           .catch((err) => {
-            toast.error("Error: " + (err.response?.data?.message || "No se pudo actualizar"));
+            toast.error(
+              "Error: " +
+                (err.response?.data?.message || "No se pudo actualizar"),
+              {
+                richColors: true,
+              }
+            );
             setTag("");
           });
       }
@@ -47,9 +55,9 @@ const navigate = useNavigate();
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
-       <Button variant="outline" onClick={() => navigate(-1)}>
-      Regresar
-    </Button>
+      <Button variant="outline" onClick={() => navigate(-1)}>
+        Regresar
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle>Escanear Tag RFID</CardTitle>
@@ -71,8 +79,12 @@ const navigate = useNavigate();
             <CardTitle>Bien Inventariado</CardTitle>
           </CardHeader>
           <CardContent className="text-lg">
-            <p><strong>Nombre:</strong> {bien.nombreBien}</p>
-            <p><strong>Descripción:</strong> {bien.descripcionBien}</p>
+            <p>
+              <strong>Nombre:</strong> {bien.nombreBien}
+            </p>
+            <p>
+              <strong>Descripción:</strong> {bien.descripcionBien}
+            </p>
           </CardContent>
         </Card>
       )}

@@ -19,6 +19,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,6 +50,19 @@ export default function Departamentos() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [departamentoActual, setDepartamentoActual] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const totalPages = Math.ceil(departamentos.length / itemsPerPage);
+  const departamentosPaginados = departamentos.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reinicia la página si cambia la lista de departamentos
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [departamentos]);
 
   // 2) Validación en cada cambio
   const form = useForm({
@@ -56,7 +77,9 @@ export default function Departamentos() {
       const res = await api.get("/departamentos");
       setDepartamentos(res.data);
     } catch {
-      toast.error("Error al cargar departamentos");
+      toast.error("Error al cargar departamentos",{
+        richColors: true,
+      });
     }
   };
 
@@ -77,15 +100,21 @@ export default function Departamentos() {
     try {
       if (modoEdicion) {
         await api.put(`/departamentos/${departamentoActual.id}`, data);
-        toast.success("Departamento actualizado");
+        toast.success("Departamento actualizado",{
+          richColors: true,
+        });
       } else {
         await api.post("/departamentos", data);
-        toast.success("Departamento creado");
+        toast.success("Departamento creado",{
+          richColors: true,
+        });
       }
       cargarDepartamentos();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar departamento");
+      toast.error("Error al guardar departamento",{
+        richColors: true,
+      });
     }
   };
 
@@ -95,7 +124,7 @@ export default function Departamentos() {
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs md:text-[13px] sm:text-sm"
           >
             Agregar Departamento
           </Button>
@@ -116,7 +145,7 @@ export default function Departamentos() {
               sm:max-h-[400px]
             "
           >
-            <table className="w-full min-w-0 sm:min-w-[400px] text-xs sm:text-sm table-auto">
+            <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
               <thead>
                 <tr>
                   <th className="text-left p-2">Nombre</th>
@@ -124,24 +153,60 @@ export default function Departamentos() {
                 </tr>
               </thead>
               <tbody>
-                {departamentos.map((dep) => (
-                  <tr key={dep.id} className="border-t">
-                    <td className="p-2 break-words whitespace-normal">
-                      {dep.nombreDepartamento}
-                    </td>
-                    <td className="p-2 text-right">
-                      <Button
-                        size="icon"
-                        onClick={() => abrirModal(dep)}
-                        className="bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                {departamentosPaginados.length > 0 ? (
+                  departamentosPaginados.map((dep) => (
+                    <tr key={dep.id} className="border-t">
+                      <td className="p-2 break-words whitespace-normal">
+                        {dep.nombreDepartamento}
+                      </td>
+                      <td className="p-2 text-right">
+                        <Button
+                          size="icon"
+                          onClick={() => abrirModal(dep)}
+                          className="bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={2} className="text-center p-2">
+                      No hay departamentos.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
+            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    aria-disabled={currentPage === 1}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={currentPage === i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    aria-disabled={currentPage === totalPages}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </CardContent>
       </Card>
@@ -163,17 +228,17 @@ export default function Departamentos() {
                 name="nombreDepartamento"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">
                       Nombre del Departamento
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ejemplo: Contabilidad"
-                        className="text-xs sm:text-sm"
+                        className="text-xs md:text-[13px] sm:text-sm"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -182,13 +247,13 @@ export default function Departamentos() {
                 <Button
                   type="button"
                   onClick={() => setDialogOpen(false)}
-                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs md:text-[13px] sm:text-sm"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-[13px] sm:text-sm"
                   disabled={!form.formState.isValid}
                 >
                   {modoEdicion ? "Actualizar" : "Crear"}

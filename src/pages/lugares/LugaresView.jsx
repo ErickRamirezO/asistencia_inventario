@@ -19,6 +19,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -28,15 +36,32 @@ import { Pencil } from "lucide-react";
 
 const FormSchema = z.object({
   nombreLugar: z
-    .string()
-    .min(2, { message: "Debe tener al menos 2 caracteres" })
-    .max(30, { message: "No debe superar los 30 caracteres" })
+  .string()
+  .min(2, { message: "Debe tener al menos 2 caracteres" })
+  .max(30, { message: "No debe superar los 30 caracteres" })
     .regex(/^[A-Za-z0-9 ]+$/, {
       message: "No se permiten caracteres especiales",
     }),
 });
 
 export default function LugaresView() {
+  const [lugares, setLugares] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [lugarActual, setLugarActual] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  const totalPages = Math.ceil(lugares.length / itemsPerPage);
+  const lugaresPaginados = lugares.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reinicia la página si cambia la lista de lugares
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [lugares]);
   // Estado para tamaño de ventana
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
@@ -58,13 +83,9 @@ export default function LugaresView() {
   const isDesktop = windowSize.width >= 640;
   // Calcular altura disponible restando altura del header/nav (ajusta 100px según tu layout)
   const availableHeight = isDesktop
-    ? windowSize.height - 300
+    ? windowSize.height - 250
     : undefined;
 
-  const [lugares, setLugares] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [lugarActual, setLugarActual] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -78,7 +99,9 @@ export default function LugaresView() {
       const res = await api.get("/lugares");
       setLugares(res.data);
     } catch {
-      toast.error("Error al cargar lugares");
+      toast.error("Error al cargar lugares",{
+        richColors: true,
+      });
     }
   };
 
@@ -100,15 +123,21 @@ export default function LugaresView() {
           ...data,
           activo: true,
         });
-        toast.success("Lugar actualizado");
+        toast.success("Lugar actualizado",{
+          richColors: true,
+        });
       } else {
         await api.post("/lugares", data);
-        toast.success("Lugar creado");
+        toast.success("Lugar creado",{
+          richColors: true,
+        });
       }
       cargarLugares();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar lugar");
+      toast.error("Error al guardar lugar",{
+        richColors: true,
+      });
     }
   };
 
@@ -120,7 +149,7 @@ export default function LugaresView() {
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs sm:text-sm w-auto ml-auto text-white"
+            className="bg-blue-600 hover:bg-blue-700 font-semibold text-xs md:text-[13px] sm:text-sm w-auto ml-auto text-white"
           >
             Agregar Lugar
           </Button>
@@ -135,7 +164,7 @@ export default function LugaresView() {
             `}
             style={isDesktop ? { maxHeight: availableHeight } : {}}
           >
-            <table className="w-full min-w-0 sm:min-w-[400px] table-auto text-xs sm:text-sm">
+            <table className="w-full min-w-0 sm:min-w-[400px] table-auto text-xs md:text-[13px] sm:text-sm">
               <thead>
                 <tr>
                   <th className="text-left p-2">Nombre</th>
@@ -144,25 +173,61 @@ export default function LugaresView() {
                 </tr>
               </thead>
               <tbody>
-                {lugares.map((lugar) => (
-                  <tr key={lugar.id} className="border-t">
-                    <td className="p-2">{lugar.nombreLugar}</td>
-                    <td className="p-2">
-                      {lugar.activo ? "Activo" : "Inactivo"}
-                    </td>
-                    <td className="p-2 text-right">
-                      <Button
-                        size="icon"
-                        onClick={() => abrirModal(lugar)}
-                        className="bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                {lugaresPaginados.length > 0 ? (
+                  lugaresPaginados.map((lugar) => (
+                    <tr key={lugar.id} className="border-t">
+                      <td className="p-2">{lugar.nombreLugar}</td>
+                      <td className="p-2">
+                        {lugar.activo ? "Activo" : "Inactivo"}
+                      </td>
+                      <td className="p-2 text-right">
+                        <Button
+                          size="icon"
+                          onClick={() => abrirModal(lugar)}
+                          className="bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="text-center p-2">
+                      No hay lugares.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
+            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    aria-disabled={currentPage === 1}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={currentPage === i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    aria-disabled={currentPage === totalPages}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </CardContent>
       </Card>
@@ -184,17 +249,17 @@ export default function LugaresView() {
                 name="nombreLugar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">
                       Nombre del Lugar
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ejemplo: Laboratorio B"
-                        className="text-xs sm:text-sm"
+                        className="text-xs md:text-[13px] sm:text-sm"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -203,14 +268,14 @@ export default function LugaresView() {
                 <Button
                   type="button"
                   onClick={() => setDialogOpen(false)}
-                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs md:text-[13px] sm:text-sm"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={!formState.isValid}
-                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm disabled:opacity-50"
+                  className="bg-blue-600 hover:bg-blue-700 text-xs md:text-[13px] sm:text-sm disabled:opacity-50"
                 >
                   {modoEdicion ? "Actualizar" : "Crear"}
                 </Button>

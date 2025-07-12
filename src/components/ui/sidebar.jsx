@@ -525,7 +525,9 @@ function SidebarMenuButton({
 
   const handleClick = (e) => {
     onClick?.(e);
-    closeSidebar();
+    if (props["data-close-sidebar"]) {
+      closeSidebar();
+    }
   };
 
   const button = (

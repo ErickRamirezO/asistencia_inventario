@@ -158,7 +158,7 @@ const ProfilePage = () => {
     <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] py-8">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-base sm:text-xl">Editar Perfil</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Editar Perfil</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -168,11 +168,11 @@ const ProfilePage = () => {
                 name="nombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Nombre</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Nombre</FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Nombre" {...field} />
+                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Nombre" {...field} />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -181,11 +181,11 @@ const ProfilePage = () => {
                 name="apellido"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Apellido</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Apellido</FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Apellido" {...field} />
+                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Apellido" {...field} />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -194,11 +194,11 @@ const ProfilePage = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Correo</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Correo</FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Correo" type="email" {...field} />
+                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Correo" type="email" {...field} />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -207,11 +207,11 @@ const ProfilePage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Nueva Contraseña</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Nueva Contraseña</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          className="text-xs sm:text-sm pr-10"
+                          className="text-xs md:text-[13px] sm:text-sm pr-10"
                           placeholder="Nueva Contraseña"
                           type={showPassword ? "text" : "password"}
                           {...field}
@@ -233,7 +233,7 @@ const ProfilePage = () => {
                     <span className="text-[11px] text-muted-foreground">
                       Mínimo 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
                     </span>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -242,11 +242,11 @@ const ProfilePage = () => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Confirmar Contraseña</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Confirmar Contraseña</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          className="text-xs sm:text-sm pr-10"
+                          className="text-xs md:text-[13px] sm:text-sm pr-10"
                           placeholder="Confirmar Contraseña"
                           type={showConfirmPassword ? "text" : "password"}
                           {...field}
@@ -270,11 +270,11 @@ const ProfilePage = () => {
               />
               {/* Mensaje en tiempo real */}
               {showPasswordMatch && (
-                <p className={`text-xs sm:text-sm ${passwordsMatch ? "text-green-500" : "text-red-500"}`}>
+                <p className={`text-xs md:text-[13px] sm:text-sm ${passwordsMatch ? "text-green-500" : "text-red-500"}`}>
                   {passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
                 </p>
               )}
-              <Button type="submit" className="text-xs sm:text-sm">Actualizar Datos</Button>
+              <Button type="submit" variant="blue" className="text-xs md:text-[13px] sm:text-sm">Actualizar Datos</Button>
             </form>
           </Form>
         </CardContent>

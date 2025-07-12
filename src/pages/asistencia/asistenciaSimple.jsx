@@ -269,7 +269,7 @@ export default function AsistenciaSimple() {
       <Card className="w-96">
         <CardHeader className="flex flex-col items-center">
           <CardTitle className="text-base sm:text-lg text-center">Registro de Asistencia</CardTitle>
-          <CardDescription className="text-xs sm:text-sm text-center">Ingrese el tag RFID</CardDescription>
+          <CardDescription className="text-xs md:text-[13px] sm:text-sm text-center">Ingrese el tag RFID</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center">
           <Input

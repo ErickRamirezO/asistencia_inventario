@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ export default function VerUsuario() {
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
   const [terminoBusqueda, setTerminoBusqueda] = useState("");
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
     const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -51,7 +54,6 @@ export default function VerUsuario() {
   const availableHeight = isDesktop
     ? windowSize.height - 250 // ajusta 200px según header + paddings
     : undefined;
-
 
 
   // Obtener usuarios y horarios al cargar el componente
@@ -165,6 +167,14 @@ export default function VerUsuario() {
     return coincideBusqueda
   });
 
+    // Calcula los usuarios a mostrar en la página actual
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const usuariosPaginados = usuariosFiltrados.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Calcula el número total de páginas
+  const totalPages = Math.ceil(usuariosFiltrados.length / usersPerPage);
+
   // Reemplaza la función eliminarUsuario actual con esta
   const eliminarUsuario = (id) => {
     const usuario = usuarios.find(u => u.id === id);
@@ -199,6 +209,10 @@ export default function VerUsuario() {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [terminoBusqueda]);
+
   return (
     <div className="p-6">
 
@@ -208,13 +222,13 @@ export default function VerUsuario() {
           <input
             type="text"
             placeholder="Buscar por nombre o cédula..."
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-[13px] sm:text-sm"
             value={terminoBusqueda}
             onChange={(e) => setTerminoBusqueda(e.target.value)}
           />
           {terminoBusqueda && (
             <button 
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs md:text-[13px] sm:text-sm"
               onClick={() => setTerminoBusqueda("")}
             >
               ×
@@ -222,37 +236,40 @@ export default function VerUsuario() {
           )}
         </div>
       </div>
-     <div className="rounded-md border md:max-h-[500px] md:overflow-y-auto "style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
-          }
->
- 
-        <Table className="min-w-[100px] table-auto text-xs sm:text-sm">
+      <div
+        className="rounded-md border md:overflow-y-auto"
+        style={{
+          minHeight: "340px",
+          maxHeight: "340px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start"
+        }}
+      >
+        <Table className="min-w-[100px] table-auto text-xs md:text-[13px] sm:text-sm flex-1">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs sm:text-sm">Nombre</TableHead>
-              <TableHead className="text-xs sm:text-sm">Apellido</TableHead>
-              <TableHead className="text-xs sm:text-sm">Cédula</TableHead>
-              <TableHead className="text-xs sm:text-sm">Email</TableHead>
-              <TableHead className="text-xs sm:text-sm">Teléfono</TableHead>
-              <TableHead className="text-xs sm:text-sm">Estado</TableHead>
-              <TableHead className="text-xs sm:text-sm">Departamento</TableHead>
-              <TableHead className="text-xs sm:text-sm">Horario Laboral</TableHead>
-              <TableHead className="text-right text-xs sm:text-sm">Acciones</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Nombre</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Apellido</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Cédula</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Email</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Teléfono</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Estado</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Departamento</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Horario Laboral</TableHead>
+              <TableHead className="text-right text-xs md:text-[13px] sm:text-sm">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuariosFiltrados.length > 0 ? (
-              usuariosFiltrados.map((usuario) => (
+            {usuariosPaginados.length > 0 ? (
+              usuariosPaginados.map((usuario) => (
                 <TableRow key={usuario.id}>
-                  <TableCell className="font-medium text-xs sm:text-sm">{usuario.nombre}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{usuario.apellido}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{usuario.cedula}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{usuario.email}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{usuario.telefono}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">
+                  <TableCell className="font-medium text-xs md:text-[13px] sm:text-sm">{usuario.nombre}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">{usuario.apellido}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">{usuario.cedula}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">{usuario.email}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">{usuario.telefono}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
                     <div className="flex items-center space-x-2">
                       <Switch
                         id={`status-${usuario.id}`}
@@ -260,18 +277,19 @@ export default function VerUsuario() {
                         onCheckedChange={() => toggleEstadoUsuario(usuario.id, usuario.status)}
                       />
                       <Label htmlFor={`status-${usuario.id}`} 
-                        className={`${usuario.status === 1 ? "text-green-600" : "text-red-600"} font-medium text-xs sm:text-sm`}>
+                        className={`${usuario.status === 1 ? "text-green-600" : "text-red-600"} font-medium text-xs md:text-[13px] sm:text-sm`}>
                         {usuario.status === 1 ? "Activo" : "Inactivo"}
                       </Label>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs sm:text-sm">{usuario.departamentoNombre || "No asignado"}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">{usuario.departamentoNombre || "No asignado"}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
                     <Select
                       value={usuario.horarioLaboralId?.toString() || ""}
                       onValueChange={(value) => cambiarHorarioLaboral(usuario.id, parseInt(value))}
+                      disabled={!usuario.habilitado}
                     >
-                      <SelectTrigger className="w-[180px] text-xs sm:text-sm">
+                      <SelectTrigger className="w-[180px] text-xs md:text-[13px] sm:text-sm">
                         <SelectValue placeholder="Seleccione horario">
                           {usuario.horarioLaboralId 
                             ? (horarios.find(h => h.id === usuario.horarioLaboralId)?.nombreHorario || usuario.horarioLaboralNombre || "Horario no encontrado") 
@@ -280,7 +298,7 @@ export default function VerUsuario() {
                       </SelectTrigger>
                       <SelectContent>
                         {horarios.map((horario) => (
-                          <SelectItem key={horario.id} value={horario.id.toString()} className="text-xs sm:text-sm">
+                          <SelectItem key={horario.id} value={horario.id.toString()} className="text-xs md:text-[13px] sm:text-sm">
                             {horario.nombreHorario} ({horario.horaInicio} - {horario.horaFin})
                           </SelectItem>
                         ))}
@@ -294,6 +312,7 @@ export default function VerUsuario() {
                         size="icon"
                         onClick={() => navigate(`/usuarios/editar/${usuario.id}`)}
                         className="h-8 w-8"
+                        disabled={!usuario.habilitado}
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                       </Button>
@@ -312,7 +331,7 @@ export default function VerUsuario() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-xs sm:text-sm">
+                <TableCell colSpan={10} className="text-center text-xs md:text-[13px] sm:text-sm">
                   No se encontraron usuarios que coincidan con los filtros.
                 </TableCell>
               </TableRow>
@@ -320,12 +339,43 @@ export default function VerUsuario() {
           </TableBody>
         </Table>
       </div>
+      <Pagination
+        className="mt-2"
+        style={{ minHeight: "48px" }}
+      >
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              aria-disabled={currentPage === 1}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <PaginationItem key={i}>
+              <PaginationLink
+                isActive={currentPage === i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              aria-disabled={currentPage === totalPages}
+              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
       {/* Diálogo de confirmación para eliminar usuario */}
       <Dialog open={dialogoConfirmacionAbierto} onOpenChange={setDialogoConfirmacionAbierto}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-xs sm:text-sm">Confirmar eliminación</DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm">
+            <DialogTitle className="text-xs md:text-[13px] sm:text-sm">Confirmar eliminación</DialogTitle>
+            <DialogDescription className="text-xs md:text-[13px] sm:text-sm">
               ¿Está seguro que desea eliminar al usuario {usuarioAEliminar?.nombre} {usuarioAEliminar?.apellido}?
               Esta acción no se puede deshacer.
             </DialogDescription>
@@ -334,14 +384,14 @@ export default function VerUsuario() {
             <Button
               variant="outline"
               onClick={() => setDialogoConfirmacionAbierto(false)}
-              className="text-xs sm:text-sm"
+              className="text-xs md:text-[13px] sm:text-sm"
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={confirmarEliminacion}
-              className="text-xs sm:text-sm"
+              className="text-xs md:text-[13px] sm:text-sm"
             >
               Eliminar
             </Button>

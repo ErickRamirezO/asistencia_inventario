@@ -37,157 +37,197 @@ import {
 
 // Helper function to convert "HH:mm" string to minutes for easy comparison
 const timeToMinutes = (timeString) => {
-    if (!timeString) return null;
-    const [hours, minutes] = timeString.split(':').map(Number);
-    return hours * 60 + minutes;
+  if (!timeString) return null;
+  const [hours, minutes] = timeString.split(":").map(Number);
+  return hours * 60 + minutes;
 };
 
-const FormSchema = z.object({
-  shiftName: z.string().min(3, {
-    message: "El nombre del turno debe tener al menos 3 caracteres.",
-  }).max(30).regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/, {
-    message: "El nombre del turno solo puede contener letras, números y guiones.",
-  })
-  .refine(val => !/[<>{}[\];:"'`~!@#$%^&*()_=+\\|/?.,]/.test(val), {
-    message: "No se permiten caracteres especiales en el nombre del turno.",
-  }),
-  startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: "Debe ser una hora válida en formato HH:mm.",
-  }),
-  endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: "Debe ser una hora válida en formato HH:mm.",
-  })
-    // RN01 (Frontend Validation): Turno no puede finalizar después de las 22:00
-    .refine(time => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours < 22 || (hours === 22 && minutes === 0); // Allows up to 22:00:00
-    }, {
-      message: "El turno no puede finalizar después de las 22:00."
+const FormSchema = z
+  .object({
+    shiftName: z
+      .string()
+      .min(3, {
+        message: "El nombre del turno debe tener al menos 3 caracteres.",
+      })
+      .max(30)
+      .regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/, {
+        message:
+          "El nombre del turno solo puede contener letras, números y guiones.",
+      })
+      .refine((val) => !/[<>{}[\];:"'`~!@#$%^&*()_=+\\|/?.,]/.test(val), {
+        message: "No se permiten caracteres especiales en el nombre del turno.",
+      }),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+      message: "Debe ser una hora válida en formato HH:mm.",
     }),
+    endTime: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+        message: "Debe ser una hora válida en formato HH:mm.",
+      })
+      // RN01 (Frontend Validation): Turno no puede finalizar después de las 22:00
+      .refine(
+        (time) => {
+          const [hours, minutes] = time.split(":").map(Number);
+          return hours < 22 || (hours === 22 && minutes === 0); // Allows up to 22:00:00
+        },
+        {
+          message: "El turno no puede finalizar después de las 22:00.",
+        }
+      ),
 
-  startLunchTime: z.string()
-    .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
-      message: "Debe ser una hora válida en formato HH:mm."
-    })
-    .optional(),
+    startLunchTime: z
+      .string()
+      .refine((val) => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
+        message: "Debe ser una hora válida en formato HH:mm.",
+      })
+      .optional(),
 
-  endLunchTime: z.string()
-    .refine(val => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
-      message: "Debe ser una hora válida en formato HH:mm."
-    })
-    .optional(),
-})
-.superRefine((data, ctx) => {
+    endLunchTime: z
+      .string()
+      .refine((val) => val === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val), {
+        message: "Debe ser una hora válida en formato HH:mm.",
+      })
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
     const startShiftMinutes = timeToMinutes(data.startTime);
     const endShiftMinutes = timeToMinutes(data.endTime);
 
-    if (startShiftMinutes !== null && endShiftMinutes !== null && endShiftMinutes <= startShiftMinutes) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "La hora de fin no puede ser anterior o igual a la hora de inicio.",
-            path: ["endTime"], // Associate the error with the endTime field
-        });
+    if (
+      startShiftMinutes !== null &&
+      endShiftMinutes !== null &&
+      endShiftMinutes <= startShiftMinutes
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "La hora de fin no puede ser anterior o igual a la hora de inicio.",
+        path: ["endTime"], // Associate the error with the endTime field
+      });
     }
-})
-// RN05 (Frontend Refinement): The lunch schedule must be contained within the shift schedule
-.superRefine((data, ctx) => {
+  })
+  // RN05 (Frontend Refinement): The lunch schedule must be contained within the shift schedule
+  .superRefine((data, ctx) => {
     const startShiftMinutes = timeToMinutes(data.startTime);
     const endShiftMinutes = timeToMinutes(data.endTime);
     const startLunchMinutes = timeToMinutes(data.startLunchTime);
     const endLunchMinutes = timeToMinutes(data.endLunchTime);
 
     // Rule: Lunch is optional if shift ends at or before 12:00
-    const isLunchOptional = (endShiftMinutes !== null && endShiftMinutes <= timeToMinutes("12:00"));
+    const isLunchOptional =
+      endShiftMinutes !== null && endShiftMinutes <= timeToMinutes("12:00");
 
-    if (!isLunchOptional) { // If lunch is mandatory
-        if (!data.startLunchTime || !data.endLunchTime) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Debe ingresar la hora de inicio y fin del almuerzo.",
-                path: ["startLunchTime"], // Associate with a field for better UX
-            });
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Debe ingresar la hora de inicio y fin del almuerzo.",
-                path: ["endLunchTime"],
-            });
-            return; // Stop further lunch validations if fields are missing
-        }
+    if (!isLunchOptional) {
+      // If lunch is mandatory
+      if (!data.startLunchTime || !data.endLunchTime) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Debe ingresar la hora de inicio y fin del almuerzo.",
+          path: ["startLunchTime"], // Associate with a field for better UX
+        });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Debe ingresar la hora de inicio y fin del almuerzo.",
+          path: ["endLunchTime"],
+        });
+        return; // Stop further lunch validations if fields are missing
+      }
 
-        // El inicio de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
+      // El inicio de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
+      if (
+        startLunchMinutes <= startShiftMinutes ||
+        startLunchMinutes >= endShiftMinutes
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "El inicio de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
+          path: ["startLunchTime"],
+        });
+      }
+
+      // El fin de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
+      if (
+        endLunchMinutes <= startShiftMinutes ||
+        endLunchMinutes >= endShiftMinutes
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "El fin de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
+          path: ["endLunchTime"],
+        });
+      }
+
+      // El inicio de almuerzo debe ser antes que el fin de almuerzo
+      if (
+        startLunchMinutes !== null &&
+        endLunchMinutes !== null &&
+        startLunchMinutes >= endLunchMinutes
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "La hora de fin del almuerzo no puede ser igual o posterior a la hora de fin del almuerzo.",
+          path: ["endLunchTime"],
+        });
+        return;
+      }
+
+      // Validate lunch contained within shift
+      if (
+        startLunchMinutes < startShiftMinutes ||
+        endLunchMinutes > endShiftMinutes
+      ) {
         if (
-            startLunchMinutes <= startShiftMinutes ||
-            startLunchMinutes >= endShiftMinutes
+          startLunchMinutes < startShiftMinutes ||
+          startLunchMinutes >= endShiftMinutes
         ) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El inicio de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
-                path: ["startLunchTime"],
-            });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              "El inicio de almuerzo debe estar dentro del horario del turno laboral.",
+            path: ["startLunchTime"],
+          });
         }
-
-        // El fin de almuerzo debe ser estrictamente después del inicio y antes del fin de la jornada
         if (
-            endLunchMinutes <= startShiftMinutes ||
-            endLunchMinutes >= endShiftMinutes
+          endLunchMinutes > endShiftMinutes ||
+          endLunchMinutes <= startShiftMinutes
         ) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El fin de almuerzo debe estar entre la hora de inicio y fin de la jornada laboral.",
-                path: ["endLunchTime"],
-            });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              "El fin de almuerzo debe estar dentro del horario del turno laboral.",
+            path: ["endLunchTime"],
+          });
         }
-
-        // El inicio de almuerzo debe ser antes que el fin de almuerzo
-        if (startLunchMinutes !== null && endLunchMinutes !== null && startLunchMinutes >= endLunchMinutes) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "La hora de fin del almuerzo no puede ser igual o posterior a la hora de fin del almuerzo.",
-                path: ["endLunchTime"],
-            });
-            return;
-        }
-
-        // Validate lunch contained within shift
-        if (startLunchMinutes < startShiftMinutes || endLunchMinutes > endShiftMinutes) {
-          if (startLunchMinutes < startShiftMinutes || startLunchMinutes >= endShiftMinutes) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El inicio de almuerzo debe estar dentro del horario del turno laboral.",
-                path: ["startLunchTime"],
-            });
-          }
-          if (endLunchMinutes > endShiftMinutes || endLunchMinutes <= startShiftMinutes) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "El fin de almuerzo debe estar dentro del horario del turno laboral.",
-                path: ["endLunchTime"],
-            });
-          }
-        }
-    } else { // If lunch is optional, ensure no values are provided
-        if (data.startLunchTime !== "" || data.endLunchTime !== "") {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
-                path: ["startLunchTime"],
-            });
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
-                path: ["endLunchTime"],
-            });
-        }
-        if (data.startLunchTime !== "") data.startLunchTime = "";
-        if (data.endLunchTime !== "") data.endLunchTime = "";
+      }
+    } else {
+      // If lunch is optional, ensure no values are provided
+      if (data.startLunchTime !== "" || data.endLunchTime !== "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
+          path: ["startLunchTime"],
+        });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Para turnos que terminan a las 12:00 o antes, el almuerzo no debe ser especificado.",
+          path: ["endLunchTime"],
+        });
+      }
+      if (data.startLunchTime !== "") data.startLunchTime = "";
+      if (data.endLunchTime !== "") data.endLunchTime = "";
     }
-});
-
+  });
 
 export default function TurnosLaborales() {
   const [turnos, setTurnos] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [windowSize, setWindowSize] = useState({
+  const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
@@ -221,7 +261,7 @@ export default function TurnosLaborales() {
       setTurnos(response.data);
     } catch (error) {
       console.error("Error al recuperar los horarios laborales:", error);
-      toast.error("Error al cargar turnos laborales.",{
+      toast.error("Error al cargar turnos laborales.", {
         richColors: true,
       });
     }
@@ -247,7 +287,7 @@ export default function TurnosLaborales() {
       };
 
       const response = await api.post("/horarios-laborales", payload);
-      setTurnos(prevTurnos => [...prevTurnos, response.data]);
+      setTurnos((prevTurnos) => [...prevTurnos, response.data]);
       toast.success("Turno creado", {
         description: "El turno laboral se ha registrado correctamente.",
         richColors: true,
@@ -257,24 +297,31 @@ export default function TurnosLaborales() {
     } catch (error) {
       console.error("Error al registrar el turno laboral:", error);
 
-      let errorMessage = "No se pudo registrar el turno laboral. Intente nuevamente.";
+      let errorMessage =
+        "No se pudo registrar el turno laboral. Intente nuevamente.";
       if (axios.isAxiosError(error) && error.response) {
         // This is the part that handles the backend's error message format
         if (error.response.data) {
-            // Case 1: Backend sends a JSON object with a 'message' field (most common for Spring's ResponseStatusException)
-            if (typeof error.response.data === 'object' && error.response.data.message) {
-                const fullBackendMessage = error.response.data.message;
-                // Try to extract the message from quotes (e.g., "409 CONFLICT "Actual message"")
-                const match = fullBackendMessage.match(/"([^"]*)"$/);
-                errorMessage = (match && match[1]) ? match[1] : fullBackendMessage;
-            }
-            // Case 2: Backend sends a plain string directly as the response body
-            else if (typeof error.response.data === 'string' && error.response.data.length > 0) {
-                errorMessage = error.response.data;
-            }
+          // Case 1: Backend sends a JSON object with a 'message' field (most common for Spring's ResponseStatusException)
+          if (
+            typeof error.response.data === "object" &&
+            error.response.data.message
+          ) {
+            const fullBackendMessage = error.response.data.message;
+            // Try to extract the message from quotes (e.g., "409 CONFLICT "Actual message"")
+            const match = fullBackendMessage.match(/"([^"]*)"$/);
+            errorMessage = match && match[1] ? match[1] : fullBackendMessage;
+          }
+          // Case 2: Backend sends a plain string directly as the response body
+          else if (
+            typeof error.response.data === "string" &&
+            error.response.data.length > 0
+          ) {
+            errorMessage = error.response.data;
+          }
         } else if (error.message) {
-            // Fallback for Axios errors where response.data might be missing (e.g., network errors)
-            errorMessage = error.message;
+          // Fallback for Axios errors where response.data might be missing (e.g., network errors)
+          errorMessage = error.message;
         }
       } else if (error.message) {
         // Fallback for non-Axios errors
@@ -290,24 +337,25 @@ export default function TurnosLaborales() {
 
   return (
     <div className="p-2 sm:p-6">
-      
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="flex justify-end mb-4">
-  <DialogTrigger asChild>
-    <Button
-      variant="blue"
-      className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-auto"
-    >
-      Crear Turno Laboral
-    </Button>
-  </DialogTrigger>
-</div>
+          <DialogTrigger asChild>
+            <Button
+              variant="blue"
+              className="bg-blue-600 text-white md:text-[13px] sm:text-sm hover:bg-blue-700 text-xs px-3 py-1 h-auto"
+            >
+              Crear Turno Laboral
+            </Button>
+          </DialogTrigger>
+        </div>
 
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-sm sm:text-lg">Crear Turno Laboral</DialogTitle>
+            <DialogTitle className="text-xs md:text-[13px] sm:text-lg">
+              Crear Turno Laboral
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-xs sm:text-sm text-gray-500 mb-2">
+          <p className="text-xs md:text-[13px] sm:text-sm text-gray-500 mb-2">
             El formato de hora es de 24 horas (ejemplo: 08:00, 13:30, 21:45).
           </p>
           <Form {...form}>
@@ -317,11 +365,17 @@ export default function TurnosLaborales() {
                 name="shiftName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Nombre del Turno</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                      Nombre del Turno
+                    </FormLabel>
                     <FormControl>
-                      <Input className="text-xs sm:text-sm" placeholder="Ejemplo: Turno Mañana" {...field} />
+                      <Input
+                        className="text-xs md:text-[13px] sm:text-sm"
+                        placeholder="Ejemplo: Turno Mañana"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -331,11 +385,17 @@ export default function TurnosLaborales() {
                   name="startTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="text-xs sm:text-sm">Hora de Inicio</FormLabel>
+                      <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        Hora de Inicio
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" className="text-xs sm:text-sm" {...field} />
+                        <Input
+                          type="time"
+                          className="text-xs md:text-[13px] sm:text-sm"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
+                      <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                     </FormItem>
                   )}
                 />
@@ -344,11 +404,17 @@ export default function TurnosLaborales() {
                   name="endTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="text-xs sm:text-sm">Hora de Fin</FormLabel>
+                      <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        Hora de Fin
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" className="text-xs sm:text-sm" {...field} />
+                        <Input
+                          type="time"
+                          className="text-xs md:text-[13px] sm:text-sm"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
+                      <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                     </FormItem>
                   )}
                 />
@@ -359,11 +425,17 @@ export default function TurnosLaborales() {
                   name="startLunchTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="text-xs sm:text-sm">Inicio de Almuerzo</FormLabel>
+                      <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        Inicio de Almuerzo
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" className="text-xs sm:text-sm" {...field} />
+                        <Input
+                          type="time"
+                          className="text-xs md:text-[13px] sm:text-sm"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
+                      <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                     </FormItem>
                   )}
                 />
@@ -372,17 +444,27 @@ export default function TurnosLaborales() {
                   name="endLunchTime"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="text-xs sm:text-sm">Fin de Almuerzo</FormLabel>
+                      <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        Fin de Almuerzo
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" className="text-xs sm:text-sm" {...field} />
+                        <Input
+                          type="time"
+                          className="text-xs md:text-[13px] sm:text-sm"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
+                      <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                     </FormItem>
                   )}
                 />
               </div>
               <DialogFooter>
-                <Button type="submit" variant="blue" className="text-xs sm:text-base">
+                <Button
+                  type="submit"
+                  variant="blue"
+                  className="text-xs md:text-[13px] sm:text-base"
+                >
                   Crear turno
                 </Button>
               </DialogFooter>
@@ -391,36 +473,57 @@ export default function TurnosLaborales() {
         </DialogContent>
       </Dialog>
 
-      <div className="md:max-h-[450px] md:overflow-y-auto overflow-x-auto border rounded-md" style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
-          }>
-
-        <Table className="min-w-[600px] text-xs sm:text-sm">
+      <div
+        className="md:max-h-[450px] md:overflow-y-auto overflow-x-auto border rounded-md"
+        style={
+          isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+        }
+      >
+        <Table className="min-w-[600px] text-xs md:text-[13px] sm:text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs sm:text-sm">Nombre del Turno</TableHead>
-              <TableHead className="text-xs sm:text-sm">Hora de Inicio</TableHead>
-              <TableHead className="text-xs sm:text-sm">Hora de Fin</TableHead>
-              <TableHead className="text-xs sm:text-sm">Inicio de Almuerzo</TableHead>
-              <TableHead className="text-xs sm:text-sm">Fin de Almuerzo</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">
+                Nombre del Turno
+              </TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">
+                Hora de Inicio
+              </TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">Hora de Fin</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">
+                Inicio de Almuerzo
+              </TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">
+                Fin de Almuerzo
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {turnos.length > 0 ? (
               turnos.map((turno, index) => (
                 <TableRow key={index}>
-                  <TableCell className="text-xs sm:text-sm">{turno.nombreHorario}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{turno.horaInicio}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{turno.horaFin}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{turno.horaInicioAlmuerzo || "—"}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{turno.horaFinAlmuerzo || "—"}</TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    {turno.nombreHorario}
+                  </TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    {turno.horaInicio}
+                  </TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    {turno.horaFin}
+                  </TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    {turno.horaInicioAlmuerzo || "—"}
+                  </TableCell>
+                  <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    {turno.horaFinAlmuerzo || "—"}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan="5" className="text-center text-xs sm:text-sm">
+                <TableCell
+                  colSpan="5"
+                  className="text-center text-xs md:text-[13px] sm:text-sm"
+                >
                   No hay turnos laborales registrados.
                 </TableCell>
               </TableRow>

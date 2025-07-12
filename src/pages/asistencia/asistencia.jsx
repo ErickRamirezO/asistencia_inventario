@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "@/utils/axios";
-import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Badge } from "../../components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
-import { Calendar, Clock } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "../../components/ui/pagination";
+import { Clock } from "lucide-react";
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationLink } from "../../components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { toast } from "sonner";
 import moment from 'moment';
@@ -35,12 +34,29 @@ export default function Asistencia() {
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [Departments, setDepartments] = useState([]);
 
-  const recordsPerPage = 10;
+  const recordsPerPage = 5;
+  const eventRecordsPerPage = 5;
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+  const [eventCurrentPage, setEventCurrentPage] = useState(1);
+
+  const eventTotalPages = Math.ceil(eventAttendanceData.length / eventRecordsPerPage);
+  const eventCurrentRecords = eventAttendanceData.slice(
+    (eventCurrentPage - 1) * eventRecordsPerPage,
+    eventCurrentPage * eventRecordsPerPage
+  );
     const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedDepartment, dateFilter]);
+    
+  useEffect(() => {
+    setEventCurrentPage(1);
+  }, [selectedEvent]);
+
   useEffect(() => {
     const handleResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -267,7 +283,7 @@ export default function Asistencia() {
           ].map(({ title, value, icon }, index) => (
             <Card key={index} className="p-2 h-full flex flex-col justify-center">
               <CardHeader className="pb-1 flex-1 flex flex-col justify-center items-center">
-                <CardTitle className="text-sm sm:text-sm font-medium text-center">{title}</CardTitle>
+                <CardTitle className="text-xs md:text-[13px] sm:text-sm font-medium text-center">{title}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col justify-center items-center">
                 <div className="text-sm sm:text-2xl font-bold flex items-center justify-center text-center">
@@ -281,24 +297,24 @@ export default function Asistencia() {
         {/* Filtros en una sola fila */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-stretch sm:items-center">
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium">Buscar empleado</label>
+            <label className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium">Buscar empleado</label>
             <Input
               placeholder="Buscar empleado..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs sm:text-sm"
+              className="w-full text-xs md:text-[13px] sm:text-sm"
             />
           </div>
 
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium">Departamento</label>
+            <label className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium">Departamento</label>
             <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
-              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
+              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm">
                 <SelectValue placeholder="Seleccionar Departamento" className="departamento"/>
               </SelectTrigger>
               <SelectContent>
                 {Departments.map(dept => (
-                  <SelectItem key={dept.value} value={dept.value} className="text-xs sm:text-sm">
+                  <SelectItem key={dept.value} value={dept.value} className="text-xs md:text-[13px] sm:text-sm">
                     <span role="img" aria-label={dept.label}></span> {dept.label}
                   </SelectItem>
                 ))}
@@ -307,22 +323,22 @@ export default function Asistencia() {
           </div>
 
           <div className="flex flex-col w-full sm:w-1/4">
-            <label className="mb-1 text-xs sm:text-sm font-medium">Fecha</label>
+            <label className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium">Fecha</label>
             <Select onValueChange={setDateFilter} value={dateFilter}>
-              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
+              <SelectTrigger className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm">
                 <SelectValue placeholder="Seleccionar Fecha" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-xs sm:text-sm">
+                <SelectItem value="all" className="text-xs md:text-[13px] sm:text-sm">
                   <span role="img" aria-label="Todos">📅</span> Todos
                 </SelectItem>
-                <SelectItem value="today" className="text-xs sm:text-sm">
+                <SelectItem value="today" className="text-xs md:text-[13px] sm:text-sm">
                   <span role="img" aria-label="Hoy">🗓️</span> Hoy
                 </SelectItem>
-                <SelectItem value="thisWeek" className="text-xs sm:text-sm">
+                <SelectItem value="thisWeek" className="text-xs md:text-[13px] sm:text-sm">
                   <span role="img" aria-label="Esta Semana">📅</span> Esta Semana
                 </SelectItem>
-                <SelectItem value="lastMonth" className="text-xs sm:text-sm">
+                <SelectItem value="lastMonth" className="text-xs md:text-[13px] sm:text-sm">
                   <span role="img" aria-label="Mes Anterior">📆</span> Mes Anterior
                 </SelectItem>
               </SelectContent>
@@ -333,19 +349,19 @@ export default function Asistencia() {
         {/* Sección de pestañas */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="mb-4 flex flex-wrap gap-2">
-            <TabsTrigger value="regular" className="text-xs sm:text-sm">Asistencia Diaria</TabsTrigger>
-            <TabsTrigger value="events" className="text-xs sm:text-sm">Asistencia en Eventos</TabsTrigger>
+            <TabsTrigger value="regular" className="text-xs md:text-[13px] sm:text-sm">Asistencia Diaria</TabsTrigger>
+            <TabsTrigger value="events" className="text-xs md:text-[13px] sm:text-sm">Asistencia en Eventos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="regular">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Registros de Asistencia Diaria</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Ver y gestionar los registros de asistencia de los empleados.</CardDescription>
+                <CardDescription className="text-xs md:text-[13px] sm:text-sm">Ver y gestionar los registros de asistencia de los empleados.</CardDescription>
               </CardHeader>
               <CardContent>
-                {isLoading && <p className="text-xs">Cargando datos...</p>}
-                {error && <p className="text-red-500 text-xs">{error}</p>}
+                {isLoading && <p className="text-xs md:text-[13px] sm:text-sm">Cargando datos...</p>}
+                {error && <p className="text-red-500 text-xs md:text-[13px] sm:text-sm">{error}</p>}
                 {!isLoading && !error && (
                   <>
                     {currentRecords.length === 0 ? (
@@ -358,7 +374,7 @@ export default function Asistencia() {
                     ) : (
                       <div className="overflow-x-auto">
                         <div className="max-h-[500px] overflow-y-auto">
-                          <Table className="min-w-[700px] text-xs sm:text-sm">
+                          <Table className="min-w-[700px] text-xs md:text-[13px] sm:text-sm">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Nombre</TableHead>
@@ -403,19 +419,30 @@ export default function Asistencia() {
 
                 {/* Paginación */}
                 {currentRecords.length > 0 && (
-                  <Pagination className="mt-4">
+                  <Pagination className="mt-4" style={{ minHeight: "48px" }}>
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious
-                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                          disabled={currentPage === 1}
+                          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                          aria-disabled={currentPage === 1}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                         />
                       </PaginationItem>
-                      <span className="px-4 text-xs sm:text-sm">Página {currentPage} de {totalPages}</span>
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            isActive={currentPage === i + 1}
+                            onClick={() => setCurrentPage(i + 1)}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                          disabled={currentPage === totalPages}
+                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                          aria-disabled={currentPage === totalPages}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -429,18 +456,18 @@ export default function Asistencia() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Asistencia en Eventos</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Registro de asistencia por evento</CardDescription>
+                <CardDescription className="text-xs md:text-[13px] sm:text-sm">Registro de asistencia por evento</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold mb-2">Evento:</h3>
+                    <h3 className="text-xs md:text-[13px] sm:text-sm font-semibold mb-2">Evento:</h3>
                     <Select 
                       value={selectedEvent} 
                       onValueChange={(value) => setSelectedEvent(value)}
                     >
-                      <SelectTrigger className="text-xs sm:text-sm w-[200px] sm:w-[250px]">
-                        <SelectValue className="text-xs sm:text-sm" placeholder="Seleccione el evento" />
+                      <SelectTrigger className="text-xs md:text-[13px] sm:text-sm w-[200px] sm:w-[250px]">
+                        <SelectValue className="text-xs md:text-[13px] sm:text-sm" placeholder="Seleccione el evento" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableEvents.length === 0 ? (
@@ -449,7 +476,7 @@ export default function Asistencia() {
                           </div>
                         ) : (
                           availableEvents.map(event => (
-                            <SelectItem className="text-xs sm:text-sm" key={event} value={event}>{event}</SelectItem>
+                            <SelectItem className="text-xs md:text-[13px] sm:text-sm" key={event} value={event}>{event}</SelectItem>
                           ))
                         )}
                       </SelectContent>
@@ -466,11 +493,11 @@ export default function Asistencia() {
                       </div>
                     ) : eventAttendanceData.length === 0 ? (
                       <div className="text-center p-8 border rounded-md">
-                        <p className="text-xs sm:text-sm text-muted-foreground">No hay asistencias registradas para este evento.</p>
+                        <p className="text-xs md:text-[13px] sm:text-sm text-muted-foreground">No hay asistencias registradas para este evento.</p>
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
-                        <Table className="min-w-[600px] text-xs sm:text-sm">
+                        <Table className="min-w-[600px] text-xs md:text-[13px] sm:text-sm">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Nombre</TableHead>
@@ -481,7 +508,7 @@ export default function Asistencia() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {eventAttendanceData.map((attendee) => {
+                            {eventCurrentRecords.map((attendee) => {
                               const tieneEntrada = !!attendee.entrada;
                               const tieneSalida = !!attendee.salida;
                               let estadoBadge = "no_asistio";
@@ -518,6 +545,36 @@ export default function Asistencia() {
                   <div className="text-center p-8 border rounded-md">
                     <p className="text-muted-foreground">Selecciona un evento para ver las asistencias</p>
                   </div>
+                )}
+                {eventCurrentRecords.length > 0 && (
+                  <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setEventCurrentPage((prev) => Math.max(prev - 1, 1))}
+                          aria-disabled={eventCurrentPage === 1}
+                          className={eventCurrentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: eventTotalPages }, (_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            isActive={eventCurrentPage === i + 1}
+                            onClick={() => setEventCurrentPage(i + 1)}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setEventCurrentPage((prev) => Math.min(prev + 1, eventTotalPages))}
+                          aria-disabled={eventCurrentPage === eventTotalPages}
+                          className={eventCurrentPage === eventTotalPages ? "pointer-events-none opacity-50" : ""}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 )}
               </CardContent>
             </Card>
