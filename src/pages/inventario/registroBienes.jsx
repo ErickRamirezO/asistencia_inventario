@@ -140,7 +140,7 @@ export default function RegistrarBien() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 280 // ajusta 200px según header + paddings
+    ? windowSize.height - 100 // ajusta 200px según header + paddings
     : undefined;
 
   const form = useForm({

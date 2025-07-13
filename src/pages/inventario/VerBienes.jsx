@@ -32,7 +32,7 @@ export default function VerBienes() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 220 // ajusta 200px según header + paddings
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
     : undefined;
 
 
