@@ -11,7 +11,6 @@ import { ScanLine } from "lucide-react";
 import api from "@/utils/axios";
 import { getUserIdFromToken } from "@/pages/auth/auth";
 
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +42,14 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,8 +68,21 @@ export default function Inventarios() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [inventarioActual, setInventarioActual] = useState(null);
+  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(inventarios.length / itemsPerPage);
+  const inventariosPaginados = inventarios.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reinicia la página si cambia la lista de inventarios
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [inventarios]);
   const navigate = useNavigate();
-    const [windowSize, setWindowSize] = useState({
+  const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
@@ -90,7 +110,9 @@ export default function Inventarios() {
       const res = await api.get("/inventarios");
       setInventarios(res.data);
     } catch {
-      toast.error("Error al cargar inventarios");
+      toast.error("Error al cargar inventarios",{
+        richColors: true,
+      });
     }
   };
 
@@ -99,7 +121,9 @@ export default function Inventarios() {
       const res = await api.get("/lugares");
       setLugares(res.data);
     } catch {
-      toast.error("Error al cargar lugares");
+      toast.error("Error al cargar lugares",{
+        richColors: true,
+      });
     }
   };
 
@@ -119,26 +143,32 @@ export default function Inventarios() {
   };
 
   const onSubmit = async (data) => {
-  const userId = getUserIdFromToken();
+    const userId = getUserIdFromToken();
 
-  const payload = {
-    ...data,
-    usuariosId: userId,
-  };
+    const payload = {
+      ...data,
+      usuariosId: userId,
+    };
 
     try {
       if (modoEdicion) {
         await api.put(`/inventarios/${inventarioActual.id}`, payload);
-        toast.success("Inventario actualizado");
+        toast.success("Inventario actualizado",{
+          richColors: true,
+        });
       } else {
         await api.post("/inventarios", payload);
-        toast.success("Inventario creado");
+        toast.success("Inventario creado",{
+          richColors: true,
+        });
       }
 
       cargarInventarios();
       setFormVisible(false);
     } catch {
-      toast.error("Error al guardar inventario");
+      toast.error("Error al guardar inventario",{
+        richColors: true,
+      });
     }
   };
 
@@ -147,7 +177,9 @@ export default function Inventarios() {
       <Dialog open={formVisible} onOpenChange={setFormVisible}>
         <DialogContent className="sm:max-w-lg z-[60]">
           <DialogHeader>
-            <DialogTitle>{modoEdicion ? "Editar Inventario" : "Nuevo Inventario"}</DialogTitle>
+            <DialogTitle>
+              {modoEdicion ? "Editar Inventario" : "Nuevo Inventario"}
+            </DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -159,7 +191,10 @@ export default function Inventarios() {
                   <FormItem>
                     <FormLabel>Nombre de Inventario</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ejemplo: Inventario Q2 2025" {...field} />
+                      <Input
+                        placeholder="Ejemplo: Inventario Q2 2025"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,9 +210,15 @@ export default function Inventarios() {
                     <Popover modal>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <Button variant="outline" role="combobox" className="justify-between">
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="justify-between"
+                          >
                             {field.value
-                              ? lugares.find((l) => l.nombreLugar === field.value)?.nombreLugar
+                              ? lugares.find(
+                                  (l) => l.nombreLugar === field.value
+                                )?.nombreLugar
                               : "Seleccionar lugar"}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -193,13 +234,18 @@ export default function Inventarios() {
                                 <CommandItem
                                   key={lugar.id}
                                   onSelect={() => {
-                                    form.setValue("lugarInventario", lugar.nombreLugar);
+                                    form.setValue(
+                                      "lugarInventario",
+                                      lugar.nombreLugar
+                                    );
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      field.value === lugar.nombreLugar ? "opacity-100" : "opacity-0"
+                                      field.value === lugar.nombreLugar
+                                        ? "opacity-100"
+                                        : "opacity-0"
                                     )}
                                   />
                                   {lugar.nombreLugar}
@@ -239,70 +285,105 @@ export default function Inventarios() {
 
       <Card>
         <CardHeader className="flex justify-end items-center">
-  <Button
-    className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-8 sm:h-auto"
-    onClick={() => abrirFormulario()}
-  >
-    Agregar Inventario
-  </Button>
-</CardHeader>
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-8 sm:h-auto"
+            onClick={() => abrirFormulario()}
+          >
+            Agregar Inventario
+          </Button>
+        </CardHeader>
 
-        <CardContent style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
+        <CardContent
+          style={
+            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
->
-  <div className="overflow-x-auto max-w-full">
-    <div className=" md:overflow-y-auto">
-
-      <table className="w-full text-sm border table-auto">
-
-            <thead>
-              <tr>
-                <th className="p-2 text-left hidden">ID</th>
-                <th className="p-2 text-left">Nombre</th>
-                <th className="p-2 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {inventarios.map((inv) => (
-                <tr key={inv.id} className="border-t">
-                  <td className="hidden">{inv.id}</td>
-                  <td className="p-2">{inv.nombreInventario}</td>
-                  <td className="p-2 text-right flex gap-2 justify-end">
-  <Button
-    size="icon"
-    className="bg-yellow-400 hover:bg-yellow-500 text-black dark:text-white"
-    onClick={() => abrirFormulario(inv)}
-  >
-    <Pencil className="w-5 h-5" />
-  </Button>
-  <Button
-    size="icon"
-    className="bg-blue-500 hover:bg-blue-600 text-white"
-    onClick={() => navigate(`/inventarios/${inv.id}/ver`)}
-  >
-    <Eye className="w-5 h-5" />
-  </Button>
-  <Button
-    size="icon"
-    className="bg-green-600 hover:bg-green-700 text-white"
-    onClick={() => navigate(`/inventarios/${inv.id}/realizar`)}
-  >
-    <ScanLine className="w-5 h-5" />
-  </Button>
-</td>
-
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
+        >
+          <div className="overflow-x-auto max-w-full">
+            <div className=" md:overflow-y-auto">
+              <table className="w-full border table-auto text-xs md:text-[13px] sm:text-sm">
+                <thead>
+                  <tr>
+                    <th className="p-2 text-left hidden">ID</th>
+                    <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">Nombre</th>
+                    <th className="p-2 text-right text-xs md:text-[13px] sm:text-sm">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inventariosPaginados.length > 0 ? (
+                    inventariosPaginados.map((inv) => (
+                      <tr key={inv.id} className="border-t">
+                        <td className="hidden">{inv.id}</td>
+                        <td className="p-2 text-xs md:text-[13px] sm:text-sm">{inv.nombreInventario}</td>
+                        <td className="p-2 text-right flex gap-2 justify-end">
+                          <Button
+                            size="icon"
+                            className="bg-yellow-400 hover:bg-yellow-500 text-black dark:text-white text-xs md:text-[13px] sm:text-sm"
+                            onClick={() => abrirFormulario(inv)}
+                          >
+                            <Pencil className="w-5 h-5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() =>
+                              navigate(`/inventarios/${inv.id}/ver`)
+                            }
+                          >
+                            <Eye className="w-5 h-5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() =>
+                              navigate(`/inventarios/${inv.id}/realizar`)
+                            }
+                          >
+                            <ScanLine className="w-5 h-5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="text-center p-2 text-xs md:text-[13px] sm:text-sm">
+                        No hay inventarios.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              <Pagination className="mt-4 text-xs md:text-[13px] sm:text-sm" style={{ minHeight: "48px" }}>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      aria-disabled={currentPage === 1}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      aria-disabled={currentPage === totalPages}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </CardContent>
       </Card>
     </div>
-    
   );
 }

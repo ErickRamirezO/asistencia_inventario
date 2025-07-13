@@ -1,9 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
 import { toast } from "sonner";
 import api from "@/utils/axios";
 
@@ -18,7 +36,11 @@ export default function AsistenciaEvento() {
   const [availableEvents, setAvailableEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
-  const [newEvent, setNewEvent] = useState({ nombre: "", horaIngreso: "07:00", horaSalida: "09:00" });
+  const [newEvent, setNewEvent] = useState({
+    nombre: "",
+    horaIngreso: "07:00",
+    horaSalida: "09:00",
+  });
   const inputRef = useRef(null);
   const lastProcessedTag = useRef("");
   const [showEditHoraFin, setShowEditHoraFin] = useState(false);
@@ -28,7 +50,9 @@ export default function AsistenciaEvento() {
 
   useEffect(() => {
     if (newEvent.nombre && !nombreEventoValido(newEvent.nombre)) {
-      setNombreError("El nombre solo puede contener letras, números, espacios y guiones.");
+      setNombreError(
+        "El nombre solo puede contener letras, números, espacios y guiones."
+      );
     } else {
       setNombreError("");
     }
@@ -78,7 +102,9 @@ export default function AsistenciaEvento() {
       return;
     }
     if (!nombreEventoValido(newEvent.nombre)) {
-      setNombreError("El nombre solo puede contener letras, números, espacios y guiones.");
+      setNombreError(
+        "El nombre solo puede contener letras, números, espacios y guiones."
+      );
       return;
     } else {
       setNombreError("");
@@ -90,7 +116,7 @@ export default function AsistenciaEvento() {
         horaIngreso: newEvent.horaIngreso,
         horaSalida: newEvent.horaSalida,
       });
-      toast.success("Evento creado correctamente.",{
+      toast.success("Evento creado correctamente.", {
         richColors: true,
       });
       setShowCreateEvent(false);
@@ -107,76 +133,87 @@ export default function AsistenciaEvento() {
   };
 
   // Obtener info de usuario
-  const fetchUserInfo = useCallback(async (tag) => {
-    if (processing) return;
-    setProcessing(true);
-    setIsLoading(true);
-    try {
-      const response = await api.get(`/usuarios/tag/${tag}`);
-      setUserInfo(response.data);
+  const fetchUserInfo = useCallback(
+    async (tag) => {
+      if (processing) return;
+      setProcessing(true);
+      setIsLoading(true);
+      try {
+        const response = await api.get(`/usuarios/tag/${tag}`);
+        setUserInfo(response.data);
 
-      setTimeout(() => {
+        setTimeout(() => {
+          setUserInfo(null);
+          setRfidTag("");
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+          setProcessing(false);
+          lastProcessedTag.current = "";
+        }, 3000);
+      } catch (error) {
         setUserInfo(null);
-        setRfidTag("");
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-        setProcessing(false);
-        lastProcessedTag.current = "";
-      }, 3000);
-    } catch (error) {
-      setUserInfo(null);
-      toast.error("Usuario no encontrado para este Tag", {
-        description: error?.response?.data?.mensaje || "No se pudo conectar con el servidor.",
-        richColors: true,
-      });
-      setTimeout(() => {
-        setRfidTag("");
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-        setProcessing(false);
-        lastProcessedTag.current = "";
-      }, 3000);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [processing]);
+        toast.error("Usuario no encontrado para este Tag", {
+          description:
+            error?.response?.data?.mensaje ||
+            "No se pudo conectar con el servidor.",
+          richColors: true,
+        });
+        setTimeout(() => {
+          setRfidTag("");
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+          setProcessing(false);
+          lastProcessedTag.current = "";
+        }, 3000);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [processing]
+  );
 
   // Registrar asistencia en evento
-  const registerEventAttendance = useCallback(async (tag) => {
-    if (!tag || !selectedEvent) {
-      toast.warning("Seleccione un evento antes de registrar asistencia.", {
-        richColors: true,
-      });
-      return;
-    }
+  const registerEventAttendance = useCallback(
+    async (tag) => {
+      if (!tag || !selectedEvent) {
+        toast.warning("Seleccione un evento antes de registrar asistencia.", {
+          richColors: true,
+        });
+        return;
+      }
 
-    setIsLoading(true);
-    try {
-      const response = await api.post("/asistencias/registrar-asistencia-evento", { rfid: tag, eventoNombre: selectedEvent });
-      console.log(response.data);
-      if (response.status === 200) {
-        const { mensaje } = response.data;
-        toast.success(mensaje, {
-          richColors: true,
-        });
+      setIsLoading(true);
+      try {
+        const response = await api.post(
+          "/asistencias/registrar-asistencia-evento",
+          { rfid: tag, eventoNombre: selectedEvent }
+        );
+        console.log(response.data);
+        if (response.status === 200) {
+          const { mensaje } = response.data;
+          toast.success(mensaje, {
+            richColors: true,
+          });
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data.mensaje, {
+            richColors: true,
+          });
+        } else {
+          toast.error("Error al registrar asistencia en evento", {
+            description: "No se pudo conectar con el servidor.",
+            richColors: true,
+          });
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        toast.error(error.response.data.mensaje, {
-          richColors: true,
-        });
-      } else {
-        toast.error("Error al registrar asistencia en evento", {
-          description: "No se pudo conectar con el servidor.",
-          richColors: true,
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedEvent]);
+    },
+    [selectedEvent]
+  );
 
   // Escaneo de tag
   const handleTagChange = (e) => {
@@ -190,8 +227,11 @@ export default function AsistenciaEvento() {
     }
   }, [rfidTag]);
 
-    const horaFinActual = availableEvents.find(ev => ev === selectedEvent || ev.nombre === selectedEvent)?.horaSalida || "";
-    const handleEditarHoraFin = async (e) => {
+  const horaFinActual =
+    availableEvents.find(
+      (ev) => ev === selectedEvent || ev.nombre === selectedEvent
+    )?.horaSalida || "";
+  const handleEditarHoraFin = async (e) => {
     e.preventDefault();
     if (!selectedEvent || !nuevaHoraFin) return;
     try {
@@ -200,7 +240,9 @@ export default function AsistenciaEvento() {
         eventoNombre: selectedEvent,
         nuevaHoraFin,
       });
-      toast.success("Hora de fin actualizada correctamente.", { richColors: true });
+      toast.success("Hora de fin actualizada correctamente.", {
+        richColors: true,
+      });
       setShowEditHoraFin(false);
       setNuevaHoraFin("");
       await fetchEvents();
@@ -218,26 +260,23 @@ export default function AsistenciaEvento() {
   const fetchHoraFinEvento = async (eventoNombre) => {
     try {
       const response = await api.post("/asistencias/evento/hora-fin", {
-        eventoNombre: eventoNombre
+        eventoNombre: eventoNombre,
       });
       return response.data.horaFin || "";
     } catch (error) {
-      toast.error("No se pudo obtener la hora de fin del evento.",{
+      toast.error("No se pudo obtener la hora de fin del evento.", {
         description: error?.response?.data?.mensaje || error.message,
         richColors: true,
       });
-      setShowEditHoraFin(false);      // Cierra el modal de edición
+      setShowEditHoraFin(false); // Cierra el modal de edición
       setNuevaHoraFin("");
       return "";
     }
   };
 
   return (
-
-    
-   <div className=" w-full flex items-center justify-center px-1 sm:px-0 mt-20 ">
-  <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg mt-0  mt-0">
-
+    <div className=" w-full flex items-center justify-center px-1 sm:px-0 mt-20 ">
+      <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg mt-0">
         <CardHeader className="flex flex-col items-center">
           <CardTitle>Registro de Asistencia en Evento</CardTitle>
           <CardDescription>
@@ -253,6 +292,7 @@ export default function AsistenciaEvento() {
               type="button"
               variant="outline"
               onClick={() => setShowCreateEvent(true)}
+              className="text-xs sm:text-sm md:text-[13px]"
             >
               Crear nuevo evento
             </Button>
@@ -265,18 +305,23 @@ export default function AsistenciaEvento() {
                 const horaFin = await fetchHoraFinEvento(selectedEvent);
                 setNuevaHoraFin(horaFin || "09:00");
               }}
+              className="text-xs sm:text-sm md:text-[13px]"
             >
               Editar hora de fin
             </Button>
           </div>
           {/* Selector de eventos */}
-          <Select value={selectedEvent} onValueChange={setSelectedEvent} disabled={showCreateEvent}>
-            <SelectTrigger className="w-full">
+          <Select
+            value={selectedEvent}
+            onValueChange={setSelectedEvent}
+            disabled={showCreateEvent}
+          >
+            <SelectTrigger className="w-full text-sm sm:text-sm md:text-[13px]">
               <SelectValue placeholder="Seleccionar evento" />
             </SelectTrigger>
             <SelectContent>
               {availableEvents.length === 0 ? (
-                <div className="px-4 py-2 text-muted-foreground text-sm">
+                <div className="px-4 py-2 text-muted-foreground text-sm sm:text-sm md:text-[13px]">
                   No hay eventos disponibles
                 </div>
               ) : (
@@ -294,42 +339,55 @@ export default function AsistenciaEvento() {
               <DialogHeader>
                 <DialogTitle>Crear nuevo evento</DialogTitle>
               </DialogHeader>
-              <form className="flex flex-col gap-3" onSubmit={handleCreateEvent}>
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={handleCreateEvent}
+              >
                 <Input
                   placeholder="Nombre del evento"
                   value={newEvent.nombre}
-                  onChange={(e) => setNewEvent({ ...newEvent, nombre: e.target.value })}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, nombre: e.target.value })
+                  }
                   required
                 />
                 {nombreError && (
-                  <span className="text-xs text-red-500">{nombreError}</span>
+                  <span className="text-xs md:text-[13px] sm:text-sm text-red-500">{nombreError}</span>
                 )}
-                <label className="text-sm text-muted-foreground mb-1">
-                    Establezca la hora de inicio y fin del evento
+                <label className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1">
+                  Establezca la hora de inicio y fin del evento
                 </label>
                 <Input
                   type="time"
                   placeholder="Hora de ingreso"
                   value={newEvent.horaIngreso}
-                  onChange={(e) => setNewEvent({ ...newEvent, horaIngreso: e.target.value })}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, horaIngreso: e.target.value })
+                  }
                   required
                 />
                 <Input
                   type="time"
                   placeholder="Hora de salida"
                   value={newEvent.horaSalida}
-                  onChange={(e) => setNewEvent({ ...newEvent, horaSalida: e.target.value })}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, horaSalida: e.target.value })
+                  }
                   required
                 />
-                {horaError && ( 
-                  <span className="text-xs text-red-500">{horaError}</span>
+                {horaError && (
+                  <span className="text-xs md:text-[13px] sm:text-sm text-red-500">{horaError}</span>
                 )}
                 <DialogFooter>
-                  <Button type="button" variant="secondary" onClick={() => setShowCreateEvent(false)}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowCreateEvent(false)}
+                  >
                     Cancelar
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isLoading || !!nombreError || !!horaError}
                   >
                     Guardar evento
@@ -344,18 +402,25 @@ export default function AsistenciaEvento() {
               <DialogHeader>
                 <DialogTitle>Editar hora de fin</DialogTitle>
               </DialogHeader>
-              <form className="flex flex-col gap-3" onSubmit={handleEditarHoraFin}>
-                <label className="text-sm text-muted-foreground mb-1">
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={handleEditarHoraFin}
+              >
+                <label className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1">
                   Nueva hora de fin para <b>{selectedEvent}</b>
                 </label>
                 <Input
                   type="time"
                   value={nuevaHoraFin}
-                  onChange={e => setNuevaHoraFin(e.target.value)}
+                  onChange={(e) => setNuevaHoraFin(e.target.value)}
                   required
                 />
                 <DialogFooter>
-                  <Button type="button" variant="secondary" onClick={() => setShowEditHoraFin(false)}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowEditHoraFin(false)}
+                  >
                     Cancelar
                   </Button>
                   <Button type="submit" disabled={isLoading}>
@@ -374,7 +439,12 @@ export default function AsistenciaEvento() {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                if (rfidTag.length > 0 && !processing && selectedEvent && !showCreateEvent) {
+                if (
+                  rfidTag.length > 0 &&
+                  !processing &&
+                  selectedEvent &&
+                  !showCreateEvent
+                ) {
                   fetchUserInfo(rfidTag);
                   registerEventAttendance(rfidTag);
                   setRfidTag(""); // Limpia el input después de procesar

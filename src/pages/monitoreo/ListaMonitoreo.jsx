@@ -112,13 +112,13 @@ export default function MonitoreoLista() {
           placeholder="Buscar por nombre o fecha (ej. 26/05/2025)"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="w-full md:w-1/2"
+          className="w-full md:w-1/2 text-xs md:text-[13px] sm:text-sm"
         />
 
         <div className="overflow-x-auto md:max-h-[230px] overflow-y-auto md:overflow-y-auto max-h-none">
 
 
-          <Table>
+          <Table className="text-xs md:text-[13px] sm:text-sm">
             <TableHeader>
               <TableRow>
                 <TableHead>Tag</TableHead>

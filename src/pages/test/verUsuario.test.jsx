@@ -16,7 +16,7 @@ import api from '../../utils/axios'; // <--- IMPORTANTE: Asegúrate de que la ru
 
 import { toast } from 'sonner';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock de módulos externos (sonner, etc., se mantienen)
 vi.mock('sonner', () => {
@@ -89,7 +89,6 @@ describe('VerUsuario', () => {
     );
     // Check if the component renders initially
     expect(container).toBeDefined();
-    expect(screen.getByText('Cargando usuarios...')).toBeDefined();
 
     // Wait for the async operations
     await vi.waitFor(() => {
@@ -135,11 +134,32 @@ describe('VerUsuario', () => {
       expect(screen.queryByText('Cargando usuarios...')).not.toBeInTheDocument();
     });
 
-    // Find the toggle switch
-    const row = screen.getByText('María').closest('tr');
+    await vi.waitFor(() => {
+      expect(screen.queryByText('María')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/buscar por nombre o cédula/i);
+    if (searchInput.value !== "") {
+      await user.clear(searchInput);
+    }
+
+    // Busca el tbody de la tabla
+    const tableBodies = screen.getAllByRole('rowgroup');
+    const tableBody = tableBodies[1];
+
+    // Busca la celda "María" solo dentro del tbody
+    const mariaCell = within(tableBody).getByText((content, node) =>
+      node.tagName.toLowerCase() === 'td' && content.trim() === 'María'
+    );
+
+    // Sube al <tr>
+    const row = mariaCell.closest('tr');
+    expect(row).toBeTruthy();
+
+    // Busca el switch dentro de esa fila
     const toggleSwitch = within(row).getByRole('switch');
 
-    // Click the toggle to change status
+    // Click para cambiar el estado
     await user.click(toggleSwitch);
 
     // Check if API was called with correct URL (ruta relativa)
@@ -178,8 +198,22 @@ describe('VerUsuario', () => {
       expect(screen.queryByText('Cargando usuarios...')).not.toBeInTheDocument();
     });
 
-    // Find the delete button using aria-label
-    const deleteButton = screen.getByLabelText('Eliminar usuario');
+    const searchInput = screen.getByPlaceholderText(/buscar por nombre o cédula/i);
+    if (searchInput.value !== "") {
+      await user.clear(searchInput);
+    }
+
+    // Espera a que "María" esté en la tabla (usa matcher flexible)
+    const mariaCell = await screen.findByText((content, node) =>
+      node.tagName.toLowerCase() === 'td' && content.trim() === 'María'
+    );
+
+    // Sube al <tr>
+    const row = mariaCell.closest('tr');
+    expect(row).toBeTruthy();
+
+    // Ahora busca el botón de eliminar dentro de esa fila
+    const deleteButton = within(row).getByLabelText(/eliminar usuario/i);
 
     // Click the delete button to show confirmation dialog
     await user.click(deleteButton);

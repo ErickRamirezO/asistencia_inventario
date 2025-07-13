@@ -19,6 +19,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,6 +50,19 @@ export default function Categorias() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [categoriaActual, setCategoriaActual] = useState(null);
+  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(categorias.length / itemsPerPage);
+  const categoriasPaginadas = categorias.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reinicia la página si cambia la lista de categorías
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categorias]);
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -57,7 +78,6 @@ export default function Categorias() {
     ? windowSize.height - 280 // ajusta 200px según header + paddings
     : undefined;
 
-
   // Validación en tiempo real
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -71,7 +91,9 @@ export default function Categorias() {
       const res = await api.get("/categorias/stock");
       setCategorias(res.data);
     } catch {
-      toast.error("Error al cargar categorías");
+      toast.error("Error al cargar categorías",{
+        richColors: true,
+      });
     }
   };
 
@@ -90,15 +112,21 @@ export default function Categorias() {
     try {
       if (modoEdicion) {
         await api.put(`/categorias/${categoriaActual.id}`, data);
-        toast.success("Categoría actualizada");
+        toast.success("Categoría actualizada",{
+          richColors: true,
+        });
       } else {
         await api.post("/categorias", data);
-        toast.success("Categoría creada");
+        toast.success("Categoría creada",{
+          richColors: true,
+        });
       }
       cargarCategorias();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar categoría");
+      toast.error("Error al guardar categoría",{
+        richColors: true,
+      });
     }
   };
 
@@ -108,18 +136,17 @@ export default function Categorias() {
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs md:text-[13px] sm:text-sm"
           >
             Agregar Categoría
           </Button>
         </CardHeader>
 
-        <CardContent style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
+        <CardContent
+          style={
+            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
->
+        >
           {/*
             Contenedor con:
              - overflow-x-hidden en móvil, overflow-x-auto en ≥ sm
@@ -134,7 +161,7 @@ export default function Categorias() {
               sm:max-h-[400px]
             "
           >
-            <table className="w-full min-w-0 sm:min-w-[500px] text-xs sm:text-sm table-auto">
+            <table className="w-full min-w-0 sm:min-w-[500px] text-xs md:text-[13px] sm:text-sm table-auto">
               <thead>
                 <tr>
                   <th className="text-left p-2 hidden">ID</th>
@@ -144,26 +171,72 @@ export default function Categorias() {
                 </tr>
               </thead>
               <tbody>
-                {categorias.map((categoria) => (
-                  <tr key={categoria.id} className="border-t">
-                    <td className="p-2 hidden">{categoria.id}</td>
-                    <td className="p-2 break-words whitespace-normal">
-                      {categoria.nombreCategoria}
-                    </td>
-                    <td className="p-2">{categoria.cantidad ?? 0}</td>
-                    <td className="p-2 text-right">
-                      <Button
-                        size="icon"
-                        onClick={() => abrirModal(categoria)}
-                        className="bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                {categoriasPaginadas.length > 0 ? (
+                  categoriasPaginadas.map((categoria) => (
+                    <tr key={categoria.id} className="border-t">
+                      <td className="p-2 hidden">{categoria.id}</td>
+                      <td className="p-2 break-words whitespace-normal">
+                        {categoria.nombreCategoria}
+                      </td>
+                      <td className="p-2">{categoria.cantidad ?? 0}</td>
+                      <td className="p-2 text-right">
+                        <Button
+                          size="icon"
+                          onClick={() => abrirModal(categoria)}
+                          className="bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="text-center p-2">
+                      No hay categorías.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
+            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    aria-disabled={currentPage === 1}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={currentPage === i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    aria-disabled={currentPage === totalPages}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </CardContent>
       </Card>
@@ -185,17 +258,17 @@ export default function Categorias() {
                 name="nombreCategoria"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">
                       Nombre de Categoría
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ejemplo: Tecnología"
-                        className="text-xs sm:text-sm"
+                        className="text-xs md:text-[13px] sm:text-sm"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs sm:text-sm" />
+                    <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -203,13 +276,13 @@ export default function Categorias() {
                 <Button
                   type="button"
                   onClick={() => setDialogOpen(false)}
-                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs md:text-[13px] sm:text-sm"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-xs md:text-[13px] sm:text-sm text-white"
                   disabled={!form.formState.isValid}
                 >
                   {modoEdicion ? "Actualizar" : "Crear"}

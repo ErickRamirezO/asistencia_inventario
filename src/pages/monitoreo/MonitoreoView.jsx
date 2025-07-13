@@ -34,7 +34,9 @@ export default function MonitoreoView() {
         const activos = res.data.filter((l) => l.activo);
         setLugares(activos);
       } catch (err) {
-        toast.error("Error al cargar lugares");
+        toast.error("Error al cargar lugares",{
+          richColors: true,
+        });
       }
     };
 
@@ -83,10 +85,12 @@ export default function MonitoreoView() {
         lugar: ubicacion,
         timestamp: new Date().toISOString(),
       });
-      toast.success("Tag registrado", { description: `RFID: ${rfid}` });
+      toast.success("Tag registrado", { description: `RFID: ${rfid}`, richColors: true });
     } catch (error) {
       console.error("Error al registrar monitoreo:", error.response || error);
-      toast.error("Error al registrar tag");
+      toast.error("Error al registrar tag",{
+        richColors: true,
+      });
     }
   };
 
@@ -99,7 +103,9 @@ export default function MonitoreoView() {
     localStorage.removeItem("ubicacionMonitoreo");
     setConfirmado(false);
     setUbicacion("");
-    toast.info("Monitoreo detenido");
+    toast.info("Monitoreo detenido",{
+      richColors: true,
+    });
   };
 
   return (
@@ -114,12 +120,12 @@ export default function MonitoreoView() {
           {!confirmado ? (
             <>
               <div>
-                <label htmlFor="lugar" className="font-semibold text-sm mb-1 block">
+                <label htmlFor="lugar" className="font-semibold text-xs md:text-[13px] sm:text-sm mb-1 block">
                   Seleccione el lugar de monitoreo:
                 </label>
                 <Popover modal>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" className="justify-between w-full">
+                    <Button variant="outline" role="combobox" className="justify-between w-full text-xs md:text-[13px] sm:text-sm">
                       {ubicacion
                         ? lugares.find((l) => l.nombreLugar === ubicacion)?.nombreLugar
                         : "Seleccionar lugar"}

@@ -43,6 +43,7 @@ export default function Layout() {
   const [defaultOpen, setDefaultOpen] = useState(true)
   const { user, setUser } = useUser();
   const [userInitials, setUserInitials] = useState("AD");
+  const [openIndex, setOpenIndex] = useState(null);
 
   const handleLogout = useCallback(async (event) => {
     event.stopPropagation(); // Evita la propagación del evento
@@ -128,7 +129,11 @@ useEffect(() => {
             <SidebarMenu>
               {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega") && (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 0}
+                  onOpenChange={() => setOpenIndex(openIndex === 0 ? null : 0)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Package className="h-5 w-5" />
@@ -138,7 +143,7 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/")}>
+                        <SidebarMenuButton asChild isActive={isActive("/")} data-close-sidebar>
                           <Link to="/bienes/inventario">
                             <Package className="h-5 w-5" />
                             <span>Inventario</span>
@@ -146,7 +151,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")} data-close-sidebar>
                           <Link to="/bienes/registro">
                             <Archive className="h-5 w-5" />
                             <span>Registrar Bienes</span>
@@ -154,7 +159,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/bienes/lista-bienes">
                             <Box className="h-5 w-5" />
                             <span>Bienes Empresariales</span>
@@ -162,7 +167,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/cambio">
                             <Users className="h-5 w-5" />
                             <span>Cambio de Encargado</span>
@@ -170,7 +175,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/bienes/categoria">
                             <Tag className="h-5 w-5" />
                             <span>Categoría de Bienes</span>
@@ -184,7 +189,11 @@ useEffect(() => {
               )}
               {user?.rol === "Administrador" && (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 1}
+                  onOpenChange={() => setOpenIndex(openIndex === 1 ? null : 1)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Clipboard className="h-5 w-5" />
@@ -194,7 +203,7 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")}>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia-dashboard")} data-close-sidebar>
                           <Link to="/asistencia-dashboard">
                             <LayoutDashboard className="h-5 w-5" />
                             <span>Ver Asistencias</span>
@@ -202,7 +211,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/turnosLaborales">
                             <Calendar className="h-5 w-5" />
                             <span>Crear turnos laborales</span>
@@ -210,7 +219,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")}>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")} data-close-sidebar>
                           <Link to="/asistencia-evento">
                             <Bookmark className="h-5 w-5" />
                             <span>Eventos</span>
@@ -224,7 +233,11 @@ useEffect(() => {
             )}
             {user?.rol === "Administrador" && (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 2}
+                  onOpenChange={() => setOpenIndex(openIndex === 2 ? null : 2)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Users className="h-5 w-5" />
@@ -234,7 +247,7 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")} data-close-sidebar>
                           <Link to="/usuarios/registrar">
                             <UserPlus className="h-5 w-5" />
                             <span>Registrar Usuarios</span>
@@ -242,7 +255,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/verUsuarios">
                             <Eye className="h-5 w-5" />
                             <span>Ver Usuarios</span>
@@ -256,7 +269,11 @@ useEffect(() => {
             )}
             {(user?.rol === "Administrador" || user?.rol === "Encargado de Bodega")&& (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 3}
+                  onOpenChange={() => setOpenIndex(openIndex === 3 ? null : 3)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <Building className="h-5 w-5" />
@@ -267,7 +284,7 @@ useEffect(() => {
                     <SidebarMenuSub>
                       {(user?.rol === "Administrador" )&& (
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")} data-close-sidebar>
                           <Link to="/departamentos">
                             <Shapes className="h-5 w-5" />
                             <span>Departamentos</span>
@@ -276,7 +293,7 @@ useEffect(() => {
                       </SidebarMenuSubItem>
                       )}
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")} data-close-sidebar>
                           <Link to="/lugar">
                             <MapPinHouse className="h-5 w-5" />
                             <span>Gestión de lugares</span>
@@ -291,7 +308,11 @@ useEffect(() => {
             )}
             {(user?.rol === "Administrador" )&& (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 4}
+                  onOpenChange={() => setOpenIndex(openIndex === 4 ? null : 4)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <FileText className="h-5 w-5" />
@@ -301,7 +322,7 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/inventory")}>
+                        <SidebarMenuButton asChild isActive={isActive("/inventory")} data-close-sidebar>
                           <Link to="/reporteAsistencia">
                             <Clipboard className="h-5 w-5" />
                             <span>Reporte de Asistencia</span>
@@ -309,7 +330,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/lista-monitoreo">
                             <ClipboardPlus className="h-5 w-5" />
                             <span>Reporte Monitoreo</span>
@@ -323,7 +344,11 @@ useEffect(() => {
             )}
             {(user?.rol === "Administrador" )&& (
               <SidebarMenuItem>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible
+                  open={openIndex === 5}
+                  onOpenChange={() => setOpenIndex(openIndex === 5 ? null : 5)}
+                  className="group/collapsible"
+                >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <LocateFixed className="h-5 w-5" />
@@ -333,7 +358,7 @@ useEffect(() => {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/asistencia")}>
+                        <SidebarMenuButton asChild isActive={isActive("/asistencia")} data-close-sidebar>
                           <Link to="/asistencia">
                             <ClipboardCheck className="h-5 w-5" />
                             <span>Registrar Asistencia</span>
@@ -341,7 +366,7 @@ useEffect(() => {
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuButton asChild isActive={isActive("/new-feature")}>
+                        <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/monitoreo-tag">
                             <MapPin className="h-5 w-5" />
                             <span>Configurar monitoreo</span>
@@ -359,7 +384,7 @@ useEffect(() => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start">
-                <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-sm text-black font-semibold justify-center items-center flex">
+                <Avatar className="h-8 w-8 mr-2 rounded-full bg-gray-700 text-xs md:text-[13px] sm:text-sm text-black font-semibold justify-center items-center flex">
                     <AvatarImage src="/placeholder.svg" />
                     <AvatarFallback className="bg-neutral-200 dark:bg-neutral-100 text-black">
                       {userInitials}
@@ -394,7 +419,7 @@ useEffect(() => {
                 {location.pathname === "/empresas" && "Gestión de Empresas"}
                 {location.pathname === "/departamentos" && "Gestión de Departamentos"}
                 {location.pathname === "/empleados" && "Gestión de Empleados"}
-                {location.pathname === "/bienes/registro" && "Gestión de Inventario"}
+                {location.pathname === "/bienes/registro" && "Registro de Bienes"}
                 {location.pathname === "/asistencia-dashboard" && "Control de Asistencia"}
                 {location.pathname === "/asistencia" && "Toma de Asistencia"}
                 {location.pathname === "/asistencia-evento" && "Gestión de eventos"}

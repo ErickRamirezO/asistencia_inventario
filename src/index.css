@@ -158,3 +158,25 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Scrollbar para todo el sitio */
+* {
+  scrollbar-width: thin;           /* Firefox */
+  scrollbar-color: #e5e7eb transparent; /* thumb color, track color */
+}
+
+/* Scrollbar para Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: #e5e7eb;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;   /* Color del track */
+  border-radius: 8px;
+}

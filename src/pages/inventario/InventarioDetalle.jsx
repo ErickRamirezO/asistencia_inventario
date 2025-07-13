@@ -5,12 +5,7 @@ import { useParams } from "react-router-dom";
 import api from "@/utils/axios";
 import { useNavigate } from "react-router-dom";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -39,7 +34,7 @@ export default function InventarioDetalle() {
   const [bienEditar, setBienEditar] = useState(null);
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const navigate = useNavigate();
-    const [windowSize, setWindowSize] = useState({
+  const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
@@ -53,9 +48,6 @@ export default function InventarioDetalle() {
   const availableHeight = isDesktop
     ? windowSize.height - 150 // ajusta 200px según header + paddings
     : undefined;
-
-
-
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -93,9 +85,13 @@ export default function InventarioDetalle() {
 
   const guardarDescripcion = async () => {
     try {
-      await api.patch(`/bienes-inmuebles/${bienEditar.bienesInmueblesId}/descripcion`, JSON.stringify(nuevaDescripcion), {
-        headers: { "Content-Type": "application/json" },
-      });
+      await api.patch(
+        `/bienes-inmuebles/${bienEditar.bienesInmueblesId}/descripcion`,
+        JSON.stringify(nuevaDescripcion),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       setHistorial((prev) =>
         prev.map((h) =>
@@ -112,112 +108,129 @@ export default function InventarioDetalle() {
   };
   const [searchTerm, setSearchTerm] = useState("");
 
-const historialFiltrado = historial.filter(h =>
-  h.nombreBien.toLowerCase().includes(searchTerm.toLowerCase())
-);
-
+  const historialFiltrado = historial.filter((h) =>
+    h.nombreBien.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="p-6 space-y-6 "  style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
-          }>
-      
-<Button className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto" variant="outline" onClick={() => navigate(-1)}>
-Regresar
-</Button>
+    <div
+      className="p-6 space-y-6 "
+      style={isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}}
+    >
+      <Button
+        className="bg-gray-200 hover:bg-gray-200 text-xs md:text-[13px] sm:text-sm px-3 py-1 h-auto"
+        variant="outline"
+        onClick={() => navigate(-1)}
+      >
+        Regresar
+      </Button>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4" >
-
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader><CardTitle>Total Bienes</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">{total}</p></CardContent>
+          <CardHeader>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Total Bienes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-bold">{total}</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Inventariados</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">{inventariados}</p></CardContent>
+          <CardHeader>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Inventariados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-bold">{inventariados}</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Faltantes</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">{faltantes}</p></CardContent>
+          <CardHeader>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Faltantes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-bold">{faltantes}</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Hora Actual</CardTitle></CardHeader>
-          <CardContent className="flex items-center gap-2 text-2xl font-bold">
+          <CardHeader>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Hora Actual</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center gap-2 text-xl font-bold">
             <Clock className="h-5 w-5" /> {horaActual}
           </CardContent>
         </Card>
       </div>
 
       <div className="mt-6 space-y-4">
-  <Input
-    placeholder="Buscar bien por nombre..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="max-w-sm"
-  />
-  <div className="rounded shadow overflow-x-auto">
-   <div className="overflow-y-auto  max-h-none">
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre Bien</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Encargado</TableHead>
-              <TableHead>Lugar</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {historialFiltrado.map((h) => (
-
-              <TableRow key={h.id}>
-                <TableCell>{h.nombreBien}</TableCell>
-                <TableCell>{h.descripcionBien}</TableCell>
-                <TableCell>{h.nombreEncargado || "Sin encargado"}</TableCell>
-                <TableCell
-                  className={clsx({
-                    "text-red-600 font-semibold": h.lugar !== lugarInventario,
-                  })}
-                >
-                  {h.lugar || "Sin ubicación"}
-                </TableCell>
-                <TableCell>{new Date(h.fechaInventario).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <span
-                    className={clsx("font-semibold", {
-                      "text-green-600": h.status === 1,
-                      "text-red-500": h.status === 0,
-                    })}
-                  >
-                    {h.status === 1 ? "Inventariado" : "Pendiente"}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {h.status === 1 && (
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        setBienEditar(h);
-                        setNuevaDescripcion(h.descripcionBien);
-                      }}
+        <Input
+          placeholder="Buscar bien por nombre..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm text-xs md:text-[13px] sm:text-sm"
+        />
+        <div className="rounded shadow overflow-x-auto">
+          <div className="overflow-y-auto  max-h-none">
+            <Table className="text-xs md:text-[13px] sm:text-sm">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre Bien</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead>Encargado</TableHead>
+                  <TableHead>Lugar</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {historialFiltrado.map((h) => (
+                  <TableRow key={h.id}>
+                    <TableCell>{h.nombreBien}</TableCell>
+                    <TableCell>{h.descripcionBien}</TableCell>
+                    <TableCell>
+                      {h.nombreEncargado || "Sin encargado"}
+                    </TableCell>
+                    <TableCell
+                      className={clsx({
+                        "text-red-600 font-semibold":
+                          h.lugar !== lugarInventario,
+                      })}
                     >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-       </div>
+                      {h.lugar || "Sin ubicación"}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(h.fechaInventario).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={clsx("font-semibold", {
+                          "text-green-600": h.status === 1,
+                          "text-red-500": h.status === 0,
+                        })}
+                      >
+                        {h.status === 1 ? "Inventariado" : "Pendiente"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {h.status === 1 && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => {
+                            setBienEditar(h);
+                            setNuevaDescripcion(h.descripcionBien);
+                          }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
+      </div>
 
       <Dialog open={!!bienEditar} onOpenChange={() => setBienEditar(null)}>
         <DialogContent className="sm:max-w-md">
@@ -233,7 +246,10 @@ Regresar
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <Button onClick={guardarDescripcion} className="bg-blue-600 text-white">
+            <Button
+              onClick={guardarDescripcion}
+              className="bg-blue-600 text-white"
+            >
               Guardar
             </Button>
           </div>

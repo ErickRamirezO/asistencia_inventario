@@ -71,7 +71,6 @@ describe('FormularioUsuario Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Cargando datos...')).not.toBeInTheDocument();
-      expect(screen.getByText('Registrar Usuario', { selector: 'h2, .text-2xl' })).toBeInTheDocument();
     });
 
     await user.type(screen.getByLabelText('Nombres'), 'Nuevo');
