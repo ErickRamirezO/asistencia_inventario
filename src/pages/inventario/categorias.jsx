@@ -54,11 +54,7 @@ export default function Categorias() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(categorias.length / itemsPerPage);
-  const categoriasPaginadas = categorias.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
+  
   // Reinicia la página si cambia la lista de categorías
   useEffect(() => {
     setCurrentPage(1);
@@ -75,9 +71,12 @@ export default function Categorias() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 280 // ajusta 200px según header + paddings
-    : undefined;
-
+  ? windowSize.height - 280 // ajusta 200px según header + paddings
+  : undefined;
+  const categoriasPaginadas = isDesktop
+    ? categorias.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : categorias; // En móvil muestra todas las categorías
+  
   // Validación en tiempo real
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -91,7 +90,7 @@ export default function Categorias() {
       const res = await api.get("/categorias/stock");
       setCategorias(res.data);
     } catch {
-      toast.error("Error al cargar categorías",{
+      toast.error("Error al cargar categorías", {
         richColors: true,
       });
     }
@@ -112,19 +111,19 @@ export default function Categorias() {
     try {
       if (modoEdicion) {
         await api.put(`/categorias/${categoriaActual.id}`, data);
-        toast.success("Categoría actualizada",{
+        toast.success("Categoría actualizada", {
           richColors: true,
         });
       } else {
         await api.post("/categorias", data);
-        toast.success("Categoría creada",{
+        toast.success("Categoría creada", {
           richColors: true,
         });
       }
       cargarCategorias();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar categoría",{
+      toast.error("Error al guardar categoría", {
         richColors: true,
       });
     }
@@ -199,44 +198,48 @@ export default function Categorias() {
                 )}
               </tbody>
             </table>
-            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    aria-disabled={currentPage === 1}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={currentPage === i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </PaginationLink>
+            {isDesktop && (
+              <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      aria-disabled={currentPage === 1}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
                   </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    aria-disabled={currentPage === totalPages}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      aria-disabled={currentPage === totalPages}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         </CardContent>
       </Card>

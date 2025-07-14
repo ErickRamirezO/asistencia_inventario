@@ -17,7 +17,6 @@ import {
   Calendar,
 } from "lucide-react";
 import "react-day-picker/dist/style.css";
-import axios from "axios";
 import api from "@/utils/axios";
 import { toast } from "sonner";
 import {
@@ -69,6 +68,12 @@ const ReporteAsistencia = () => {
   const availableHeight = isDesktop
     ? windowSize.height - 380 // ajusta 200px según header + paddings
     : undefined;
+  const inputHeight = isDesktop
+    ? Math.max(15, Math.floor((availableHeight || 400) / 13))
+    : 32;
+  const labelHeight = isDesktop
+    ? Math.max(8, Math.floor(inputHeight / 12))
+    : 15;
 
   //Vista previa de asistencia
   useEffect(() => {
@@ -378,12 +383,21 @@ const ReporteAsistencia = () => {
             isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div
+            className="grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+            gap-4 sm:gap-6"
+          >
             {/* Columna 1: Selección de usuarios */}
             <div className="space-y-3">
               <div className="flex items-center mb-2 sm:mb-3">
                 <Users className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold text-xs md:text-[13px] sm:text-sm">
+                <h3
+                  className="font-semibold text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: labelHeight }}
+                >
                   Seleccionar Usuarios
                 </h3>
               </div>
@@ -450,7 +464,10 @@ const ReporteAsistencia = () => {
             <div className="space-y-3">
               <div className="flex items-center mb-2 sm:mb-3">
                 <UserPlus className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold text-xs md:text-[13px] sm:text-sm">
+                <h3
+                  className="font-semibold text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: labelHeight }}
+                >
                   Usuarios Seleccionados
                 </h3>
               </div>
@@ -496,10 +513,21 @@ const ReporteAsistencia = () => {
             </div>
 
             {/* Columna 3: Rango de fechas */}
-            <div className="space-y-3">
+            <div
+              className=" space-y-3
+              col-span-1
+              sm:col-span-2
+              lg:col-span-1
+              sm:row-start-2
+              lg:row-start-auto
+              w-full"
+            >
               <div className="flex items-center mb-2 sm:mb-3">
                 <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold text-xs md:text-[13px] sm:text-sm">
+                <h3
+                  className="font-semibold text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: labelHeight }}
+                >
                   Rango de Fechas
                 </h3>
               </div>
@@ -585,7 +613,7 @@ const ReporteAsistencia = () => {
                     {data.registros[0].departamentoUsuario}
                   </div>
                   <div
-                    className="overflow-x-auto overflow-y-auto rounded-md border bg-background"
+                    className="overflow-x-auto rounded-md border bg-background"
                     style={{
                       maxWidth: "100%", // No se expande más que el contenedor padre
                       width: "100%",
@@ -597,24 +625,24 @@ const ReporteAsistencia = () => {
                       </TableCaption>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="px-2 py-1">Fecha</TableHead>
-                          <TableHead className="px-2 py-1">Entrada</TableHead>
-                          <TableHead className="px-2 py-1">Salida</TableHead>
-                          <TableHead className="px-2 py-1">
+                          <TableHead className="px-2 py-1 truncate">Fecha</TableHead>
+                          <TableHead className="px-2 py-1 truncate">Entrada</TableHead>
+                          <TableHead className="px-2 py-1 truncate">Salida</TableHead>
+                          <TableHead className="px-2 py-1 truncate">
                             Inicio almuerzo
                           </TableHead>
-                          <TableHead className="px-2 py-1">
+                          <TableHead className="px-2 py-1 truncate">
                             Fin Almuerzo
                           </TableHead>
-                          <TableHead className="px-2 py-1">Evento</TableHead>
-                          <TableHead className="px-2 py-1">
+                          <TableHead className="px-2 py-1 truncate">Evento</TableHead>
+                          <TableHead className="px-2 py-1 truncate">
                             Observación
                           </TableHead>
-                          <TableHead className="px-2 py-1">Estado</TableHead>
-                          <TableHead className="px-2 py-1">
+                          <TableHead className="px-2 py-1 truncate">Estado</TableHead>
+                          <TableHead className="px-2 py-1 truncate">
                             Horas Trabajadas
                           </TableHead>
-                          <TableHead className="px-2 py-1">
+                          <TableHead className="px-2 py-1 truncate">
                             Horas Extra
                           </TableHead>
                         </TableRow>
@@ -622,16 +650,16 @@ const ReporteAsistencia = () => {
                       <TableBody>
                         {data.registros.map((a, idx) => (
                           <TableRow key={idx}>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.fechaAsistenciaFormatted}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.horaEntradaFormatted}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.horaSalidaFormatted}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.eventoNombre !== "Asistencia Normal" ? (
                                 "----"
                               ) : (
@@ -646,7 +674,7 @@ const ReporteAsistencia = () => {
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.eventoNombre !== "Asistencia Normal" ? (
                                 "----"
                               ) : (
@@ -661,23 +689,23 @@ const ReporteAsistencia = () => {
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.eventoNombre}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.observacionDisplay}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               <Badge
                                 className={getBadgeColor(a.statusAsistencia)}
                               >
                                 {a.statusAsistencia}
                               </Badge>
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.horasLaboradasDisplay}
                             </TableCell>
-                            <TableCell className="px-2 py-1">
+                            <TableCell className="px-2 py-1 truncate">
                               {a.eventoNombre !== "Asistencia Normal"
                                 ? "----"
                                 : a.horasExtrasDisplay}

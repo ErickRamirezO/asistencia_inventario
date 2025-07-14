@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import {
   Form,
@@ -15,71 +15,109 @@ import { useForm } from "react-hook-form";
 import api from "@/utils/axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
 
-const profileFormSchema = z.object({
-  nombre: z.string()
-    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
-    .regex(nameRegex, { message: "El nombre solo debe contener letras y espacios." })
-    .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
-  apellido: z.string()
-    .min(2, { message: "El apellido debe tener al menos 2 caracteres." })
-    .regex(nameRegex, { message: "El apellido solo debe contener letras y espacios." })
-    .refine(val => !/<.*?>/.test(val), { message: "No se permiten etiquetas HTML." }),
-  email: z.string().email({
-    message: "Por favor, introduce un correo electrónico válido.",
-  }),
-  password: z.string()
-    .regex(passwordRegex, {
-      message: "La contraseña debe tener al menos 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.",
-    })
-    .optional()
-    .or(z.literal("")),
-  confirmPassword: z.string()
-    .optional()
-    .or(z.literal("")),
-}).refine((data) => {
-  if (data.password || data.confirmPassword) {
-    return data.password === data.confirmPassword;
-  }
-  return true;
-}, {
-  message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
-});
+const profileFormSchema = z
+  .object({
+    nombre: z
+      .string()
+      .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+      .regex(nameRegex, {
+        message: "El nombre solo debe contener letras y espacios.",
+      })
+      .refine((val) => !/<.*?>/.test(val), {
+        message: "No se permiten etiquetas HTML.",
+      }),
+    apellido: z
+      .string()
+      .min(2, { message: "El apellido debe tener al menos 2 caracteres." })
+      .regex(nameRegex, {
+        message: "El apellido solo debe contener letras y espacios.",
+      })
+      .refine((val) => !/<.*?>/.test(val), {
+        message: "No se permiten etiquetas HTML.",
+      }),
+    email: z.string().email({
+      message: "Por favor, introduce un correo electrónico válido.",
+    }),
+    password: z
+      .string()
+      .regex(passwordRegex, {
+        message:
+          "La contraseña debe tener al menos 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.",
+      })
+      .optional()
+      .or(z.literal("")),
+    confirmPassword: z.string().optional().or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      if (data.password || data.confirmPassword) {
+        return data.password === data.confirmPassword;
+      }
+      return true;
+    },
+    {
+      message: "Las contraseñas no coinciden",
+      path: ["confirmPassword"],
+    }
+  );
 
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false); 
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
+    : undefined;
+  const inputHeight = isDesktop
+    ? Math.max(15, Math.floor((availableHeight || 400) / 13)) // mínimo 15px
+    : 32;
+  const labelHeight = isDesktop
+    ? Math.max(8, Math.floor(inputHeight / 12)) // mínimo 8px
+    : 15;
 
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      nombre: '',
-      apellido: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      nombre: "",
+      apellido: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
-    mode: "onChange", 
-    reValidateMode: "onChange", 
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const { handleSubmit, setValue, watch } = form;
 
-    const password = watch("password");
-    const confirmPassword = watch("confirmPassword");
-    const showPasswordMatch = password && confirmPassword;
-    const passwordsMatch = password === confirmPassword && password.length > 0;
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const showPasswordMatch = password && confirmPassword;
+  const passwordsMatch = password === confirmPassword && password.length > 0;
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
@@ -108,13 +146,13 @@ const ProfilePage = () => {
         console.error("Error decoding token:", e);
       }
     } else {
-      console.warn('No token found');
+      console.warn("No token found");
       setLoading(false);
     }
   }, [setValue]);
 
   const onSubmit = async (values) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     try {
       const decodedToken = jwtDecode(token);
       const userId = decodedToken.userId;
@@ -130,14 +168,14 @@ const ProfilePage = () => {
       }
 
       try {
-        await api.patch(`/usuarios/${userId}`, updateData); 
-        toast.success('Perfil actualizado correctamente',{
-            richColors: true
+        await api.patch(`/usuarios/${userId}`, updateData);
+        toast.success("Perfil actualizado correctamente", {
+          richColors: true,
         });
       } catch (err) {
-        toast.error('Error al actualizar el perfil',{
-            richColors: true
-        })
+        toast.error("Error al actualizar el perfil", {
+          richColors: true,
+        });
         setError(err.response?.data?.message || err.message);
       }
     } catch (e) {
@@ -155,7 +193,10 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] py-8">
+    <div
+      className="flex justify-center items-center min-h-[calc(100vh-4rem)] py-8"
+      style={isDesktop ? { minHeight: availableHeight } : {}}
+    >
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg">Editar Perfil</CardTitle>
@@ -168,9 +209,19 @@ const ProfilePage = () => {
                 name="nombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Nombre</FormLabel>
+                    <FormLabel
+                      className="text-xs md:text-[13px] sm:text-sm"
+                      style={{ minHeight: labelHeight }}
+                    >
+                      Nombre
+                    </FormLabel>
                     <FormControl>
-                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Nombre" {...field} />
+                      <Input
+                        className="text-xs md:text-[13px] sm:text-sm"
+                        style={{ minHeight: inputHeight }}
+                        placeholder="Nombre"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
@@ -181,9 +232,19 @@ const ProfilePage = () => {
                 name="apellido"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Apellido</FormLabel>
+                    <FormLabel
+                      className="text-xs md:text-[13px] sm:text-sm"
+                      style={{ minHeight: labelHeight }}
+                    >
+                      Apellido
+                    </FormLabel>
                     <FormControl>
-                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Apellido" {...field} />
+                      <Input
+                        className="text-xs md:text-[13px] sm:text-sm"
+                        style={{ minHeight: inputHeight }}
+                        placeholder="Apellido"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
@@ -194,9 +255,20 @@ const ProfilePage = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Correo</FormLabel>
+                    <FormLabel
+                      className="text-xs md:text-[13px] sm:text-sm"
+                      style={{ minHeight: labelHeight }}
+                    >
+                      Correo
+                    </FormLabel>
                     <FormControl>
-                      <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Correo" type="email" {...field} />
+                      <Input
+                        className="text-xs md:text-[13px] sm:text-sm"
+                        placeholder="Correo"
+                        type="email"
+                        style={{ minHeight: inputHeight }}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
@@ -207,13 +279,19 @@ const ProfilePage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Nueva Contraseña</FormLabel>
+                    <FormLabel
+                      className="text-xs md:text-[13px] sm:text-sm"
+                      style={{ minHeight: labelHeight }}
+                    >
+                      Nueva Contraseña
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           className="text-xs md:text-[13px] sm:text-sm pr-10"
                           placeholder="Nueva Contraseña"
                           type={showPassword ? "text" : "password"}
+                          style={{ minHeight: inputHeight }}
                           {...field}
                         />
                         <button
@@ -231,7 +309,8 @@ const ProfilePage = () => {
                       </div>
                     </FormControl>
                     <span className="text-[11px] text-muted-foreground">
-                      Mínimo 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+                      Mínimo 12 caracteres, una mayúscula, una minúscula, un
+                      número y un carácter especial.
                     </span>
                     <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                   </FormItem>
@@ -242,12 +321,16 @@ const ProfilePage = () => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs md:text-[13px] sm:text-sm">Confirmar Contraseña</FormLabel>
+                    <FormLabel className="text-xs md:text-[13px] sm:text-sm"
+                      style={{ minHeight: labelHeight }}>
+                      Confirmar Contraseña
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           className="text-xs md:text-[13px] sm:text-sm pr-10"
                           placeholder="Confirmar Contraseña"
+                          style={{ minHeight: inputHeight }}
                           type={showConfirmPassword ? "text" : "password"}
                           {...field}
                         />
@@ -270,11 +353,24 @@ const ProfilePage = () => {
               />
               {/* Mensaje en tiempo real */}
               {showPasswordMatch && (
-                <p className={`text-xs md:text-[13px] sm:text-sm ${passwordsMatch ? "text-green-500" : "text-red-500"}`}>
-                  {passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
+                <p
+                  className={`text-xs md:text-[13px] sm:text-sm ${
+                    passwordsMatch ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {passwordsMatch
+                    ? "Las contraseñas coinciden"
+                    : "Las contraseñas no coinciden"}
                 </p>
               )}
-              <Button type="submit" variant="blue" className="text-xs md:text-[13px] sm:text-sm">Actualizar Datos</Button>
+              <Button
+                type="submit"
+                variant="blue"
+                className="text-xs md:text-[13px] sm:text-sm"
+                style={{ minHeight: inputHeight }}
+              >
+                Actualizar Datos
+              </Button>
             </form>
           </Form>
         </CardContent>

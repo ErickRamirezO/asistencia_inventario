@@ -47,6 +47,28 @@ export default function AsistenciaEvento() {
   const [nuevaHoraFin, setNuevaHoraFin] = useState("");
   const [nombreError, setNombreError] = useState("");
   const [horaError, setHoraError] = useState("");
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
+    : undefined;
+  const inputHeight = isDesktop
+    ? Math.max(15, Math.floor((availableHeight || 400) / 13))
+    : 32;
+  const labelHeight = isDesktop
+    ? Math.max(8, Math.floor(inputHeight / 12))
+    : 15;
 
   useEffect(() => {
     if (newEvent.nombre && !nombreEventoValido(newEvent.nombre)) {
@@ -316,7 +338,10 @@ export default function AsistenciaEvento() {
             onValueChange={setSelectedEvent}
             disabled={showCreateEvent}
           >
-            <SelectTrigger className="w-full text-sm sm:text-sm md:text-[13px]">
+            <SelectTrigger
+              className="w-full text-sm sm:text-sm md:text-[13px]"
+              style={{ minHeight: inputHeight }}
+            >
               <SelectValue placeholder="Seleccionar evento" />
             </SelectTrigger>
             <SelectContent>
@@ -350,11 +375,20 @@ export default function AsistenciaEvento() {
                     setNewEvent({ ...newEvent, nombre: e.target.value })
                   }
                   required
+                  style={{ minHeight: inputHeight }}
                 />
                 {nombreError && (
-                  <span className="text-xs md:text-[13px] sm:text-sm text-red-500">{nombreError}</span>
+                  <span
+                    className="text-xs md:text-[13px] sm:text-sm text-red-500"
+                    style={{ minHeight: labelHeight }}
+                  >
+                    {nombreError}
+                  </span>
                 )}
-                <label className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1">
+                <label
+                  className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1"
+                  style={{ minHeight: labelHeight }}
+                >
                   Establezca la hora de inicio y fin del evento
                 </label>
                 <Input
@@ -365,6 +399,7 @@ export default function AsistenciaEvento() {
                     setNewEvent({ ...newEvent, horaIngreso: e.target.value })
                   }
                   required
+                  style={{ minHeight: inputHeight }}
                 />
                 <Input
                   type="time"
@@ -374,9 +409,15 @@ export default function AsistenciaEvento() {
                     setNewEvent({ ...newEvent, horaSalida: e.target.value })
                   }
                   required
+                  style={{ minHeight: inputHeight }}
                 />
                 {horaError && (
-                  <span className="text-xs md:text-[13px] sm:text-sm text-red-500">{horaError}</span>
+                  <span
+                    className="text-xs md:text-[13px] sm:text-sm text-red-500"
+                    style={{ minHeight: labelHeight }}
+                  >
+                    {horaError}
+                  </span>
                 )}
                 <DialogFooter>
                   <Button
@@ -406,7 +447,10 @@ export default function AsistenciaEvento() {
                 className="flex flex-col gap-3"
                 onSubmit={handleEditarHoraFin}
               >
-                <label className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1">
+                <label
+                  className="text-xs md:text-[13px] sm:text-sm text-muted-foreground mb-1"
+                  style={{ minHeight: labelHeight }}
+                >
                   Nueva hora de fin para <b>{selectedEvent}</b>
                 </label>
                 <Input
@@ -414,6 +458,7 @@ export default function AsistenciaEvento() {
                   value={nuevaHoraFin}
                   onChange={(e) => setNuevaHoraFin(e.target.value)}
                   required
+                  style={{ minHeight: inputHeight }}
                 />
                 <DialogFooter>
                   <Button
@@ -451,6 +496,7 @@ export default function AsistenciaEvento() {
                 }
               }
             }}
+            style={{ minHeight: inputHeight }}
             disabled={!selectedEvent || showCreateEvent}
           />
           {isLoading && <p>Cargando...</p>}

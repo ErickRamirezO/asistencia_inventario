@@ -120,7 +120,7 @@ export default function Inventarios() {
       const res = await api.get("/inventarios");
       setInventarios(res.data);
     } catch {
-      toast.error("Error al cargar inventarios",{
+      toast.error("Error al cargar inventarios", {
         richColors: true,
       });
     }
@@ -131,7 +131,7 @@ export default function Inventarios() {
       const res = await api.get("/lugares");
       setLugares(res.data);
     } catch {
-      toast.error("Error al cargar lugares",{
+      toast.error("Error al cargar lugares", {
         richColors: true,
       });
     }
@@ -163,12 +163,12 @@ export default function Inventarios() {
     try {
       if (modoEdicion) {
         await api.put(`/inventarios/${inventarioActual.id}`, payload);
-        toast.success("Inventario actualizado",{
+        toast.success("Inventario actualizado", {
           richColors: true,
         });
       } else {
         await api.post("/inventarios", payload);
-        toast.success("Inventario creado",{
+        toast.success("Inventario creado", {
           richColors: true,
         });
       }
@@ -176,7 +176,7 @@ export default function Inventarios() {
       cargarInventarios();
       setFormVisible(false);
     } catch {
-      toast.error("Error al guardar inventario",{
+      toast.error("Error al guardar inventario", {
         richColors: true,
       });
     }
@@ -314,8 +314,12 @@ export default function Inventarios() {
                 <thead>
                   <tr>
                     <th className="p-2 text-left hidden">ID</th>
-                    <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">Nombre</th>
-                    <th className="p-2 text-right text-xs md:text-[13px] sm:text-sm">Acciones</th>
+                    <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">
+                      Nombre
+                    </th>
+                    <th className="p-2 text-right text-xs md:text-[13px] sm:text-sm">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -323,7 +327,9 @@ export default function Inventarios() {
                     inventariosPaginados.map((inv) => (
                       <tr key={inv.id} className="border-t">
                         <td className="hidden">{inv.id}</td>
-                        <td className="p-2 text-xs md:text-[13px] sm:text-sm">{inv.nombreInventario}</td>
+                        <td className="p-2 text-xs md:text-[13px] sm:text-sm">
+                          {inv.nombreInventario}
+                        </td>
                         <td className="p-2 text-right flex gap-2 justify-end">
                           <Button
                             size="icon"
@@ -355,7 +361,10 @@ export default function Inventarios() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3} className="text-center p-2 text-xs md:text-[13px] sm:text-sm">
+                      <td
+                        colSpan={3}
+                        className="text-center p-2 text-xs md:text-[13px] sm:text-sm"
+                      >
                         No hay inventarios.
                       </td>
                     </tr>

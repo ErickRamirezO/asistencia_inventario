@@ -106,7 +106,7 @@ const departamentosPaginados = isDesktop
       const res = await api.get("/departamentos");
       setDepartamentos(res.data);
     } catch {
-      toast.error("Error al cargar departamentos",{
+      toast.error("Error al cargar departamentos", {
         richColors: true,
       });
     }
@@ -129,19 +129,19 @@ const departamentosPaginados = isDesktop
     try {
       if (modoEdicion) {
         await api.put(`/departamentos/${departamentoActual.id}`, data);
-        toast.success("Departamento actualizado",{
+        toast.success("Departamento actualizado", {
           richColors: true,
         });
       } else {
         await api.post("/departamentos", data);
-        toast.success("Departamento creado",{
+        toast.success("Departamento creado", {
           richColors: true,
         });
       }
       cargarDepartamentos();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar departamento",{
+      toast.error("Error al guardar departamento", {
         richColors: true,
       });
     }
@@ -212,34 +212,46 @@ const departamentosPaginados = isDesktop
               </tbody>
             </table>
             {isDesktop && (
-            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    aria-disabled={currentPage === 1}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={currentPage === i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </PaginationLink>
+              <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      aria-disabled={currentPage === 1}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
                   </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    aria-disabled={currentPage === totalPages}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      aria-disabled={currentPage === totalPages}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </div>
         </CardContent>

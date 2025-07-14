@@ -34,7 +34,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 // Helper function to convert "HH:mm" string to minutes for easy comparison
 const timeToMinutes = (timeString) => {
   if (!timeString) return null;
@@ -241,6 +248,14 @@ export default function TurnosLaborales() {
   const availableHeight = isDesktop
     ? windowSize.height - 200 // ajusta 200px según header + paddings
     : undefined;
+  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const turnosPaginados = isDesktop
+    ? turnos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : turnos; // En móvil muestra todos los turnos
+
+  const totalPages = Math.ceil(turnos.length / itemsPerPage);
+
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -498,8 +513,8 @@ export default function TurnosLaborales() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {turnos.length > 0 ? (
-              turnos.map((turno, index) => (
+            {turnosPaginados.length > 0 ? (
+              turnosPaginados.map((turno, index) => (
                 <TableRow key={index}>
                   <TableCell className="text-xs md:text-[13px] sm:text-sm">
                     {turno.nombreHorario}
@@ -530,6 +545,48 @@ export default function TurnosLaborales() {
             )}
           </TableBody>
         </Table>
+        {isDesktop && (
+          <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  aria-disabled={currentPage === 1}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    isActive={currentPage === i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  aria-disabled={currentPage === totalPages}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </div>
     </div>
   );

@@ -36,9 +36,9 @@ import { Pencil } from "lucide-react";
 
 const FormSchema = z.object({
   nombreLugar: z
-  .string()
-  .min(2, { message: "Debe tener al menos 2 caracteres" })
-  .max(30, { message: "No debe superar los 30 caracteres" })
+    .string()
+    .min(2, { message: "Debe tener al menos 2 caracteres" })
+    .max(30, { message: "No debe superar los 30 caracteres" })
     .regex(/^[A-Za-z0-9 ]+$/, {
       message: "No se permiten caracteres especiales",
     }),
@@ -81,9 +81,8 @@ export default function LugaresView() {
 
   const totalPages = Math.ceil(lugares.length / itemsPerPage);
   const lugaresPaginados = isDesktop
-  ? lugares.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : lugares;
-
+    ? lugares.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : lugares; // En móvil muestra todos los lugares
 
   // Reinicia la página si cambia la lista de lugares
   useEffect(() => {
@@ -118,7 +117,7 @@ export default function LugaresView() {
       const res = await api.get("/lugares");
       setLugares(res.data);
     } catch {
-      toast.error("Error al cargar lugares",{
+      toast.error("Error al cargar lugares", {
         richColors: true,
       });
     }
@@ -142,19 +141,19 @@ export default function LugaresView() {
           ...data,
           activo: true,
         });
-        toast.success("Lugar actualizado",{
+        toast.success("Lugar actualizado", {
           richColors: true,
         });
       } else {
         await api.post("/lugares", data);
-        toast.success("Lugar creado",{
+        toast.success("Lugar creado", {
           richColors: true,
         });
       }
       cargarLugares();
       setDialogOpen(false);
     } catch {
-      toast.error("Error al guardar lugar",{
+      toast.error("Error al guardar lugar", {
         richColors: true,
       });
     }
@@ -220,36 +219,47 @@ export default function LugaresView() {
               </tbody>
             </table>
             {isDesktop && (
-            <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    aria-disabled={currentPage === 1}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={currentPage === i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </PaginationLink>
+              <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      aria-disabled={currentPage === 1}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
                   </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    aria-disabled={currentPage === totalPages}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      aria-disabled={currentPage === totalPages}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
-
           </div>
         </CardContent>
       </Card>

@@ -63,9 +63,8 @@ export default function VerBienes() {
   const totalPages = Math.ceil(bienesFiltrados.length / itemsPerPage);
   const bienesPaginados = isDesktop
   ? bienesFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : bienesFiltrados;
+  : bienesFiltrados; // En móvil muestra todos los bienes
 
-  
 
   // Reinicia la página si cambia el filtro de búsqueda
   useEffect(() => {
@@ -80,7 +79,7 @@ export default function VerBienes() {
         setLoading(false);
       } catch (error) {
         console.error("Error al obtener los bienes:", error);
-        toast.error("No se pudieron cargar los bienes inmuebles",{
+        toast.error("No se pudieron cargar los bienes inmuebles", {
           richColors: true,
         });
         setLoading(false);
@@ -98,12 +97,12 @@ export default function VerBienes() {
           b.id === id ? { ...b, status: b.status === 1 ? 0 : 1 } : b
         )
       );
-      toast.success("Estado actualizado correctamente",{
+      toast.success("Estado actualizado correctamente", {
         richColors: true,
       });
     } catch (error) {
       console.error("Error al cambiar estado del bien:", error);
-      toast.error("No se pudo actualizar el estado del bien.",{
+      toast.error("No se pudo actualizar el estado del bien.", {
         richColors: true,
       });
     }

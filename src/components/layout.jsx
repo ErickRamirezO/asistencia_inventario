@@ -118,7 +118,7 @@ useEffect(() => {
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <div className="flex min-h-screen w-screen ">
+      <div className="flex min-h-screen w-screen overflow-hidden">
         <Sidebar>
           <SidebarHeader>
             <div className="flex justify-center gap-2 p-4b">
@@ -390,7 +390,7 @@ useEffect(() => {
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span>Mi Cuentamm</span>
+                  <span>Mi Cuenta</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
