@@ -40,7 +40,7 @@ export default function VerBienes() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 100 // ajusta 200px según header + paddings
+    ? windowSize.height - 230 // ajusta 200px según header + paddings
     : undefined;
     const itemsPerPage = (() => {
   if (!isDesktop) return 3;

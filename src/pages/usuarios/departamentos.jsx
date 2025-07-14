@@ -67,7 +67,7 @@ export default function Departamentos() {
   }, []);
 
   const isDesktop = windowSize.width >= 768;
-  const availableHeight = isDesktop ? windowSize.height - 200 : undefined;
+  const availableHeight = isDesktop ? windowSize.height - 230 : undefined;
 
   // 👇 Igual que VerBienes: cálculo dinámico
   const itemsPerPage = (() => {
