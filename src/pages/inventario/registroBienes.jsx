@@ -162,9 +162,17 @@ export default function RegistrarBien() {
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
 
-    ? windowSize.height - 100 // ajusta 200px según header + paddings
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
 
     : undefined;
+    const inputHeight = isDesktop
+  ? Math.max(15, Math.floor((availableHeight || 400) /13 )) // mínimo 32px
+  : 32;
+  const labelHeight = isDesktop
+  ? Math.max(8, Math.floor(inputHeight / 12)) // mínimo 8px (h-2)
+  : 15;
+
+
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -481,11 +489,14 @@ export default function RegistrarBien() {
       {/* <-- pt-0 elimina padding top extra */}
       <Card className="w-full">
         <CardContent
-          className="overflow-x-hidden w-full max-w-full p-4"
-          style={
-            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
-          }
-        >
+  className="w-full max-w-full p-2 overflow-hidden"
+  style={
+    isDesktop
+      ? { height: availableHeight, overflowY: "auto" }
+      : undefined
+  }
+>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Sección del formulario */}
             <div>
@@ -501,11 +512,12 @@ export default function RegistrarBien() {
                     name="nombreBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Nombre del Bien
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: Escritorio"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -521,11 +533,12 @@ export default function RegistrarBien() {
                     name="descripcion"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel  style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Descripción
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: De madera color negro"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -541,11 +554,12 @@ export default function RegistrarBien() {
                     name="precio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Precio
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             type="number"
                             placeholder="Ejemplo: 120.00"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
@@ -561,17 +575,18 @@ export default function RegistrarBien() {
                     name="usuarioId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
-                          Usuario Encargado (opcional)
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                          Usuario Encargado
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                              style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm",
+                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -632,13 +647,14 @@ export default function RegistrarBien() {
                     name="serieBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Serie
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: SN123456"
-                            className="w-full text-xs md:text-[13px] sm:text-sm"
+                            className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
                           />
                         </FormControl>
@@ -652,13 +668,14 @@ export default function RegistrarBien() {
                     name="modeloBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Modelo
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: X300"
-                            className="w-full text-xs md:text-[13px] sm:text-sm"
+                            className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
                           />
                         </FormControl>
@@ -672,11 +689,12 @@ export default function RegistrarBien() {
                     name="marcaBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Marca
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: HP"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -692,13 +710,14 @@ export default function RegistrarBien() {
                     name="materialBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Material
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: Acero inoxidable"
-                            className="w-full text-xs md:text-[13px] sm:text-sm"
+                            className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
                           />
                         </FormControl>
@@ -712,13 +731,14 @@ export default function RegistrarBien() {
                     name="dimensionesBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Dimensiones
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: 1.2m x 0.6m"
-                            className="w-full text-xs md:text-[13px] sm:text-sm"
+                            className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
                           />
                         </FormControl>
@@ -732,11 +752,12 @@ export default function RegistrarBien() {
                     name="observacionBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
                           Observaciones
                         </FormLabel>
                         <FormControl>
                           <Input
+                          style={{ height: inputHeight }}
                             placeholder="Ejemplo: Leve desgaste"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -752,13 +773,14 @@ export default function RegistrarBien() {
                     name="ubicacionBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="w-full text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm ">
                           Ubicación (Lugar)
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                              style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -829,17 +851,18 @@ export default function RegistrarBien() {
                     name="departamentoId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="w-full text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm">
                           Departamento
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                              style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm",
+                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm  ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -906,17 +929,18 @@ export default function RegistrarBien() {
                     name="categoriaId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="w-full text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm">
                           Categoría
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                              style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm",
+                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
