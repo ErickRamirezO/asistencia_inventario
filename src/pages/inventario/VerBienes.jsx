@@ -61,10 +61,11 @@ export default function VerBienes() {
 
 
   const totalPages = Math.ceil(bienesFiltrados.length / itemsPerPage);
-  const bienesPaginados = bienesFiltrados.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const bienesPaginados = isDesktop
+  ? bienesFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : bienesFiltrados;
+
+  
 
   // Reinicia la página si cambia el filtro de búsqueda
   useEffect(() => {
@@ -203,6 +204,7 @@ export default function VerBienes() {
               )}
             </TableBody>
           </Table>
+          {isDesktop && (
           <Pagination className="mt-4" style={{ minHeight: "48px" }}>
             <PaginationContent>
               <PaginationItem>
@@ -241,6 +243,7 @@ export default function VerBienes() {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
+          )}
         </div>
       </div>
     </div>

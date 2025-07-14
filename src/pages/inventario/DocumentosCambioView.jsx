@@ -1,6 +1,6 @@
 "use client";
+import { useEffect, useState, useMemo } from "react";
 
-import { useEffect, useState } from "react";
 import api from "@/utils/axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,39 +18,51 @@ import {
 export default function DocumentosCambioView() {
   const [documentos, setDocumentos] = useState([]);
   const [historial, setHistorial] = useState([]);
-  const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
-  const itemsPerPage = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(documentos.length / itemsPerPage);
-  const documentosPaginados = documentos.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Reinicia la página si cambia la lista de documentos
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [documentos]);
-  const navigate = useNavigate();
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
+    const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+    ? windowSize.height - 230 // ajusta 200px según header + paddings
+    : undefined;
+
+  useEffect(() => {
+    cargarDocumentos();
+  }, []);
+  const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
+  const itemsPerPage = useMemo(() => {
+  if (!isDesktop) return 3;
+  if (availableHeight < 350) return 3;
+  if (availableHeight < 400) return 4;
+  if (availableHeight < 450) return 5;
+  if (availableHeight < 550) return 6;
+  if (availableHeight < 600) return 7;
+  return 8;
+}, [availableHeight, isDesktop]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(documentos.length / itemsPerPage);
+  const documentosPaginados = isDesktop
+  ? documentos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : documentos;
+
+
+  // Reinicia la página si cambia la lista de documentos
+ useEffect(() => {
+  setCurrentPage(1);
+}, [documentos, itemsPerPage]);
+
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const handleResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
-  const availableHeight = isDesktop
-    ? windowSize.height - 280 // ajusta 200px según header + paddings
-    : undefined;
 
-  useEffect(() => {
-    cargarDocumentos();
-  }, []);
 
   const cargarDocumentos = async () => {
     try {
@@ -66,7 +78,7 @@ export default function DocumentosCambioView() {
       <Card>
         <CardHeader className="flex justify-end px-4 sm:px-6">
           <Button
-          variant="blue"
+           variant="blue"
             onClick={() => navigate("/cambio-encargado")}
             className="text-xs md:text-[13px] sm:text-sm"
           >
@@ -80,52 +92,43 @@ export default function DocumentosCambioView() {
           }
         >
           <div className="md:overflow-y-auto border rounded-md overflow-x-auto">
-            <table className="min-w-[600px] w-full text-xs md:text-[13px] sm:text-sm">
-              <thead>
-                <tr>
-                  <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">Fecha</th>
-                  <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">Nuevo Custodio</th>
-                  <th className="p-2 text-left text-xs md:text-[13px] sm:text-sm">Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentosPaginados.length > 0 ? (
-                  documentosPaginados.map((doc) => (
-                    <tr key={doc.id} className="border-t">
-                      <td className="p-2">
-                        {new Date(doc.fechaCambio)
-                          .toLocaleString("sv-SE", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          })
-                          .replace(",", "")}
-                      </td>
-                      <td className="p-2">{doc.nombreUsuarioCompleto}</td>
-                      <td className="p-2">
-                        <Button
-                          onClick={() =>
-                            navigate(`/cambio/historial/${doc.id}`)
-                          }
-                          className="bg-blue-500 text-white hover:bg-blue-600 text-xs md:text-[13px] sm:text-sm"
-                        >
-                          Ver Historial
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={3} className="text-center p-2 text-xs md:text-[13px] sm:text-sm">
-                      No hay documentos.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
+  <thead>
+    <tr>
+      <th className="p-2 text-center w-[30%]">Fecha</th>
+      <th className="p-2 text-center w-[40%]">Nuevo Custodio</th>
+      <th className="p-2 text-center w-[30%]">Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {documentosPaginados.length > 0 ? (
+      documentosPaginados.map((doc) => (
+        <tr key={doc.id} className="border-t">
+          <td className="p-2 truncate text-center">{new Date(doc.fechaCambio).toLocaleString("sv-SE", {
+              year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+            }).replace(",", "")}
+          </td>
+          <td className="p-2 truncate text-center">{doc.nombreUsuarioCompleto}</td>
+          <td className="p-2 truncate text-center">
+            <Button
+              onClick={() => navigate(`/cambio/historial/${doc.id}`)}
+              className="bg-blue-500 text-white hover:bg-blue-600 text-xs md:text-[13px] sm:text-sm"
+            >
+              Ver Historial
+            </Button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan={3} className="text-center p-2">
+          No hay documentos.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+{isDesktop && (
             <Pagination className="mt-4" style={{ minHeight: "48px" }}>
               <PaginationContent>
                 <PaginationItem>
@@ -164,6 +167,7 @@ export default function DocumentosCambioView() {
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
+)}
           </div>
         </CardContent>
       </Card>

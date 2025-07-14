@@ -87,7 +87,7 @@ export default function Inventarios() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const isDesktop = windowSize.width >= 600; // md: 768px breakpoint
   const availableHeight = isDesktop
     ? windowSize.height - 230 // ajusta 200px según header + paddings
     : undefined;
@@ -103,10 +103,10 @@ export default function Inventarios() {
   return 8;
 })();
  const totalPages = Math.ceil(inventarios.length / itemsPerPage);
-   const inventariosPaginados = inventarios.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+   const inventariosPaginados = isDesktop
+  ? inventarios.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : inventarios;
+
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -362,6 +362,7 @@ export default function Inventarios() {
                   )}
                 </tbody>
               </table>
+              {isDesktop && (
               <Pagination className="mt-4 text-xs md:text-[13px] sm:text-sm" style={{ minHeight: "48px" }}>
                 <PaginationContent>
                   <PaginationItem>
@@ -390,6 +391,7 @@ export default function Inventarios() {
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
+              )}
             </div>
           </div>
         </CardContent>
