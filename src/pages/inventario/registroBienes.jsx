@@ -159,17 +159,17 @@ export default function RegistrarBien() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const isDesktop = windowSize.width >= 600; // md: 768px breakpoint
   const availableHeight = isDesktop
 
     ? windowSize.height - 200 // ajusta 200px según header + paddings
 
     : undefined;
     const inputHeight = isDesktop
-  ? Math.max(15, Math.floor((availableHeight || 400) /13 )) // mínimo 32px
+  ? Math.max(18, Math.floor(((availableHeight-60) || 800) /12 )) // mínimo 32px
   : 32;
   const labelHeight = isDesktop
-  ? Math.max(8, Math.floor(inputHeight / 12)) // mínimo 8px (h-2)
+  ? Math.max(7, Math.floor(inputHeight / 12)) // mínimo 8px (h-2)
   : 15;
 
 
@@ -487,7 +487,7 @@ export default function RegistrarBien() {
     <div className="p-1 md:p-10 pt-0">
       {" "}
       {/* <-- pt-0 elimina padding top extra */}
-      <Card className="w-full">
+      <Card className="  border-transparent shadow-none rounded-none p-0 ">
         <CardContent
   className="w-full max-w-full p-2 overflow-hidden"
   style={
@@ -774,7 +774,7 @@ export default function RegistrarBien() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm ">
-                          Ubicación (Lugar)
+                          Ubicación
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -862,7 +862,7 @@ export default function RegistrarBien() {
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[10px] sm:text-sm  ",
+                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm  ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -940,7 +940,7 @@ export default function RegistrarBien() {
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[10px] sm:text-sm ",
+                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >

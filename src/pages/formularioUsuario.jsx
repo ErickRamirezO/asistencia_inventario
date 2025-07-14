@@ -163,14 +163,14 @@ export default function FormularioUsuario() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 300 // ajusta 200px según header + paddings
+    ? windowSize.height - 230 // ajusta 200px según header + paddings
     : undefined;
         const inputHeight = isDesktop
   ? Math.max(15, Math.floor((availableHeight || 400) /9 )) // mínimo 32px
   : 32;
   const labelHeight = isDesktop
-  ? Math.max(10, Math.floor(inputHeight / 4)) // mínimo 8px (h-2)
-  : 15;
+  ? Math.max(1, Math.floor(inputHeight / 10)) // mínimo 8px (h-2)
+  : 10;
 
 
 
@@ -518,12 +518,12 @@ return (
         </div>
       )}
       
-      <Card className="overflow-hidden">
+      <Card className="border-transparent shadow-none rounded-none pt-6">
         
         <CardContent className="px-2 sm:px-6" >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4" style={
     isDesktop
       ? { maxHeight: availableHeight, overflowY: 'auto' }
       : {}
@@ -551,7 +551,7 @@ return (
                       name="apellidos"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Apellidos</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Apellidos</FormLabel>
                           <FormControl>
                             <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm"placeholder="Ejemplo: Pérez Gómez" {...field} />
                           </FormControl>

@@ -40,7 +40,7 @@ export default function VerBienes() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 230 // ajusta 200px según header + paddings
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
     : undefined;
     const itemsPerPage = (() => {
   if (!isDesktop) return 3;
@@ -128,15 +128,16 @@ export default function VerBienes() {
             isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
         >
-          <Table className="min-w-full w-full table-auto text-xs md:text-[13px] sm:text-sm">
+          <Table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
+
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-[13px] sm:text-sm">Nombres</TableHead>
-                <TableHead className="text-xs md:text-[13px] sm:text-sm">Categoría</TableHead>
-                <TableHead className="text-xs md:text-[13px] sm:text-sm">Ubicación</TableHead>
-                <TableHead className="text-xs md:text-[13px] sm:text-sm">Tag RFID</TableHead>
-                <TableHead className="text-xs md:text-[13px] sm:text-sm">Estado</TableHead>
-                <TableHead className="text-right text-xs md:text-[13px] sm:text-sm">
+                <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Nombres</TableHead>
+                <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Categoría</TableHead>
+                <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Ubicación</TableHead>
+                <TableHead className="text-xs md:text-[13px] sm:text-sm w-[20%]">Tag RFID</TableHead>
+                <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Estado</TableHead>
+                <TableHead className="text-right text-xs md:text-[13px] sm:text-sm w-[10%]">
                   Acciones
                 </TableHead>
               </TableRow>
@@ -145,19 +146,19 @@ export default function VerBienes() {
               {bienesPaginados.length > 0 ? (
                 bienesPaginados.map((bien) => (
                   <TableRow key={bien.id}>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {bien.nombreBien}
                     </TableCell>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {bien.categoriaNombre || "Sin categoría"}
                     </TableCell>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {bien.ubicacionBien}
                     </TableCell>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[25%] truncate">
                       <code>{bien.tagRfidNumero || "No asignado"}</code>
                     </TableCell>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm">
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[10%] truncate">
                       <div className="flex items-center space-x-2">
                         <Switch
                           id={`status-${bien.id}`}
@@ -177,7 +178,7 @@ export default function VerBienes() {
                         </Label>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right w-[5%]">
                       <Button
                         variant="outline"
                         size="icon"

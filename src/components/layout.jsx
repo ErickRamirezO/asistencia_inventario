@@ -390,7 +390,7 @@ useEffect(() => {
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span>Mi Cuenta</span>
+                  <span>Mi Cuentamm</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
