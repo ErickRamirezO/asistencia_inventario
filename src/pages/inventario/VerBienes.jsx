@@ -40,13 +40,25 @@ export default function VerBienes() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 200 // ajusta 200px según header + paddings
+    ? windowSize.height - 100 // ajusta 200px según header + paddings
     : undefined;
+    const itemsPerPage = (() => {
+  if (!isDesktop) return 3;
+  if (availableHeight < 350) return 3;
+  if (availableHeight < 400) return 4;
+  if (availableHeight < 450) return 5;
+    if (availableHeight < 550) return 6;
+  if (availableHeight < 600) return 8;
+
+  return 8;
+})();
+
   const bienesFiltrados = bienes.filter((bien) =>
     bien.nombreBien.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+ // const itemsPerPage = isDesktop ? 7 : 12;
+
 
   const totalPages = Math.ceil(bienesFiltrados.length / itemsPerPage);
   const bienesPaginados = bienesFiltrados.slice(

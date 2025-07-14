@@ -51,13 +51,42 @@ export default function Departamentos() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [departamentoActual, setDepartamentoActual] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+
+   // 👇 Medir tamaño de pantalla
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isDesktop = windowSize.width >= 768;
+  const availableHeight = isDesktop ? windowSize.height - 200 : undefined;
+
+  // 👇 Igual que VerBienes: cálculo dinámico
+  const itemsPerPage = (() => {
+    if (!isDesktop) return 3;
+    if (availableHeight < 350) return 3;
+    if (availableHeight < 400) return 4;
+    if (availableHeight < 450) return 5;
+    if (availableHeight < 550) return 6;
+    if (availableHeight < 600) return 8;
+    return 8;
+  })();
+
+
 
   const totalPages = Math.ceil(departamentos.length / itemsPerPage);
-  const departamentosPaginados = departamentos.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+const departamentosPaginados = isDesktop
+  ? departamentos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : departamentos;
+
 
   // Reinicia la página si cambia la lista de departamentos
   useEffect(() => {
@@ -144,6 +173,9 @@ export default function Departamentos() {
               overflow-y-visible sm:overflow-y-auto
               sm:max-h-[400px]
             "
+            style={
+            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+          }
           >
             <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
               <thead>
@@ -179,6 +211,7 @@ export default function Departamentos() {
                 )}
               </tbody>
             </table>
+            {isDesktop && (
             <Pagination className="mt-4" style={{ minHeight: "48px" }}>
               <PaginationContent>
                 <PaginationItem>
@@ -207,6 +240,7 @@ export default function Departamentos() {
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
+            )}
           </div>
         </CardContent>
       </Card>
