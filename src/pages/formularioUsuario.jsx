@@ -163,8 +163,15 @@ export default function FormularioUsuario() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 250 // ajusta 200px según header + paddings
+    ? windowSize.height - 300 // ajusta 200px según header + paddings
     : undefined;
+        const inputHeight = isDesktop
+  ? Math.max(15, Math.floor((availableHeight || 400) /9 )) // mínimo 32px
+  : 32;
+  const labelHeight = isDesktop
+  ? Math.max(10, Math.floor(inputHeight / 4)) // mínimo 8px (h-2)
+  : 15;
+
 
 
   const formDepartamento = useForm({
@@ -530,9 +537,9 @@ return (
                       name="nombres"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Nombres</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Nombres</FormLabel>
                           <FormControl>
-                            <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: Juan Carlos" {...field} />
+                            <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: Juan Carlos" {...field} />
                           </FormControl>
                           <FormMessage className="text-xs md:text-[13px] sm:text-sm"/>
                         </FormItem>
@@ -546,7 +553,7 @@ return (
                         <FormItem>
                           <FormLabel className="text-xs md:text-[13px] sm:text-sm">Apellidos</FormLabel>
                           <FormControl>
-                            <Input className="text-xs md:text-[13px] sm:text-sm"placeholder="Ejemplo: Pérez Gómez" {...field} />
+                            <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm"placeholder="Ejemplo: Pérez Gómez" {...field} />
                           </FormControl>
                           <FormMessage className="text-xs md:text-[13px] sm:text-sm"/>
                         </FormItem>
@@ -562,9 +569,9 @@ return (
                       min={10}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Cédula</FormLabel>
+                          <FormLabel style={{ height: labelHeight }}    className="text-xs md:text-[13px] sm:text-sm">Cédula</FormLabel>
                           <FormControl>
-                            <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: 1234567890" {...field} />
+                            <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: 1234567890" {...field} />
                           </FormControl>
                           <FormMessage className="text-xs md:text-[13px] sm:text-sm"/>
                         </FormItem>
@@ -576,9 +583,9 @@ return (
                       name="telefono"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Teléfono</FormLabel>
+                          <FormLabel  style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Teléfono</FormLabel>
                           <FormControl>
-                            <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: 0987654321" {...field} />
+                            <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm" placeholder="Ejemplo: 0987654321" {...field} />
                           </FormControl>
                           <FormMessage className="text-xs md:text-[13px] sm:text-sm" />
                         </FormItem>
@@ -593,9 +600,9 @@ return (
                       name="correoElectronico"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Correo Electrónico</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Correo Electrónico</FormLabel>
                           <FormControl>
-                            <Input className="text-xs md:text-[13px] sm:text-sm" placeholder="usuario@correo.com" {...field} />
+                            <Input style={{ height: inputHeight }} className="text-xs md:text-[13px] sm:text-sm" placeholder="usuario@correo.com" {...field} />
                           </FormControl>
                           <FormMessage className="text-xs md:text-[13px] sm:text-sm"/>
                         </FormItem>
@@ -607,11 +614,11 @@ return (
                       name="fechaNacimiento"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Fecha de Nacimiento</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Fecha de Nacimiento</FormLabel>
                           <Popover open={openFechaNacimiento} onOpenChange={setOpenFechaNacimiento}>
                             <PopoverTrigger asChild>
                               <FormControl>
-                                <Button
+                                <Button style={{ height: inputHeight }}
                                   variant="outline"
                                   className={cn(
                                     "w-full pl-3 text-left font-normal text-xs md:text-[13px] sm:text-sm",
@@ -661,11 +668,12 @@ return (
                       name="departamentoId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Departamento</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Departamento</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
+                                style={{ height: inputHeight }}
                                   variant="outline"
                                   role="combobox"
                                   className={cn("w-full justify-between text-xs md:text-[13px] sm:text-sm", !field.value && "text-muted-foreground")}
@@ -710,11 +718,12 @@ return (
                       name="rol"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs md:text-[13px] sm:text-sm">Rol</FormLabel>
+                          <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">Rol</FormLabel>
                           <Popover open={openRol} onOpenChange={setOpenRol}>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
+                                style={{ height: inputHeight }}
                                   variant="outline"
                                   role="combobox"
                                   className={cn(
@@ -781,7 +790,7 @@ return (
                     name="tagsRFIDTag"
                     render={() => (
                       <FormItem className="flex-1 flex flex-col">
-                        <FormLabel className="text-xs sm:text-sm md:text-[13px]">Tarjeta RFID</FormLabel>
+                        <FormLabel style={{ height: labelHeight }} className="text-xs sm:text-sm md:text-[13px]">Tarjeta RFID</FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 flex-1 flex flex-col justify-center">
                           {/* Contenido existente sin cambios */}
                           {rfidValue ? (
@@ -874,7 +883,7 @@ return (
                 name="nombreDepartamento"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre del Departamento</FormLabel>
+                    <FormLabel style={{ height: labelHeight }}>Nombre del Departamento</FormLabel>
                     <FormControl>
                       <Input placeholder="Ejemplo: Contabilidad" className="w-full" {...field} />
                     </FormControl>

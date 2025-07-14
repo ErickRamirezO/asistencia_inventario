@@ -862,7 +862,7 @@ export default function RegistrarBien() {
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm  ",
+                                  "w-full justify-between text-xs md:text-[10px] sm:text-sm  ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -940,10 +940,11 @@ export default function RegistrarBien() {
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between text-xs md:text-[13px] sm:text-sm ",
+                                  "w-full justify-between text-xs md:text-[10px] sm:text-sm ",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
+                                
                                 {field.value
                                   ? categorias.find(
                                       (cat) => cat.value === field.value
@@ -1005,7 +1006,8 @@ export default function RegistrarBien() {
 
             {/* Panel RFID como Card */}
             <Card className="h-fit self-start w-full">
-              <CardHeader>
+              <CardHeader >
+                
                 <CardTitle className="font-semibold text-xs md:text-[13px] sm:text-sm">
                   Tarjeta RFID
                 </CardTitle>
