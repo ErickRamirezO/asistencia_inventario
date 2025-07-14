@@ -68,14 +68,9 @@ export default function Inventarios() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [inventarioActual, setInventarioActual] = useState(null);
-  const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(inventarios.length / itemsPerPage);
-  const inventariosPaginados = inventarios.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
 
   // Reinicia la página si cambia la lista de inventarios
   useEffect(() => {
@@ -94,9 +89,24 @@ export default function Inventarios() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 280 // ajusta 200px según header + paddings
+    ? windowSize.height - 230 // ajusta 200px según header + paddings
     : undefined;
 
+    const itemsPerPage = (() => {
+  if (!isDesktop) return 3;
+  if (availableHeight < 350) return 3;
+  if (availableHeight < 400) return 4;
+  if (availableHeight < 450) return 5;
+    if (availableHeight < 550) return 6;
+  if (availableHeight < 600) return 8;
+
+  return 8;
+})();
+ const totalPages = Math.ceil(inventarios.length / itemsPerPage);
+   const inventariosPaginados = inventarios.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {

@@ -169,38 +169,42 @@ export default function InventarioDetalle() {
         />
         <div className="rounded shadow overflow-x-auto">
           <div className="overflow-y-auto  max-h-none">
-            <Table className="text-xs md:text-[13px] sm:text-sm">
+           <Table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
+
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nombre Bien</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead>Encargado</TableHead>
-                  <TableHead>Lugar</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Nombre Bien</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Descripción</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Encargado</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Lugar</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Fecha</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Estado</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {historialFiltrado.map((h) => (
                   <TableRow key={h.id}>
-                    <TableCell>{h.nombreBien}</TableCell>
-                    <TableCell>{h.descripcionBien}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">{h.nombreBien}</TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">{h.descripcionBien}</TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {h.nombreEncargado || "Sin encargado"}
                     </TableCell>
                     <TableCell
-                      className={clsx({
-                        "text-red-600 font-semibold":
-                          h.lugar !== lugarInventario,
-                      })}
-                    >
-                      {h.lugar || "Sin ubicación"}
-                    </TableCell>
-                    <TableCell>
+  className={clsx(
+    "text-xs md:text-[13px] sm:text-sm w-[15%] truncate",
+    {
+      "text-red-600 font-semibold": h.lugar !== lugarInventario,
+    }
+  )}
+>
+  {h.lugar || "Sin ubicación"}
+</TableCell>
+
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {new Date(h.fechaInventario).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       <span
                         className={clsx("font-semibold", {
                           "text-green-600": h.status === 1,

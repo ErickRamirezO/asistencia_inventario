@@ -10,6 +10,8 @@ import { toast } from "sonner";
 export default function HistorialDocumentoView() {
   const { documentoId } = useParams();
   const [historial, setHistorial] = useState([]);
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const navigate = useNavigate();
     const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
@@ -23,9 +25,21 @@ export default function HistorialDocumentoView() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 180 // ajusta 200px según header + paddings
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
     : undefined;
 
+useEffect(() => {
+  const handleBeforePrint = () => setIsPrinting(true);
+  const handleAfterPrint = () => setIsPrinting(false);
+
+  window.addEventListener("beforeprint", handleBeforePrint);
+  window.addEventListener("afterprint", handleAfterPrint);
+
+  return () => {
+    window.removeEventListener("beforeprint", handleBeforePrint);
+    window.removeEventListener("afterprint", handleAfterPrint);
+  };
+}, []);
 
 
   useEffect(() => {
@@ -49,37 +63,58 @@ export default function HistorialDocumentoView() {
     month: "long",
     day: "numeric",
   });
+  const handlePrint = () => {
+  setIsPrinting(true);
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      setIsPrinting(false); // Restauramos después de imprimir
+    }, 1000); // Espera adicional opcional
+  }, 100); // Espera mínima para que React re-renderice
+};
+
 
   return (
     <div className="p-6 space-y-6 print-container">
       <div className="flex justify-between items-center mb-4 no-print">
   <Button
+  variant="outline"
     onClick={() => navigate("/cambio")}
-    className="bg-gray-200 text-black hover:bg-gray-200 text-xs px-3 py-1 h-auto"
+    className="text-xs md:text-[13px] sm:text-sm"
   >
 Volver a documentos
   </Button>
   <Button
-    onClick={() => window.print()}
-    className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-auto"
-  >
-Imprimir acta
-  </Button>
+  variant="blue"
+  onClick={handlePrint}
+  className="text-xs md:text-[13px] sm:text-sm"
+>
+  Imprimir acta
+</Button>
+
 </div>
 
-<div className="p-2 print:overflow-visible print:max-h-none" style={
-            isDesktop
-              ? { maxHeight: availableHeight, overflowY: 'auto' }
-              : {}
-          }
+<div
+  className="p-2 print:overflow-visible print:max-h-none"
+  style={
+    isDesktop && !isPrinting
+      ? { maxHeight: availableHeight, overflowY: "auto" }
+      : {}
+  }
 >
 
+
+
   
-      <Card className="md:max-h-[490px] md:overflow-y-auto border rounded-md">
+<Card className="border rounded-md print:border-0 print:rounded-none print:shadow-none print:p-0 print:m-0">
+
+
+
         <CardHeader>
-          <CardTitle>ACTA DE ENTREGA-RECEPCIÓN DE BIENES – Documento #{documentoId}</CardTitle>
+          <CardTitle>ACTA  DE ENTREGA-RECEPCIÓN DE BIENES – Documento #{documentoId}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4" >
+        <CardContent className="space-y-4 print-unlimited-height card-content-print">
+
           <p className="text-justify leading-relaxed">
             En la ciudad de <strong>Sangolquí</strong>, a <strong>{fechaActa}</strong>, los suscritos señor/a <strong>{responsable}</strong>, quien entrega los bienes, y el/la señor/a <strong>{nuevoCustodio}</strong>, quien los recibe, en conocimiento de la dirección de la empresa <strong>X Empresa Tecnológica S.A.</strong>, y en presencia del personal delegado de la unidad de bienes institucionales, se constituyeron en las instalaciones para realizar la diligencia de constatación física y entrega-recepción correspondiente.
           </p>
@@ -88,7 +123,8 @@ Imprimir acta
             Al efecto, con la presencia de las personas mencionadas anteriormente, se procede a la entrega-recepción de los bienes clasificados como <strong>Propiedad Planta y Equipo</strong> y <strong>Bienes de Control Administrativo</strong>, de acuerdo al siguiente detalle:
           </p>
 
-          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm">
+         <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm print:overflow-visible print:border-0 print:shadow-none print:rounded-none">
+
 <table className="w-full min-w-[800px] table-auto border-collapse text-sm text-gray-700 print-table">
 
 
@@ -156,7 +192,7 @@ Imprimir acta
         </CardContent>
       </Card>
 </div>
-      <style>{`
+      <style>{` 
   @media print {
     @page {
       size: A4 portrait;
@@ -176,6 +212,15 @@ Imprimir acta
       width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    .print-unlimited-height,
+    .card-content-print {
+      max-height: none !important;
+      height: auto !important;
+      overflow: visible !important;
     }
 
     .overflow-x-auto {
@@ -184,7 +229,8 @@ Imprimir acta
 
     .print-table {
       width: 100% !important;
-      table-layout: auto !important; /* CAMBIO CLAVE */
+      min-width: unset !important;
+      table-layout: auto !important;
       border-collapse: collapse !important;
       font-size: 10px !important;
     }
@@ -202,7 +248,7 @@ Imprimir acta
     }
   }
 
-  /* Estilo normal para web/móvil */
+  /* Estilo normal (pantalla) */
   .print-table {
     width: 100%;
     table-layout: fixed;
@@ -220,15 +266,9 @@ Imprimir acta
   .only-print {
     display: none;
   }
-    @media print {
-  .print-table {
-    min-width: unset !important; /*  Esto elimina la min-width heredada de Tailwind */
-    width: 100% !important;
-    table-layout: auto !important;
-  }
-}
-
 `}</style>
+
+
 
 
 

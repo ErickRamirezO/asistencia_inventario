@@ -108,8 +108,9 @@ export default function CambioEncargadoView() {
     <div className="p-6 space-y-4">
       <div className="flex justify-between items-center mb-4">
         <Button
+          variant="outline"
           onClick={() => navigate("/cambio")}
-          className="bg-gray-200 text-black hover:bg-gray-200 text-xs md:text-[13px] sm:text-sm px-3 py-1 h-auto"
+          className="text-xs md:text-[13px] sm:text-sm"
         >
           Volver a documentos
         </Button>
@@ -215,6 +216,7 @@ export default function CambioEncargadoView() {
         <Button
           disabled={!usuarioSeleccionado || bienesSeleccionados.length === 0}
           onClick={() => setConfirmarCambio(true)}
+          variant="blue"
           className="text-xs md:text-[13px] sm:text-sm"
         >
           Confirmar cambio de encargado

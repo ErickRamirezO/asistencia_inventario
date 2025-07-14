@@ -66,8 +66,9 @@ export default function DocumentosCambioView() {
       <Card>
         <CardHeader className="flex justify-end px-4 sm:px-6">
           <Button
+          variant="blue"
             onClick={() => navigate("/cambio-encargado")}
-            className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1 h-auto"
+            className="text-xs md:text-[13px] sm:text-sm"
           >
             Cambio de Custodio
           </Button>
