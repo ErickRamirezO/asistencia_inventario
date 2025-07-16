@@ -66,7 +66,7 @@ const ReporteAsistencia = () => {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 380 // ajusta 200px según header + paddings
+    ? windowSize.height - 150 // ajusta 200px según header + paddings
     : undefined;
   const inputHeight = isDesktop
     ? Math.max(15, Math.floor((availableHeight || 400) / 13))
@@ -370,8 +370,22 @@ const ReporteAsistencia = () => {
   };
 
   return (
-    <div className="p-6 sm-p-6">
-      <Card>
+    <div className="px-6 py-10 space-y-10 mx-auto">
+    <div
+      className="
+        grid
+        grid-cols-1
+        grid-rows-1
+        gap-4
+        sm:grid-cols-1
+        sm:grid-rows-1
+        md:grid-cols-1
+      "
+      style={
+        isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+      }
+    >
+            <Card>
         <CardHeader>
           <CardTitle className="text-base sm:text-xl">
             Configuración del Reporte
@@ -752,6 +766,7 @@ const ReporteAsistencia = () => {
           </Button>
         </CardFooter>
       </Card>
+    </div>
     </div>
   );
 };

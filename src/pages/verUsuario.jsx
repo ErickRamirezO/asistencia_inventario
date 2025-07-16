@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react"; // Importamos los iconos
 import { useNavigate } from "react-router-dom";
+
 export default function VerUsuario() {
   const [usuarios, setUsuarios] = useState([]);
   const [horarios, setHorarios] = useState([]);
@@ -61,18 +62,32 @@ export default function VerUsuario() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 250 // ajusta 200px según header + paddings
+    ? windowSize.height - 200 // ajusta 200px según header + paddings
     : undefined;
 
   const usersPerPage = (() => {
     if (!isDesktop) return 3;
     if (availableHeight < 350) return 3;
-    if (availableHeight < 400) return 4;
-    if (availableHeight < 450) return 5;
+    if (availableHeight < 400) return 3;
+    if (availableHeight < 450) return 3;
     if (availableHeight < 550) return 6;
-    if (availableHeight < 600) return 8;
-    return 8;
+    if (availableHeight < 600) return 5;
+    return 5;
   })();
+
+  const columnasVisibles = isDesktop
+    ? [
+        "nombre",
+        "apellido",
+        "cedula",
+        "email",
+        "telefono",
+        "estado",
+        "departamento",
+        "horario",
+        "acciones",
+      ]
+    : ["nombre", "apellido", "estado", "horario", "acciones"];
 
   // Obtener usuarios y horarios al cargar el componente
   useEffect(() => {
@@ -244,17 +259,30 @@ export default function VerUsuario() {
   }, [terminoBusqueda]);
 
   return (
-    <div className="p-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base sm:text-xl">
-          Usuarios del sistema
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-6 space-y-4">
-          {/* Barra de búsqueda */}
-          <div className="relative">
+  <div className="px-6 py-10 space-y-10 max-w-[1200px] mx-auto">
+    <div
+      className="
+        grid
+        grid-cols-1
+        grid-rows-2
+        gap-4
+        sm:grid-cols-1
+        sm:grid-rows-1
+        md:grid-cols-1
+      "
+      style={
+        isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+      }
+    >
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-base sm:text-xl">
+            Usuarios del sistema
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Buscador */}
+          <div className="mb-4">
             <input
               type="text"
               placeholder="Buscar por nombre o cédula..."
@@ -262,237 +290,276 @@ export default function VerUsuario() {
               value={terminoBusqueda}
               onChange={(e) => setTerminoBusqueda(e.target.value)}
             />
-            {terminoBusqueda && (
-              <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs md:text-[13px] sm:text-sm"
-                onClick={() => setTerminoBusqueda("")}
-              >
-                ×
-              </button>
-            )}
           </div>
-        </div>
-        <div
-          className="rounded-md border shadow-sm"
-          style={
-            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
-          }
-        >
-          <div
-            className="overflow-x-auto w-full"
-            style={
-              isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
-            }
-          >
-            <Table className="table-fixed w-full min-w-[900px] text-xs md:text-[13px] sm:text-sm">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[15%] truncate">Nombre</TableHead>
-                  <TableHead className="w-[15%] truncate">Apellido</TableHead>
-                  <TableHead className="w-[15%] truncate">Cédula</TableHead>
-                  <TableHead className="w-[15%] truncate">Email</TableHead>
-                  <TableHead className="w-[15%] truncate">Teléfono</TableHead>
-                  <TableHead className="w-[10%] truncate">Estado</TableHead>
-                  <TableHead className="w-[10%] truncate">Departamento</TableHead>
-                  <TableHead className="w-[20%] truncate">
-                    Horario Laboral
-                  </TableHead>
-                  <TableHead className="text-right w-[10%] truncate">
-                    Acciones
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {usuariosPaginados.length > 0 ? (
-                  usuariosPaginados.map((usuario) => (
-                    <TableRow key={usuario.id}>
-                      <TableCell className="font-medium truncate overflow-hidden whitespace-nowrap">
-                        {usuario.nombre}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        {usuario.apellido}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        {usuario.cedula}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        {usuario.email}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        {usuario.telefono}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id={`status-${usuario.id}`}
-                            checked={usuario.status === 1}
-                            onCheckedChange={() =>
-                              toggleEstadoUsuario(usuario.id, usuario.status)
-                            }
-                          />
-                          <Label
-                            htmlFor={`status-${usuario.id}`}
-                            className={`${
-                              usuario.status === 1
-                                ? "text-green-600"
-                                : "text-red-600"
-                            } font-medium text-xs md:text-[13px] sm:text-sm`}
-                          >
-                            {usuario.status === 1 ? "Activo" : "Inactivo"}
-                          </Label>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        {usuario.departamentoNombre || "No asignado"}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
-                        <Select
-                          value={usuario.horarioLaboralId?.toString() || ""}
-                          onValueChange={(value) =>
-                            cambiarHorarioLaboral(usuario.id, parseInt(value))
-                          }
-                          disabled={!usuario.habilitado}
-                        >
-                          <SelectTrigger className="w-[120px] text-xs md:text-[13px] sm:text-sm">
-                            <SelectValue placeholder="Seleccione horario">
-                              {usuario.horarioLaboralId
-                                ? horarios.find(
-                                    (h) => h.id === usuario.horarioLaboralId
-                                  )?.nombreHorario ||
-                                  usuario.horarioLaboralNombre ||
-                                  "Horario no encontrado"
-                                : "Seleccionar horario"}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {horarios.map((horario) => (
-                              <SelectItem
-                                key={horario.id}
-                                value={horario.id.toString()}
-                                className="text-xs md:text-[13px] sm:text-sm"
+          
+          {/* Tabla con estructura similar a VerBienes.jsx */}
+          <div className="rounded-md border shadow-sm">
+            <div
+              className="max-h-none overflow-y-visible sm:overflow-y-auto"
+              style={
+                isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+              }
+            >
+              <Table className="table-fixed w-full min-w-[900px] text-xs md:text-[13px] sm:text-sm">
+                <TableHeader>
+                  <TableRow>
+                    {columnasVisibles.includes("nombre") && (
+                      <TableHead className="w-[15%] truncate">Nombre</TableHead>
+                    )}
+                    {columnasVisibles.includes("apellido") && (
+                      <TableHead className="w-[15%] truncate">Apellido</TableHead>
+                    )}
+                    {columnasVisibles.includes("cedula") && (
+                      <TableHead className="w-[15%] truncate">Cédula</TableHead>
+                    )}
+                    {columnasVisibles.includes("email") && (
+                      <TableHead className="w-[15%] truncate">Email</TableHead>
+                    )}
+                    {columnasVisibles.includes("telefono") && (
+                      <TableHead className="w-[15%] truncate">Teléfono</TableHead>
+                    )}
+                    {columnasVisibles.includes("estado") && (
+                      <TableHead className="w-[10%] truncate">Estado</TableHead>
+                    )}
+                    {columnasVisibles.includes("departamento") && (
+                      <TableHead className="w-[10%] truncate">Departamento</TableHead>
+                    )}
+                    {columnasVisibles.includes("horario") && (
+                      <TableHead className="w-[20%] truncate">
+                        Horario Laboral
+                      </TableHead>
+                    )}
+                    {columnasVisibles.includes("acciones") && (
+                      <TableHead className="text-right w-[10%] truncate">
+                        Acciones
+                      </TableHead>
+                    )}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {usuariosPaginados.length > 0 ? (
+                    usuariosPaginados.map((usuario) => (
+                      <TableRow key={usuario.id}>
+                        {columnasVisibles.includes("nombre") && (
+                          <TableCell className="font-medium truncate overflow-hidden whitespace-nowrap">
+                            {usuario.nombre}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("apellido") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            {usuario.apellido}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("cedula") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            {usuario.cedula}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("email") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            {usuario.email}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("telefono") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            {usuario.telefono}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("estado") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                id={`status-${usuario.id}`}
+                                checked={usuario.status === 1}
+                                onCheckedChange={() =>
+                                  toggleEstadoUsuario(
+                                    usuario.id,
+                                    usuario.status
+                                  )
+                                }
+                              />
+                              <Label
+                                htmlFor={`status-${usuario.id}`}
+                                className={`${
+                                  usuario.status === 1
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                } font-medium text-xs md:text-[13px] sm:text-sm`}
                               >
-                                {horario.nombreHorario} ({horario.horaInicio} -{" "}
-                                {horario.horaFin})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              navigate(`/usuarios/editar/${usuario.id}`)
-                            }
-                            className="h-8 w-8"
-                            disabled={!usuario.habilitado}
-                          >
-                            <Pencil className="h-4 w-4 mr-1" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => eliminarUsuario(usuario.id)}
-                            className="h-8 w-8"
-                            aria-label="Eliminar usuario"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                                {usuario.status === 1 ? "Activo" : "Inactivo"}
+                              </Label>
+                            </div>
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("departamento") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            {usuario.departamentoNombre || "No asignado"}
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("horario") && (
+                          <TableCell className="text-xs md:text-[13px] sm:text-sm truncate overflow-hidden whitespace-nowrap">
+                            <Select
+                              value={
+                                usuario.horarioLaboralId?.toString() || ""
+                              }
+                              onValueChange={(value) =>
+                                cambiarHorarioLaboral(
+                                  usuario.id,
+                                  parseInt(value)
+                                )
+                              }
+                              disabled={!usuario.habilitado}
+                            >
+                              <SelectTrigger className="w-[120px] text-xs md:text-[13px] sm:text-sm">
+                                <SelectValue placeholder="Seleccione horario">
+                                  {usuario.horarioLaboralId
+                                    ? horarios.find(
+                                        (h) =>
+                                          h.id === usuario.horarioLaboralId
+                                      )?.nombreHorario ||
+                                      usuario.horarioLaboralNombre ||
+                                      "Horario no encontrado"
+                                    : "Seleccionar horario"}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {horarios.map((horario) => (
+                                  <SelectItem
+                                    key={horario.id}
+                                    value={horario.id.toString()}
+                                    className="text-xs md:text-[13px] sm:text-sm"
+                                  >
+                                    {horario.nombreHorario} ({horario.horaInicio} -{" "}
+                                    {horario.horaFin})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        )}
+                        {columnasVisibles.includes("acciones") && (
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() =>
+                                  navigate(`/usuarios/editar/${usuario.id}`)
+                                }
+                                className="h-8 w-8"
+                                disabled={!usuario.habilitado}
+                              >
+                                <Pencil className="h-4 w-4 mr-1" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => eliminarUsuario(usuario.id)}
+                                className="h-8 w-8"
+                                aria-label="Eliminar usuario"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columnasVisibles.length}
+                        className="text-center text-xs md:text-[13px] sm:text-sm"
+                      >
+                        No se encontraron usuarios que coincidan con los filtros.
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={10}
-                      className="text-center text-xs md:text-[13px] sm:text-sm"
-                    >
-                      No se encontraron usuarios que coincidan con los filtros.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+              
+              {/* Paginación dentro del contenedor scrollable (como en VerBienes.jsx) */}
+              {isDesktop && (
+                <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        aria-disabled={currentPage === 1}
+                        className={
+                          currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                        }
+                        aria-disabled={currentPage === totalPages}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </div>
           </div>
-        </div>
-        {isDesktop && (
-          <Pagination className="mt-2" style={{ minHeight: "48px" }}>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  aria-disabled={currentPage === 1}
-                  className={
-                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                  }
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    isActive={currentPage === i + 1}
-                    onClick={() => setCurrentPage(i + 1)}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  aria-disabled={currentPage === totalPages}
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
-        {/* Diálogo de confirmación para eliminar usuario */}
-        <Dialog
-          open={dialogoConfirmacionAbierto}
-          onOpenChange={setDialogoConfirmacionAbierto}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="text-xs md:text-[13px] sm:text-sm">
-                Confirmar eliminación
-              </DialogTitle>
-              <DialogDescription className="text-xs md:text-[13px] sm:text-sm">
-                ¿Está seguro que desea eliminar al usuario{" "}
-                {usuarioAEliminar?.nombre} {usuarioAEliminar?.apellido}? Esta
-                acción no se puede deshacer.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex space-x-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setDialogoConfirmacionAbierto(false)}
-                className="text-xs md:text-[13px] sm:text-sm"
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmarEliminacion}
-                className="text-xs md:text-[13px] sm:text-sm"
-              >
-                Eliminar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
-  </div>
+          
+          {/* Diálogo de confirmación */}
+          <Dialog
+            open={dialogoConfirmacionAbierto}
+            onOpenChange={setDialogoConfirmacionAbierto}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-xs md:text-[13px] sm:text-sm">
+                  Confirmar eliminación
+                </DialogTitle>
+                <DialogDescription className="text-xs md:text-[13px] sm:text-sm">
+                  ¿Está seguro que desea eliminar al usuario{" "}
+                  {usuarioAEliminar?.nombre} {usuarioAEliminar?.apellido}? Esta
+                  acción no se puede deshacer.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex space-x-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setDialogoConfirmacionAbierto(false)}
+                  className="text-xs md:text-[13px] sm:text-sm"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmarEliminacion}
+                  className="text-xs md:text-[13px] sm:text-sm"
+                >
+                  Eliminar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+    </div>
+    </div>
   );
 }
 

@@ -67,14 +67,8 @@ export default function Asistencia() {
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [Departments, setDepartments] = useState([]);
 
-  const recordsPerPage = 5;
-  const eventRecordsPerPage = 5;
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
   const [eventCurrentPage, setEventCurrentPage] = useState(1);
 
-  const eventTotalPages = Math.ceil(
-    eventAttendanceData.length / eventRecordsPerPage
-  );
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -99,12 +93,24 @@ export default function Asistencia() {
     ? windowSize.height - 170 // ajusta 200px según header + paddings
     : undefined;
   const inputHeight = isDesktop
-    ? Math.max(15, Math.floor((availableHeight || 400) / 13))
+    ? Math.max(15, Math.floor((availableHeight || 400) / 20))
     : 32;
   const labelHeight = isDesktop
-    ? Math.max(8, Math.floor(inputHeight / 12))
+    ? Math.max(8, Math.floor(inputHeight / 20))
     : 15;
 
+  const recordsPerPage = (() => {
+    if (!isDesktop) return 3;
+    if (availableHeight < 350) return 3;
+    if (availableHeight < 400) return 4;
+    if (availableHeight < 450) return 5;
+    if (availableHeight < 550) return 6;
+    if (availableHeight < 600) return 8;
+    return 5;
+  })();
+
+  const eventRecordsPerPage = recordsPerPage;
+  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return "--";
     return moment(dateString).format("YYYY-MM-DD");
@@ -304,494 +310,561 @@ export default function Asistencia() {
         currentPage * recordsPerPage
       )
     : filteredData;
+
+  const filteredEventRecords = eventAttendanceData.filter((item) => {
+    // Filtro por nombre
+    const matchesName =
+      searchQuery.trim() === "" ||
+      (item.nombre &&
+        item.nombre.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // Filtro por departamento
+    const matchesDept =
+      selectedDepartment === "all" || item.departamento === selectedDepartment;
+
+    // Filtro por fecha
+    let matchesDate = true;
+    if (dateFilter && dateFilter !== "all" && item.fecha) {
+      const now = moment();
+      const itemDate = moment(item.fecha);
+      if (dateFilter === "today") {
+        matchesDate = itemDate.isSame(now, "day");
+      } else if (dateFilter === "thisWeek") {
+        const startOfWeek = now.clone().startOf("week");
+        const endOfWeek = now.clone().endOf("week");
+        matchesDate = itemDate.isBetween(startOfWeek, endOfWeek, null, "[]");
+      } else if (dateFilter === "lastMonth") {
+        const lastMonth = now.clone().subtract(1, "month");
+        const startOfLastMonth = lastMonth.startOf("month");
+        const endOfLastMonth = lastMonth.endOf("month");
+        matchesDate = itemDate.isBetween(
+          startOfLastMonth,
+          endOfLastMonth,
+          null,
+          "[]"
+        );
+      }
+    }
+
+    return matchesName && matchesDept && matchesDate;
+  });
+
   const eventCurrentRecords = isDesktop
-    ? eventAttendanceData.slice(
+    ? filteredEventRecords.slice(
         (eventCurrentPage - 1) * eventRecordsPerPage,
         eventCurrentPage * eventRecordsPerPage
       )
-    : eventAttendanceData;
+    : filteredEventRecords;
+
+  const eventTotalPages = Math.ceil(
+    filteredEventRecords.length / eventRecordsPerPage
+  );
 
   return (
-    <div className="p-6 sm:p-6">
+    <div className="px-6 py-10 space-y-10 max-w-6xl mx-auto">
+      {/* Estadísticas */}
       <div
-        className="max-w-6xl mx-auto"
+        className="
+        grid
+        grid-cols-2
+        grid-rows-2
+        gap-4
+        sm:grid-cols-2
+        sm:grid-rows-1
+        md:grid-cols-3
+        lg:grid-cols-4
+      "
         style={
           isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
         }
       >
-        {/* Título principal de la vista */}
+        {[
+          { title: "Total Empleados", value: totalEmployees },
+          { title: "Presentes Hoy", value: presentToday },
+          { title: "Ausentes", value: absentToday },
+          {
+            title: "Hora Actual",
+            value: currentTime,
+            icon: (
+              <span className="hidden sm:inline-block mr-2">
+                <Clock className="h-4 w-4" />
+              </span>
+            ),
+          },
+        ].map(({ title, value, icon }, index) => (
+          <Card
+            key={index}
+            className="p-1 sm:p-2 h-full flex flex-col justify-center min-h-0"
+            style={{ minHeight: 60, height: "auto" }}
+          >
+            <CardHeader className="pb-0 flex-1 flex flex-col items-center">
+              <CardTitle className="text-xs md:text-[13px] sm:text-sm font-medium text-center leading-tight">
+                {title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center py-1">
+              <div className="text-sm sm:text-xl font-bold flex items-center justify-center text-center">
+                {icon} {value}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        {/* Estadísticas */}
-        <div className="grid gap-2 grid-cols-2 sm:gap-4 sm:grid-cols-4 mb-6">
-          {[
-            { title: "Total Empleados", value: totalEmployees },
-            { title: "Presentes Hoy", value: presentToday },
-            { title: "Ausentes", value: absentToday },
-            {
-              title: "Hora Actual",
-              value: currentTime,
-              icon: (
-                <span className="hidden sm:inline-block mr-2">
-                  <Clock className="h-4 w-4" />
-                </span>
-              ),
-            },
-          ].map(({ title, value, icon }, index) => (
-            <Card
-              key={index}
-              className="p-1 sm:p-2 h-full flex flex-col justify-center min-h-0"
-              style={{ minHeight: 60, height: "auto" }}
-            >
-              <CardHeader className="pb-0 flex-1 flex flex-col items-center">
-                <CardTitle className="text-xs md:text-[13px] sm:text-sm font-medium text-center leading-tight">
-                  {title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center py-1">
-                <div className="text-sm sm:text-xl font-bold flex items-center justify-center text-center">
-                  {icon} {value}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Filtros en una sola fila */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 items-stretch sm:items-center">
-          <div className="flex flex-col w-full sm:w-1/4">
-            <label
-              className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
-              style={{ minHeight: labelHeight }}
-            >
-              Buscar empleado
-            </label>
-            <Input
-              placeholder="Buscar empleado..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs md:text-[13px] sm:text-sm"
-              style={{ minHeight: inputHeight }}
-            />
+      {/* Sección de pestañas */}
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
+        {/* Tabs y filtros en una sola fila */}
+        <div
+          className="
+          grid
+          gap-4
+          mb-4
+          w-full
+          grid-cols-1
+          xs:grid-cols-1
+          sm:grid-cols-2
+          md:grid-cols-2
+        "
+        >
+          <div className="w-full">
+            <TabsList className="flex flex-wrap gap-2 px-2 py-1 w-full">
+              <TabsTrigger
+                value="regular"
+                className="text-xs md:text-[13px] sm:text-sm"
+              >
+                Asistencia Diaria
+              </TabsTrigger>
+              <TabsTrigger
+                value="events"
+                className="text-xs md:text-[13px] sm:text-sm"
+              >
+                Asistencia en Eventos
+              </TabsTrigger>
+            </TabsList>
           </div>
 
-          <div className="flex flex-col w-full sm:w-1/4">
-            <label
-              className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
-              style={{ minHeight: labelHeight }}
-            >
-              Departamento
-            </label>
-            <Select
-              onValueChange={setSelectedDepartment}
-              value={selectedDepartment}
-            >
-              <SelectTrigger
-                className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm"
-                style={{ minHeight: inputHeight }}
+          {/* Filtros */}
+          <div className="grid grid-cols-1 gap-4 w-full xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col w-full">
+              <label
+                className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
+                style={{ minHeight: labelHeight }}
               >
-                <SelectValue
-                  placeholder="Seleccionar Departamento"
-                  className="departamento"
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {Departments.map((dept) => (
+                Buscar empleado
+              </label>
+              <Input
+                placeholder="Buscar empleado..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full text-xs md:text-[13px] sm:text-sm"
+                style={{ minHeight: inputHeight }}
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label
+                className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
+                style={{ minHeight: labelHeight }}
+              >
+                Departamento
+              </label>
+              <Select
+                onValueChange={setSelectedDepartment}
+                value={selectedDepartment}
+              >
+                <SelectTrigger
+                  className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: inputHeight }}
+                >
+                  <SelectValue
+                    placeholder="Seleccionar Departamento"
+                    className="departamento"
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {Departments.map((dept) => (
+                    <SelectItem
+                      key={dept.value}
+                      value={dept.value}
+                      className="text-xs md:text-[13px] sm:text-sm"
+                    >
+                      <span role="img" aria-label={dept.label}></span>{" "}
+                      {dept.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col w-full">
+              <label
+                className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
+                style={{ minHeight: labelHeight }}
+              >
+                Fecha
+              </label>
+              <Select onValueChange={setDateFilter} value={dateFilter}>
+                <SelectTrigger
+                  className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: inputHeight }}
+                >
+                  <SelectValue placeholder="Seleccionar Fecha" />
+                </SelectTrigger>
+                <SelectContent>
                   <SelectItem
-                    key={dept.value}
-                    value={dept.value}
+                    value="all"
                     className="text-xs md:text-[13px] sm:text-sm"
                   >
-                    <span role="img" aria-label={dept.label}></span>{" "}
-                    {dept.label}
+                    <span role="img" aria-label="Todos">
+                      📅
+                    </span>{" "}
+                    Todos
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col w-full sm:w-1/4">
-            <label
-              className="mb-1 text-xs md:text-[13px] sm:text-sm font-medium"
-              style={{ minHeight: labelHeight }}
-            >
-              Fecha
-            </label>
-            <Select onValueChange={setDateFilter} value={dateFilter}>
-              <SelectTrigger
-                className="w-full border border-gray-300 rounded-md bg-white p-2 shadow-sm focus:ring-2 focus:ring-indigo-500 text-xs md:text-[13px] sm:text-sm"
-                style={{ minHeight: inputHeight }}
-              >
-                <SelectValue placeholder="Seleccionar Fecha" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value="all"
-                  className="text-xs md:text-[13px] sm:text-sm"
-                >
-                  <span role="img" aria-label="Todos">
-                    📅
-                  </span>{" "}
-                  Todos
-                </SelectItem>
-                <SelectItem
-                  value="today"
-                  className="text-xs md:text-[13px] sm:text-sm"
-                >
-                  <span role="img" aria-label="Hoy">
-                    🗓️
-                  </span>{" "}
-                  Hoy
-                </SelectItem>
-                <SelectItem
-                  value="thisWeek"
-                  className="text-xs md:text-[13px] sm:text-sm"
-                >
-                  <span role="img" aria-label="Esta Semana">
-                    📅
-                  </span>{" "}
-                  Esta Semana
-                </SelectItem>
-                <SelectItem
-                  value="lastMonth"
-                  className="text-xs md:text-[13px] sm:text-sm"
-                >
-                  <span role="img" aria-label="Mes Anterior">
-                    📆
-                  </span>{" "}
-                  Mes Anterior
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                  <SelectItem
+                    value="today"
+                    className="text-xs md:text-[13px] sm:text-sm"
+                  >
+                    <span role="img" aria-label="Hoy">
+                      🗓️
+                    </span>{" "}
+                    Hoy
+                  </SelectItem>
+                  <SelectItem
+                    value="thisWeek"
+                    className="text-xs md:text-[13px] sm:text-sm"
+                  >
+                    <span role="img" aria-label="Esta Semana">
+                      📅
+                    </span>{" "}
+                    Esta Semana
+                  </SelectItem>
+                  <SelectItem
+                    value="lastMonth"
+                    className="text-xs md:text-[13px] sm:text-sm"
+                  >
+                    <span role="img" aria-label="Mes Anterior">
+                      📆
+                    </span>{" "}
+                    Mes Anterior
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
-        {/* Sección de pestañas */}
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="w-full"
-        >
-          <TabsList className="mb-4 flex flex-wrap gap-2">
-            <TabsTrigger
-              value="regular"
-              className="text-xs md:text-[13px] sm:text-sm"
-            >
-              Asistencia Diaria
-            </TabsTrigger>
-            <TabsTrigger
-              value="events"
-              className="text-xs md:text-[13px] sm:text-sm"
-            >
-              Asistencia en Eventos
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="regular">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">
-                  Registros de Asistencia Diaria
-                </CardTitle>
-                <CardDescription className="text-xs md:text-[13px] sm:text-sm">
-                  Ver y gestionar los registros de asistencia de los empleados.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading && (
-                  <p className="text-xs md:text-[13px] sm:text-sm">
-                    Cargando datos...
-                  </p>
-                )}
-                {error && (
-                  <p className="text-red-500 text-xs md:text-[13px] sm:text-sm">
-                    {error}
-                  </p>
-                )}
-                {!isLoading && !error && (
-                  <>
-                    {currentRecords.length === 0 ? (
-                      <Alert variant="destructive">
-                        <AlertTitle>No hay registros</AlertTitle>
-                        <AlertDescription>
-                          No se encontraron registros para la búsqueda o filtros
-                          seleccionados.
-                        </AlertDescription>
-                      </Alert>
-                    ) : (
-                      <div className="overflow-x-auto w-full">
-                        <div className="max-h-[500px] overflow-y-auto">
-                          <Table className="min-w-[700px] text-xs md:text-[13px] sm:text-sm">
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Nombre</TableHead>
-                                <TableHead>Departamento</TableHead>
-                                <TableHead>Entrada</TableHead>
-                                <TableHead>Salida</TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead>Fecha</TableHead>
-                                <TableHead>Observación/Novedad</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {currentRecords.map((item) => (
-                                <TableRow key={item.id}>
-                                  <TableCell>{item.nombre}</TableCell>
-                                  <TableCell>{item.departamento}</TableCell>
-                                  <TableCell>
-                                    {item.entrada
-                                      ? formatTimeForDisplay(item.entrada)
-                                      : "No registra entrada"}
-                                  </TableCell>
-                                  <TableCell>
-                                    {item.salida
-                                      ? formatTimeForDisplay(item.salida)
-                                      : "No registra salida"}
-                                  </TableCell>
-                                  <TableCell>
-                                    {item.estado === 1 ? (
-                                      <Badge variant="presente">Completo</Badge>
-                                    ) : (
-                                      <Badge variant="no_asistio">
-                                        Pendiente
-                                      </Badge>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatDateForDisplay(item.fecha)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {item.observacion ||
-                                      "No registra novedades"}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Paginación */}
-                {currentRecords.length > 0 && isDesktop && (
-                  <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() =>
-                            setCurrentPage((prev) => Math.max(prev - 1, 1))
-                          }
-                          aria-disabled={currentPage === 1}
-                          className={
-                            currentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <PaginationItem key={i}>
-                          <PaginationLink
-                            isActive={currentPage === i + 1}
-                            onClick={() => setCurrentPage(i + 1)}
-                          >
-                            {i + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() =>
-                            setCurrentPage((prev) =>
-                              Math.min(prev + 1, totalPages)
-                            )
-                          }
-                          aria-disabled={currentPage === totalPages}
-                          className={
-                            currentPage === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="events">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">
-                  Asistencia en Eventos
-                </CardTitle>
-                <CardDescription className="text-xs md:text-[13px] sm:text-sm">
-                  Registro de asistencia por evento
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs md:text-[13px] sm:text-sm font-semibold mb-2">
-                      Evento:
-                    </h3>
-                    <Select
-                      value={selectedEvent}
-                      onValueChange={(value) => setSelectedEvent(value)}
-                    >
-                      <SelectTrigger className="text-xs md:text-[13px] sm:text-sm w-[200px] sm:w-[250px]">
-                        <SelectValue
-                          className="text-xs md:text-[13px] sm:text-sm"
-                          placeholder="Seleccione el evento"
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableEvents.length === 0 ? (
-                          <div className="px-4 py-2 text-muted-foreground text-sm">
-                            No hay eventos disponibles
-                          </div>
-                        ) : (
-                          availableEvents.map((event) => (
-                            <SelectItem
-                              className="text-xs md:text-[13px] sm:text-sm"
-                              key={event}
-                              value={event}
-                            >
-                              {event}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {selectedEvent ? (
-                  <>
-                    {isLoading ? (
-                      <div className="text-center p-8">
-                        <div className="h-6 w-6 animate-spin mx-auto mb-2">
-                          ⟳
-                        </div>
-                        <p>Cargando datos...</p>
-                      </div>
-                    ) : eventAttendanceData.length === 0 ? (
-                      <div className="text-center p-8 border rounded-md">
-                        <p className="text-xs md:text-[13px] sm:text-sm text-muted-foreground">
-                          No hay asistencias registradas para este evento.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table className="min-w-[600px] text-xs md:text-[13px] sm:text-sm">
+        <TabsContent value="regular">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base sm:text-lg">
+                Registros de Asistencia Diaria
+              </CardTitle>
+              <CardDescription className="text-xs md:text-[13px] sm:text-sm">
+                Ver y gestionar los registros de asistencia de los empleados.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading && (
+                <p className="text-xs md:text-[13px] sm:text-sm">
+                  Cargando datos...
+                </p>
+              )}
+              {error && (
+                <p className="text-red-500 text-xs md:text-[13px] sm:text-sm">
+                  {error}
+                </p>
+              )}
+              {!isLoading && !error && (
+                <>
+                  {currentRecords.length === 0 ? (
+                    <Alert variant="destructive">
+                      <AlertTitle>No hay registros</AlertTitle>
+                      <AlertDescription>
+                        No se encontraron registros para la búsqueda o filtros
+                        seleccionados.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="overflow-x-auto w-full">
+                      <div className="max-h-[500px] overflow-y-auto">
+                        <Table className="min-w-[700px] text-xs md:text-[13px] sm:text-sm">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Nombre</TableHead>
-                              <TableHead>Departamento</TableHead>
+                              <TableHead className="hidden md:table-cell">
+                                Departamento
+                              </TableHead>
                               <TableHead>Entrada</TableHead>
                               <TableHead>Salida</TableHead>
                               <TableHead>Estado</TableHead>
+                              <TableHead className="hidden lg:table-cell">
+                                Fecha
+                              </TableHead>
+                              <TableHead className="hidden lg:table-cell">
+                                Observación/Novedad
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {eventCurrentRecords.map((attendee) => {
-                              const tieneEntrada = !!attendee.entrada;
-                              const tieneSalida = !!attendee.salida;
-                              let estadoBadge = "no_asistio";
-                              let estadoTexto = "Falta registrar";
-                              if (tieneEntrada && tieneSalida) {
-                                estadoBadge = "presente";
-                                estadoTexto = "Completo";
-                              } else if (tieneEntrada && !tieneSalida) {
-                                estadoBadge = "no_asistio";
-                                estadoTexto = "Incompleto";
-                              }
-                              return (
-                                <TableRow key={attendee.id}>
-                                  <TableCell>{attendee.nombre}</TableCell>
-                                  <TableCell>{attendee.departamento}</TableCell>
-                                  <TableCell>
-                                    {attendee.entrada
-                                      ? formatTimeForDisplay(attendee.entrada)
-                                      : "Falta registrar"}
-                                  </TableCell>
-                                  <TableCell>
-                                    {attendee.salida
-                                      ? formatTimeForDisplay(attendee.salida)
-                                      : "Falta registrar"}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant={estadoBadge}>
-                                      {estadoTexto}
+                            {currentRecords.map((item) => (
+                              <TableRow key={item.id}>
+                                <TableCell>{item.nombre}</TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  {item.departamento}
+                                </TableCell>
+                                <TableCell>
+                                  {item.entrada
+                                    ? formatTimeForDisplay(item.entrada)
+                                    : "No registra entrada"}
+                                </TableCell>
+                                <TableCell>
+                                  {item.salida
+                                    ? formatTimeForDisplay(item.salida)
+                                    : "No registra salida"}
+                                </TableCell>
+                                <TableCell>
+                                  {item.estado === 1 ? (
+                                    <Badge variant="presente">Completo</Badge>
+                                  ) : (
+                                    <Badge variant="no_asistio">
+                                      Pendiente
                                     </Badge>
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
+                                  )}
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">
+                                  {formatDateForDisplay(item.fecha)}
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">
+                                  {item.observacion || "No registra novedades"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
                           </TableBody>
                         </Table>
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center p-8 border rounded-md">
-                    <p className="text-muted-foreground">
-                      Selecciona un evento para ver las asistencias
-                    </p>
-                  </div>
-                )}
-                {eventCurrentRecords.length > 0 && isDesktop && (
-                  <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() =>
-                            setEventCurrentPage((prev) => Math.max(prev - 1, 1))
-                          }
-                          aria-disabled={eventCurrentPage === 1}
-                          className={
-                            eventCurrentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Paginación */}
+              {currentRecords.length > 0 && isDesktop && (
+                <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        aria-disabled={currentPage === 1}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
                       </PaginationItem>
-                      {Array.from({ length: eventTotalPages }, (_, i) => (
-                        <PaginationItem key={i}>
-                          <PaginationLink
-                            isActive={eventCurrentPage === i + 1}
-                            onClick={() => setEventCurrentPage(i + 1)}
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          )
+                        }
+                        aria-disabled={currentPage === totalPages}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base sm:text-lg">
+                Asistencia en Eventos
+              </CardTitle>
+              <CardDescription className="text-xs md:text-[13px] sm:text-sm">
+                Registro de asistencia por evento
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs md:text-[13px] sm:text-sm font-semibold mb-2">
+                    Evento:
+                  </h3>
+                  <Select
+                    value={selectedEvent}
+                    onValueChange={(value) => setSelectedEvent(value)}
+                  >
+                    <SelectTrigger className="text-xs md:text-[13px] sm:text-sm w-[200px] sm:w-[250px]">
+                      <SelectValue
+                        className="text-xs md:text-[13px] sm:text-sm"
+                        placeholder="Seleccione el evento"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableEvents.length === 0 ? (
+                        <div className="px-4 py-2 text-muted-foreground text-sm">
+                          No hay eventos disponibles
+                        </div>
+                      ) : (
+                        availableEvents.map((event) => (
+                          <SelectItem
+                            className="text-xs md:text-[13px] sm:text-sm"
+                            key={event}
+                            value={event}
                           >
-                            {i + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() =>
-                            setEventCurrentPage((prev) =>
-                              Math.min(prev + 1, eventTotalPages)
-                            )
-                          }
-                          aria-disabled={eventCurrentPage === eventTotalPages}
-                          className={
-                            eventCurrentPage === eventTotalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
+                            {event}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {selectedEvent ? (
+                <>
+                  {isLoading ? (
+                    <div className="text-center p-8">
+                      <div className="h-6 w-6 animate-spin mx-auto mb-2">⟳</div>
+                      <p>Cargando datos...</p>
+                    </div>
+                  ) : filteredEventRecords.length === 0 ? (
+                    <div className="text-center p-8 border rounded-md">
+                      <p className="text-xs md:text-[13px] sm:text-sm text-muted-foreground">
+                        No hay asistencias registradas para este evento.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table className="min-w-[600px] text-xs md:text-[13px] sm:text-sm">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Departamento</TableHead>
+                            <TableHead>Entrada</TableHead>
+                            <TableHead>Salida</TableHead>
+                            <TableHead>Estado</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {eventCurrentRecords.map((attendee) => {
+                            const tieneEntrada = !!attendee.entrada;
+                            const tieneSalida = !!attendee.salida;
+                            let estadoBadge = "no_asistio";
+                            let estadoTexto = "Falta registrar";
+                            if (tieneEntrada && tieneSalida) {
+                              estadoBadge = "presente";
+                              estadoTexto = "Completo";
+                            } else if (tieneEntrada && !tieneSalida) {
+                              estadoBadge = "no_asistio";
+                              estadoTexto = "Incompleto";
+                            }
+                            return (
+                              <TableRow key={attendee.id}>
+                                <TableCell>{attendee.nombre}</TableCell>
+                                <TableCell>{attendee.departamento}</TableCell>
+                                <TableCell>
+                                  {attendee.entrada
+                                    ? formatTimeForDisplay(attendee.entrada)
+                                    : "Falta registrar"}
+                                </TableCell>
+                                <TableCell>
+                                  {attendee.salida
+                                    ? formatTimeForDisplay(attendee.salida)
+                                    : "Falta registrar"}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={estadoBadge}>
+                                    {estadoTexto}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center p-8 border rounded-md">
+                  <p className="text-muted-foreground">
+                    Selecciona un evento para ver las asistencias
+                  </p>
+                </div>
+              )}
+              {eventCurrentRecords.length > 0 && isDesktop && (
+                <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setEventCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        aria-disabled={eventCurrentPage === 1}
+                        className={
+                          eventCurrentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: eventTotalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={eventCurrentPage === i + 1}
+                          onClick={() => setEventCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
                       </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setEventCurrentPage((prev) =>
+                            Math.min(prev + 1, eventTotalPages)
+                          )
+                        }
+                        aria-disabled={eventCurrentPage === eventTotalPages}
+                        className={
+                          eventCurrentPage === eventTotalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
