@@ -50,8 +50,30 @@ export default function Categorias() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [categoriaActual, setCategoriaActual] = useState(null);
-  const itemsPerPage = 5;
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
+  const availableHeight = isDesktop
+  ? windowSize.height - 250 // ajusta 200px según header + paddings
+  : undefined;
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const itemsPerPage = (() => {
+  if (!isDesktop) return categorias.length; // mostrar todo en móvil
+  if (availableHeight < 350) return 3;
+  if (availableHeight < 400) return 4;
+  if (availableHeight < 450) return 5;
+  if (availableHeight < 550) return 6;
+  if (availableHeight < 600) return 7;
+  return 8;
+})();
+const categoriasPaginadas = isDesktop
+  ? categorias.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : categorias;
+
+  
 
   const totalPages = Math.ceil(categorias.length / itemsPerPage);
   
@@ -59,24 +81,15 @@ export default function Categorias() {
   useEffect(() => {
     setCurrentPage(1);
   }, [categorias]);
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
+  
   useEffect(() => {
     const handleResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
-  const availableHeight = isDesktop
-  ? windowSize.height - 280 // ajusta 200px según header + paddings
-  : undefined;
-  const categoriasPaginadas = isDesktop
-    ? categorias.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : categorias; // En móvil muestra todas las categorías
   
+
   // Validación en tiempo real
   const form = useForm({
     resolver: zodResolver(FormSchema),
