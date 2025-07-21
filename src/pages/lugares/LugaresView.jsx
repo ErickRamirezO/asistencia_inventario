@@ -39,9 +39,9 @@ const FormSchema = z.object({
     .string()
     .min(2, { message: "Debe tener al menos 2 caracteres" })
     .max(30, { message: "No debe superar los 30 caracteres" })
-    .regex(/^[A-Za-z0-9 ]+$/, {
-      message: "No se permiten caracteres especiales",
-    }),
+    .regex(/^[\p{L}\p{N} ]+$/u, {
+  message: "Solo se permiten letras, números y espacios",
+}),
 });
 
 export default function LugaresView() {

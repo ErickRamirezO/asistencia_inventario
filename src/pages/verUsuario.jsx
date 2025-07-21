@@ -62,16 +62,18 @@ export default function VerUsuario() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 200 // ajusta 200px según header + paddings
+    ? windowSize.height - 100 // ajusta 200px según header + paddings
     : undefined;
 
   const usersPerPage = (() => {
-    if (!isDesktop) return 3;
-    if (availableHeight < 350) return 3;
-    if (availableHeight < 400) return 3;
-    if (availableHeight < 450) return 3;
-    if (availableHeight < 550) return 6;
-    if (availableHeight < 600) return 5;
+      if (!isDesktop) return 3;
+  if (availableHeight < 350) return 3;
+  if (availableHeight < 400) return 3;
+  if (availableHeight < 450) return 3;
+    if (availableHeight < 500) return 4;
+    if (availableHeight < 550) return 5;
+    if (availableHeight < 620) return 6;
+
     return 5;
   })();
 
@@ -259,7 +261,7 @@ export default function VerUsuario() {
   }, [terminoBusqueda]);
 
   return (
-  <div className="px-6 py-10 space-y-10 max-w-[1200px] mx-auto">
+  <div className=" space-y-10 max-w-[1200px] mx-auto">
     <div
       className="
         grid
@@ -274,12 +276,8 @@ export default function VerUsuario() {
         isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
       }
     >
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-base sm:text-xl">
-            Usuarios del sistema
-          </CardTitle>
-        </CardHeader>
+      <Card className="border-transparent shadow-none rounded-none pt-6">
+        
         <CardContent>
           {/* Buscador */}
           <div className="mb-4">
