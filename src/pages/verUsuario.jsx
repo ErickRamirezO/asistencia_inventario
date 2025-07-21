@@ -71,10 +71,10 @@ export default function VerUsuario() {
   if (availableHeight < 400) return 3;
   if (availableHeight < 450) return 3;
     if (availableHeight < 500) return 4;
-    if (availableHeight < 550) return 5;
-    if (availableHeight < 620) return 6;
+    if (availableHeight < 550) return 7;
+    if (availableHeight < 620) return 8;
 
-    return 5;
+    return 8;
   })();
 
   const columnasVisibles = isDesktop

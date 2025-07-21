@@ -6,9 +6,9 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "@/utils/axios";
 import { jwtDecode } from "jwt-decode";
 import { useUser } from "../../utils/UserContext";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription} from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react"; // Agrega esto arriba
-
+import { toast } from "sonner"; // Asegúrate de tener instalado sonner para los toasts
 const Login = () => {
 
   const [email, setEmail] = useState("");
@@ -18,6 +18,8 @@ const Login = () => {
   const { setUser } = useUser();
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showTerminosToast, setShowTerminosToast] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const roleBasedRedirects = {
     Administrador: "/verUsuarios",
@@ -138,6 +140,29 @@ const Login = () => {
           </div>
         </div>
       </div>
+      {showTerminosToast && (
+        <div className="fixed bottom-4 right-4 z-50 bg-white border shadow-lg rounded p-4 max-w-xs">
+          <div className="mb-2 text-xs sm:text-sm">
+            Debe aceptar los <a href="/terminos" className="underline text-primary">Términos y Condiciones</a> para continuar.
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowTerminosToast(false)}
+              className="text-xs px-2 py-1 rounded hover:bg-gray-100"
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+            <Button
+              size="sm"
+              className="text-xs"
+              onClick={handleAceptarTerminos}
+            >
+              Aceptar
+            </Button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

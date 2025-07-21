@@ -1,16 +1,27 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/components/theme-provider"
 
 function Card({
   className,
   ...props
 }) {
+  const { theme } = useTheme();
+  
+  // Determinar el tema actual considerando 'system'
+  const currentTheme = theme === "system" 
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : theme;
+  
+  const bgColor = currentTheme === "dark" ? "bg-zinc-950" : "bg-white";
+  
   return (
     (<div
       data-slot="card"
       className={cn(
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        bgColor,
         className
       )}
       {...props} />)
