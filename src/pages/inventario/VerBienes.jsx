@@ -40,15 +40,16 @@ export default function VerBienes() {
   }, []);
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-    ? windowSize.height - 200 // ajusta 200px según header + paddings
+    ? windowSize.height - 140 // ajusta 200px según header + paddings
     : undefined;
     const itemsPerPage = (() => {
   if (!isDesktop) return 3;
   if (availableHeight < 350) return 3;
   if (availableHeight < 400) return 4;
   if (availableHeight < 450) return 5;
-    if (availableHeight < 550) return 6;
-  if (availableHeight < 600) return 8;
+    if (availableHeight < 500) return 6;
+  if (availableHeight < 570) return 7;
+    if (availableHeight < 620) return 8;
 
   return 8;
 })();
@@ -114,6 +115,16 @@ export default function VerBienes() {
 
   return (
     <div className="p-2 sm:p-6">
+      <div className="flex justify-end mb-4">
+  <Button
+    variant="blue"
+    onClick={() => navigate("/bienes/registro")}
+    className="text-xs md:text-[13px] sm:text-sm"
+  >
+    Agregar Bien
+  </Button>
+</div>
+
       <input
         type="text"
         placeholder="Buscar por nombre..."
@@ -121,7 +132,7 @@ export default function VerBienes() {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 w-full border p-2 rounded text-xs sm:text-sm"
       />
-      <div className="rounded-md bordershadow-sm">
+      <div className="rounded-md border shadow-sm">
         <div
           className="max-h-none overflow-y-visible  sm:overflow-y-auto"
           style={

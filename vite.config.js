@@ -84,8 +84,8 @@ export default defineConfig({
     
     proxy: {
       '/api': {
-      // target: 'http://localhost:8002',
-        target: 'http://52.224.111.106:8002',
+       target: 'http://localhost:8002',
+      //  target: 'http://52.224.111.106:8002',
 
         changeOrigin: true,
         // Si tu API no tiene '/api' como prefijo, puedes reescribir la ruta

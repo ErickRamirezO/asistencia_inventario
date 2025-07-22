@@ -50,6 +50,8 @@ export default function LugaresView() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [lugarActual, setLugarActual] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+
    // 👇 Medir tamaño de pantalla
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
@@ -65,7 +67,7 @@ export default function LugaresView() {
   }, []);
 
   const isDesktop = windowSize.width >= 768;
-  const availableHeight = isDesktop ? windowSize.height - 230 : undefined;
+  const availableHeight = isDesktop ? windowSize.height - 200 : undefined;
 
   // 👇 Igual que VerBienes: cálculo dinámico
   const itemsPerPage = (() => {
@@ -79,17 +81,25 @@ export default function LugaresView() {
   })();
 
 
-  const totalPages = Math.ceil(lugares.length / itemsPerPage);
-  const lugaresPaginados = isDesktop
-    ? lugares.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : lugares; // En móvil muestra todos los lugares
+  const lugaresFiltrados = lugares.filter((lugar) =>
+  lugar.nombreLugar.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+const lugaresPaginados = isDesktop
+  ? lugaresFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : lugaresFiltrados;
+
+const totalPages = Math.ceil(lugaresFiltrados.length / itemsPerPage);
 
   // Reinicia la página si cambia la lista de lugares
   useEffect(() => {
     setCurrentPage(1);
   }, [lugares]);
   // Estado para tamaño de ventana
-  
+  useEffect(() => {
+  setCurrentPage(1);
+}, [searchTerm, itemsPerPage]);
+
 
   useEffect(() => {
     function handleResize() {
@@ -163,7 +173,7 @@ export default function LugaresView() {
 
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
-      <Card>
+      <Card className="border-transparent shadow-none rounded-none pt-0">
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
@@ -173,11 +183,19 @@ export default function LugaresView() {
           </Button>
         </CardHeader>
 
-        <CardContent>
+        <CardContent >
+          <Input
+  type="text"
+  placeholder="Buscar lugar..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="mb-4 text-xs md:text-[13px] sm:text-sm w-full"
+/>
+
           <div
             className={`
               w-full
-              overflow-x-auto sm:overflow-x-visible
+              overflow-x-auto sm:overflow-x-visible border rounded-md shadow-sm
               ${isDesktop ? "overflow-y-auto" : "overflow-y-visible"}
             `}
             style={isDesktop ? { maxHeight: availableHeight } : {}}

@@ -52,6 +52,8 @@ export default function Departamentos() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [departamentoActual, setDepartamentoActual] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
    // 👇 Medir tamaño de pantalla
   const [windowSize, setWindowSize] = useState({
@@ -68,7 +70,7 @@ export default function Departamentos() {
   }, []);
 
   const isDesktop = windowSize.width >= 768;
-  const availableHeight = isDesktop ? windowSize.height - 230 : undefined;
+  const availableHeight = isDesktop ? windowSize.height - 200 : undefined;
 
   // 👇 Igual que VerBienes: cálculo dinámico
   const itemsPerPage = (() => {
@@ -83,10 +85,16 @@ export default function Departamentos() {
 
 
 
-  const totalPages = Math.ceil(departamentos.length / itemsPerPage);
+ const departamentosFiltrados = departamentos.filter((dep) =>
+  dep.nombreDepartamento.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 const departamentosPaginados = isDesktop
-  ? departamentos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : departamentos;
+  ? departamentosFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : departamentosFiltrados;
+
+const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
+
 
 
   // Reinicia la página si cambia la lista de departamentos
@@ -150,7 +158,7 @@ const departamentosPaginados = isDesktop
 
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
-      <Card>
+      <Card className="border-transparent shadow-none rounded-none pt-0">
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
@@ -161,6 +169,15 @@ const departamentosPaginados = isDesktop
         </CardHeader>
 
         <CardContent>
+          <div className="px-0 sm:px-0 mb-4">
+    <Input
+      type="text"
+      placeholder="Buscar departamento..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full text-xs md:text-[13px] sm:text-sm"
+    />
+  </div>
           {/*
             Contenedor con:
              - overflow-x-hidden en móvil, overflow-x-auto en ≥ sm
@@ -178,7 +195,9 @@ const departamentosPaginados = isDesktop
             isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
           >
-            <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
+            <div className="rounded-md border   overflow-hidden">
+  <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
+
               <thead>
                 <tr>
                   <th className="text-left p-2">Nombre</th>
@@ -212,6 +231,7 @@ const departamentosPaginados = isDesktop
                 )}
               </tbody>
             </table>
+            
             {isDesktop && (
               <Pagination className="mt-4" style={{ minHeight: "48px" }}>
                 <PaginationContent>
@@ -254,6 +274,7 @@ const departamentosPaginados = isDesktop
                 </PaginationContent>
               </Pagination>
             )}
+          </div>
           </div>
         </CardContent>
       </Card>

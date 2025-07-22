@@ -50,6 +50,8 @@ export default function Categorias() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [categoriaActual, setCategoriaActual] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -69,14 +71,16 @@ export default function Categorias() {
   if (availableHeight < 600) return 7;
   return 8;
 })();
+const categoriasFiltradas = categorias.filter((cat) =>
+  cat.nombreCategoria.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 const categoriasPaginadas = isDesktop
-  ? categorias.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : categorias;
+  ? categoriasFiltradas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  : categoriasFiltradas;
 
-  
+const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
 
-  const totalPages = Math.ceil(categorias.length / itemsPerPage);
-  
   // Reinicia la página si cambia la lista de categorías
   useEffect(() => {
     setCurrentPage(1);
@@ -144,7 +148,7 @@ const categoriasPaginadas = isDesktop
 
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
-      <Card>
+      <Card className="border-transparent shadow-none rounded-none pt-0" >
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
@@ -159,21 +163,25 @@ const categoriasPaginadas = isDesktop
             isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
           }
         >
+          <div className="px-0 sm:px-0 mb-4">
+  <Input
+    type="text"
+    placeholder="Buscar categoría..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full text-xs md:text-[13px] sm:text-sm"
+  />
+</div>
+
           {/*
             Contenedor con:
              - overflow-x-hidden en móvil, overflow-x-auto en ≥ sm
              - sin scroll vertical en móvil, scroll vertical en ≥ sm
              - altura máxima de 400px en ≥ sm
           */}
-          <div
-            className="
-              w-full
-              overflow-x-hidden sm:overflow-x-auto
-              overflow-y-visible sm:overflow-y-auto
-              sm:max-h-[400px]
-            "
-          >
-            <table className="w-full min-w-0 sm:min-w-[500px] text-xs md:text-[13px] sm:text-sm table-auto">
+          <div className="rounded-md border   overflow-hidden  shadow-sm">
+  <table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
+
               <thead>
                 <tr>
                   <th className="text-left p-2 hidden">ID</th>
