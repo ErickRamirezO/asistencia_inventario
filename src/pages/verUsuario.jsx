@@ -286,7 +286,7 @@ export default function VerUsuario() {
             <input
               type="text"
               placeholder="Buscar por nombre o cédula..."
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-[13px] sm:text-sm"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 text-xs md:text-[13px] sm:text-sm"
               value={terminoBusqueda}
               onChange={(e) => setTerminoBusqueda(e.target.value)}
             />

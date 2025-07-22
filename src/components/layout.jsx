@@ -146,7 +146,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/")} data-close-sidebar>
                           <Link to="/bienes/inventario">
                             <Package className="h-5 w-5" />
-                            <span>Inventario</span>
+                            <span>Inventario físico</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
@@ -222,7 +222,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/asistencia/evento")} data-close-sidebar>
                           <Link to="/asistencia-evento">
                             <Bookmark className="h-5 w-5" />
-                            <span>Eventos</span>
+                            <span>Registro asistencia eventos</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>
