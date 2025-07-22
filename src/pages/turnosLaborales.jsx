@@ -248,7 +248,7 @@ export default function TurnosLaborales() {
 
 const isDesktop = windowSize.width >= 768;
 const availableHeight = isDesktop
-  ? windowSize.height - 100 // ajusta según tu layout
+  ? windowSize.height - 50 // ajusta según tu layout
   : undefined;
 
 // Cálculo dinámico de filas

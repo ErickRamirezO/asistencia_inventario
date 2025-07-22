@@ -69,6 +69,7 @@ export default function Categorias() {
   if (availableHeight < 450) return 5;
   if (availableHeight < 550) return 6;
   if (availableHeight < 600) return 7;
+   if (availableHeight < 650) return 8;
   return 8;
 })();
 const categoriasFiltradas = categorias.filter((cat) =>
