@@ -42,8 +42,11 @@ import {
 } from "../../components/ui/tabs";
 import { toast } from "sonner";
 import moment from "moment";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 export default function Asistencia() {
+  const { user } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
   const [attendanceData, setAttendanceData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -145,6 +148,10 @@ export default function Asistencia() {
       setIsLoading(false);
     } catch (error) {
       setError(error.message);
+      await crearLog(
+        `ERROR: No se pudieron cargar los datos de asistencia regular: ${error.message}`,
+        user.userId
+      );
       setIsLoading(false);
     }
   }, []);
@@ -164,6 +171,10 @@ export default function Asistencia() {
       } catch (error) {
         console.error("Error fetching departments:", error);
         toast.error("Error al cargar los departamentos.");
+        await crearLog(
+          `ERROR: No se pudieron cargar los departamentos en asistencia: ${error.message}`,
+          user.userId
+        );
         setDepartments([{ label: "Todos", value: "all" }]);
       }
     };
@@ -187,6 +198,10 @@ export default function Asistencia() {
       } catch (error) {
         console.error("Error al cargar eventos:", error);
         toast.error("Error al cargar eventos disponibles.");
+        await crearLog(
+          `ERROR: No se pudieron cargar los eventos disponibles: ${error.message}`,
+          user.userId
+        );
       } finally {
         setIsLoadingEvents(false);
       }
@@ -210,6 +225,10 @@ export default function Asistencia() {
         currentRegularTableData = response.data;
       } catch (error) {
         console.error("Error loading initial regular table data:", error);
+        await crearLog(
+          `ERROR: No se pudieron cargar los datos de asistencia regular: ${error.message}`,
+          user.userId
+        );
         currentRegularTableData = [];
       }
     };
@@ -274,6 +293,10 @@ export default function Asistencia() {
     } catch (error) {
       console.error("Error loading event attendance:", error);
       toast.error("No se pudieron cargar los datos del evento.");
+      await crearLog(
+        `ERROR: No se pudieron cargar los datos del evento ${eventName}: ${error.message}`,
+        user.userId
+      );
       setEventAttendanceData([]);
     } finally {
       setIsLoading(false);

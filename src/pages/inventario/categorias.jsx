@@ -33,7 +33,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 // Validación Zod: min 2, max 30, solo letras, dígitos y espacios
 const FormSchema = z.object({
   nombreCategoria: z
@@ -41,11 +42,12 @@ const FormSchema = z.object({
     .min(2, { message: "Debe tener al menos 2 caracteres" })
     .max(30, { message: "No debe superar los 30 caracteres" })
     .regex(/^[\p{L}\p{N} ]+$/u, {
-  message: "Solo se permiten letras, números y espacios",
-}),
+      message: "Solo se permiten letras, números y espacios",
+    }),
 });
 
 export default function Categorias() {
+  const { user } = useUser();
   const [categorias, setCategorias] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -58,42 +60,44 @@ export default function Categorias() {
   });
   const isDesktop = windowSize.width >= 768; // md: 768px breakpoint
   const availableHeight = isDesktop
-  ? windowSize.height - 250 // ajusta 200px según header + paddings
-  : undefined;
+    ? windowSize.height - 250 // ajusta 200px según header + paddings
+    : undefined;
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const itemsPerPage = (() => {
-  if (!isDesktop) return categorias.length; // mostrar todo en móvil
-  if (availableHeight < 350) return 3;
-  if (availableHeight < 400) return 4;
-  if (availableHeight < 450) return 5;
-  if (availableHeight < 550) return 6;
-  if (availableHeight < 600) return 7;
-   if (availableHeight < 650) return 8;
-  return 8;
-})();
-const categoriasFiltradas = categorias.filter((cat) =>
-  cat.nombreCategoria.toLowerCase().includes(searchTerm.toLowerCase())
-);
+    if (!isDesktop) return categorias.length; // mostrar todo en móvil
+    if (availableHeight < 350) return 3;
+    if (availableHeight < 400) return 4;
+    if (availableHeight < 450) return 5;
+    if (availableHeight < 550) return 6;
+    if (availableHeight < 600) return 7;
+    if (availableHeight < 650) return 8;
+    return 8;
+  })();
+  const categoriasFiltradas = categorias.filter((cat) =>
+    cat.nombreCategoria.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-const categoriasPaginadas = isDesktop
-  ? categoriasFiltradas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : categoriasFiltradas;
+  const categoriasPaginadas = isDesktop
+    ? categoriasFiltradas.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : categoriasFiltradas;
 
-const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
+  const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
 
   // Reinicia la página si cambia la lista de categorías
   useEffect(() => {
     setCurrentPage(1);
   }, [categorias]);
-  
+
   useEffect(() => {
     const handleResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
 
   // Validación en tiempo real
   const form = useForm({
@@ -111,6 +115,7 @@ const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
       toast.error("Error al cargar categorías", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al cargar categorías`, user.userId);
     }
   };
 
@@ -132,11 +137,19 @@ const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
         toast.success("Categoría actualizada", {
           richColors: true,
         });
+        crearLog(
+          `INFO: Categoría actualizada: ${categoriaActual.nombreCategoria}`,
+          user.userId
+        );
       } else {
         await api.post("/categorias", data);
         toast.success("Categoría creada", {
           richColors: true,
         });
+        crearLog(
+          `INFO: Nueva categoría creada: ${data.nombreCategoria}`,
+          user.userId
+        );
       }
       cargarCategorias();
       setDialogOpen(false);
@@ -144,12 +157,16 @@ const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
       toast.error("Error al guardar categoría", {
         richColors: true,
       });
+      crearLog(
+        `ERROR: Error al guardar categoría: ${data.nombreCategoria}`,
+        user.userId
+      );
     }
   };
 
   return (
     <div className="p-2 sm:p-6 max-w-full sm:max-w-4xl mx-auto">
-      <Card className="border-transparent shadow-none rounded-none pt-0" >
+      <Card className="border-transparent shadow-none rounded-none pt-0">
         <CardHeader className="flex justify-end">
           <Button
             onClick={() => abrirModal()}
@@ -165,14 +182,14 @@ const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
           }
         >
           <div className="px-0 sm:px-0 mb-4">
-  <Input
-    type="text"
-    placeholder="Buscar categoría..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="w-full text-xs md:text-[13px] sm:text-sm"
-  />
-</div>
+            <Input
+              type="text"
+              placeholder="Buscar categoría..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full text-xs md:text-[13px] sm:text-sm"
+            />
+          </div>
 
           {/*
             Contenedor con:
@@ -181,8 +198,7 @@ const totalPages = Math.ceil(categoriasFiltradas.length / itemsPerPage);
              - altura máxima de 400px en ≥ sm
           */}
           <div className="rounded-md border   overflow-hidden  shadow-sm">
-  <table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
-
+            <table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
               <thead>
                 <tr>
                   <th className="text-left p-2 hidden">ID</th>

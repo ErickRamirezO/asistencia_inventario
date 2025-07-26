@@ -43,7 +43,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 // Datos de respaldo en caso de fallo en la API
 const departamentosRespaldo = [
   { label: "Recursos Humanos", value: "1" },
@@ -138,6 +139,7 @@ const FormSchema = z.object({
   });
 
 export default function FormularioUsuario() {
+  const { user } = useUser();
   const { id } = useParams(); // Obtenemos el ID si existe (modo edición)
   const navigate = useNavigate();
   const [scanningRFID, setScanningRFID] = useState(false);
@@ -192,12 +194,20 @@ export default function FormularioUsuario() {
       toast.success("Departamento creado correctamente",{
         richColors: true,
       });
+      await crearLog(
+        `INFO Departamento creado por el usuario ${user.id}`,
+        user.userId
+      );
       setDialogOpen(false);
       cargarDepartamentos(); // Recargar departamentos después de agregar uno nuevo
-    } catch {
+    } catch(error) {
       toast.error("Error al guardar departamento",{
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al crear departamento: ${error.message}`,
+        user.userId
+      );
     }
   };
 
@@ -212,6 +222,10 @@ export default function FormularioUsuario() {
       setDepartamentos(options);
     } catch {
       toast.error("Error al cargar departamentos");
+      await crearLog(
+        `ERROR: Error al cargar departamentos`,
+        user.userId
+      );
     }
   };
 
@@ -301,6 +315,10 @@ export default function FormularioUsuario() {
           description: "No se pudieron cargar los datos. Intente nuevamente.",
           richColors: true,
         });
+        await crearLog(
+          `ERROR: Error al cargar datos: ${error.message}`,
+          user.userId
+        );
         // En caso de error, usamos los datos de respaldo para departamentos y roles
         setDepartamentos(departamentosRespaldo);
         setRoles(rolesRespaldo);
@@ -310,7 +328,7 @@ export default function FormularioUsuario() {
     };
 
     cargarDatos();
-  }, [id, form, modoEdicion]);
+  }, [id, form, modoEdicion, user.userId]);
 
   // Función para iniciar el modo de escucha del lector RFID
   function startRFIDReader() {
@@ -422,6 +440,11 @@ export default function FormularioUsuario() {
                 description: "Los datos del usuario han sido actualizados exitosamente.",
                 richColors: true,
             });
+
+            await crearLog(
+              `INFO: Usuario actualizado (${usuario.id})`,
+              user.userId
+            );
             
             // Navegar de vuelta a la lista de usuarios
             navigate("/verUsuarios");
@@ -444,6 +467,11 @@ export default function FormularioUsuario() {
                 description: "El usuario ha sido registrado exitosamente.",
                 richColors: true,
             });
+
+            await crearLog(
+              `INFO: Usuario creado por el usuario ${user.userId}`,
+              user.userId
+            );
             
             // Limpiar el formulario en modo registro
             form.reset();
@@ -451,7 +479,10 @@ export default function FormularioUsuario() {
         }
     } catch (error) {
         console.error("Error al procesar usuario:", error);
-        
+        await crearLog(
+          `ERROR: Error al procesar usuario: ${error.message}`,
+          user.userId
+        );
         let errorMessage = "Ocurrió un error inesperado. Intente nuevamente."; // Mensaje genérico por defecto
         // Verifica si el error es de Axios y tiene una respuesta
         if (axios.isAxiosError(error) && error.response) {

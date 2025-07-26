@@ -41,6 +41,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 const FormSchema = z.object({
   nombreBien: z
@@ -142,6 +144,7 @@ const FormSchemaCategoria = z.object({
 });
 
 export default function RegistrarBien() {
+  const { user } = useUser();
   const [scanningRFID, setScanningRFID] = useState(false);
   const [rfidValue, setRfidValue] = useState("");
   const [departamentos, setDepartamentos] = useState([]);
@@ -161,18 +164,14 @@ export default function RegistrarBien() {
   }, []);
   const isDesktop = windowSize.width >= 600; // md: 768px breakpoint
   const availableHeight = isDesktop
-
     ? windowSize.height - 200 // ajusta 200px según header + paddings
-
     : undefined;
-    const inputHeight = isDesktop
-  ? Math.max(18, Math.floor(((availableHeight-60) || 800) /12 )) // mínimo 32px
-  : 32;
+  const inputHeight = isDesktop
+    ? Math.max(18, Math.floor((availableHeight - 60 || 800) / 12)) // mínimo 32px
+    : 32;
   const labelHeight = isDesktop
-  ? Math.max(7, Math.floor(inputHeight / 12)) // mínimo 8px (h-2)
-  : 15;
-
-
+    ? Math.max(7, Math.floor(inputHeight / 12)) // mínimo 8px (h-2)
+    : 15;
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -218,15 +217,17 @@ export default function RegistrarBien() {
   const onSubmitLugar = async (data) => {
     try {
       await api.post("/lugares", data); // Endpoint para guardar el nuevo lugar
-      toast.success("Lugar creado correctamente",{
+      toast.success("Lugar creado correctamente", {
         richColors: true,
       });
+      await crearLog(`INFO: Lugar creado: ${data.nombreLugar}`, user.userId);
       setDialogOpenLugar(false);
       cargarLugares(); // Recargar los lugares después de agregar uno nuevo
     } catch {
-      toast.error("Error al guardar lugar",{
+      toast.error("Error al guardar lugar", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al guardar lugar`, user.userId);
     }
   };
   const cargarLugares = async () => {
@@ -238,9 +239,10 @@ export default function RegistrarBien() {
       }));
       setLugares(options);
     } catch {
-      toast.error("Error al cargar lugares",{
+      toast.error("Error al cargar lugares", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al cargar lugares`, user.userId);
     }
   };
 
@@ -257,15 +259,20 @@ export default function RegistrarBien() {
   const onSubmitDepartamento = async (data) => {
     try {
       await api.post("/departamentos", data); // Aquí guardas el nuevo departamento
-      toast.success("Departamento creado correctamente",{
+      toast.success("Departamento creado correctamente", {
         richColors: true,
       });
+      await crearLog(
+        `INFO: Departamento creado: ${data.nombreDepartamento}`,
+        user.userId
+      );
       setDialogOpen(false);
       cargarDepartamentos(); // Recargar departamentos después de agregar uno nuevo
     } catch {
-      toast.error("Error al guardar departamento",{
+      toast.error("Error al guardar departamento", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al guardar departamento`, user.userId);
     }
   };
 
@@ -279,9 +286,13 @@ export default function RegistrarBien() {
       }));
       setDepartamentos(options);
     } catch {
-      toast.error("Error al cargar departamentos",{
+      toast.error("Error al cargar departamentos en registro de bienes", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al cargar departamentos en registro de bienes`,
+        user.userId
+      );
     }
   };
   const [dialogOpenCategoria, setDialogOpenCategoria] = useState(false); // Estado para el modal de categoría
@@ -299,15 +310,23 @@ export default function RegistrarBien() {
   const onSubmitCategoria = async (data) => {
     try {
       await api.post("/categorias", data); // Endpoint para guardar la nueva categoría
-      toast.success("Categoría creada correctamente",{
+      toast.success("Categoría creada correctamente", {
         richColors: true,
       });
+      await crearLog(
+        `INFO: Categoría creada en registro de bienes: ${data.nombreCategoria}`,
+        user.userId
+      );
       setDialogOpenCategoria(false);
       cargarCategorias(); // Recargar las categorías después de agregar una nueva
     } catch {
-      toast.error("Error al guardar categoría",{
+      toast.error("Error al guardar categoría", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al guardar categoría en registro de bienes`,
+        user.userId
+      );
     }
   };
 
@@ -320,7 +339,7 @@ export default function RegistrarBien() {
       }));
       setCategorias(options);
     } catch {
-      toast.error("Error al cargar categorías",{
+      toast.error("Error al cargar categorías", {
         richColors: true,
       });
     }
@@ -347,7 +366,7 @@ export default function RegistrarBien() {
           setRfidValue(tag);
           form.setValue("tagRfidNumero", tag);
           setScanningRFID(false);
-          toast.success("Tag RFID escaneado correctamente",{
+          toast.success("Tag RFID escaneado correctamente", {
             richColors: true,
           });
         }
@@ -371,9 +390,11 @@ export default function RegistrarBien() {
         }));
         setDepartamentos(options);
       })
-      .catch(() => toast.error("Error al cargar departamentos",{
-        richColors: true,
-      }));
+      .catch(() =>
+        toast.error("Error al cargar departamentos", {
+          richColors: true,
+        })
+      );
 
     api
       .get("/categorias")
@@ -384,9 +405,11 @@ export default function RegistrarBien() {
         }));
         setCategorias(options);
       })
-      .catch(() => toast.error("Error al cargar categorías",{
-        richColors: true,
-      }));
+      .catch(() =>
+        toast.error("Error al cargar categorías", {
+          richColors: true,
+        })
+      );
 
     api
       .get("/usuarios")
@@ -397,9 +420,11 @@ export default function RegistrarBien() {
         }));
         setUsuarios(options);
       })
-      .catch(() => toast.error("Error al cargar usuarios",{
-        richColors: true,
-      }));
+      .catch(() =>
+        toast.error("Error al cargar usuarios", {
+          richColors: true,
+        })
+      );
   }, []);
 
   useEffect(() => {
@@ -427,9 +452,11 @@ export default function RegistrarBien() {
           });
           setRfidValue(bien.tagRfidNumero);
         })
-        .catch(() => toast.error("No se pudo cargar el bien",{
-          richColors: true,
-        }));
+        .catch(() =>
+          toast.error("No se pudo cargar el bien", {
+            richColors: true,
+          })
+        );
     }
   }, [id, form]);
 
@@ -447,8 +474,11 @@ export default function RegistrarBien() {
           }));
         setLugares(options);
       })
-      .catch(() => toast.error("Error al cargar lugares",{
-        richColors: true}));
+      .catch(() =>
+        toast.error("Error al cargar lugares", {
+          richColors: true,
+        })
+      );
   }, []);
 
   const onSubmit = async (data) => {
@@ -464,22 +494,31 @@ export default function RegistrarBien() {
 
       if (id) {
         await api.put(`/bienes-inmuebles/${id}`, payload);
-        toast.success("Bien actualizado correctamente",{
+        toast.success("Bien actualizado correctamente", {
           richColors: true,
         });
+        await crearLog(`"INFO: Bien actualizado con ID ${id}"`, user.userId);
       } else {
         await api.post("/bienes-inmuebles", payload);
-        toast.success("Bien registrado correctamente",{
+        toast.success("Bien registrado correctamente", {
           richColors: true,
         });
+        await crearLog(
+          `"INFO: Bien registrado con nombre ${data.nombreBien}"`,
+          user.userId
+        );
       }
 
       navigate("/bienes/lista-bienes");
     } catch (error) {
       console.error("Error al guardar el bien:", error);
-      toast.error("Error al guardar el bien.",{
+      toast.error("Error al guardar el bien.", {
         richColors: true,
       });
+      await crearLog(
+        "ERROR: No se pudo guardar el bien con nombre ${data.nombreBien}",
+        user.userId
+      );
     }
   };
 
@@ -489,14 +528,13 @@ export default function RegistrarBien() {
       {/* <-- pt-0 elimina padding top extra */}
       <Card className="  border-transparent shadow-none rounded-none p-0 ">
         <CardContent
-  className="w-full max-w-full p-2 overflow-hidden"
-  style={
-    isDesktop
-      ? { height: availableHeight, overflowY: "auto" }
-      : undefined
-  }
->
-
+          className="w-full max-w-full p-2 overflow-hidden"
+          style={
+            isDesktop
+              ? { height: availableHeight, overflowY: "auto" }
+              : undefined
+          }
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Sección del formulario */}
             <div>
@@ -512,12 +550,15 @@ export default function RegistrarBien() {
                     name="nombreBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Nombre del Bien
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: Escritorio"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -533,12 +574,15 @@ export default function RegistrarBien() {
                     name="descripcion"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel  style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Descripción
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: De madera color negro"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -554,12 +598,15 @@ export default function RegistrarBien() {
                     name="precio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Precio
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             type="number"
                             placeholder="Ejemplo: 120.00"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
@@ -575,14 +622,17 @@ export default function RegistrarBien() {
                     name="usuarioId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Usuario Encargado
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                              style={{ height: inputHeight }}
+                                style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -647,12 +697,15 @@ export default function RegistrarBien() {
                     name="serieBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Serie
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: SN123456"
                             className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
@@ -668,12 +721,15 @@ export default function RegistrarBien() {
                     name="modeloBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Modelo
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: X300"
                             className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
@@ -689,12 +745,15 @@ export default function RegistrarBien() {
                     name="marcaBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Marca
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: HP"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -710,12 +769,15 @@ export default function RegistrarBien() {
                     name="materialBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Material
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: Acero inoxidable"
                             className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
@@ -731,12 +793,15 @@ export default function RegistrarBien() {
                     name="dimensionesBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Dimensiones
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: 1.2m x 0.6m"
                             className="w-full text-xs md:text-[13px] sm:text-sm "
                             {...field}
@@ -752,12 +817,15 @@ export default function RegistrarBien() {
                     name="observacionBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="text-xs md:text-[13px] sm:text-sm"
+                        >
                           Observaciones
                         </FormLabel>
                         <FormControl>
                           <Input
-                          style={{ height: inputHeight }}
+                            style={{ height: inputHeight }}
                             placeholder="Ejemplo: Leve desgaste"
                             className="w-full text-xs md:text-[13px] sm:text-sm"
                             {...field}
@@ -773,14 +841,17 @@ export default function RegistrarBien() {
                     name="ubicacionBien"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm ">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="w-full text-xs md:text-[13px] sm:text-sm "
+                        >
                           Ubicación
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                              style={{ height: inputHeight }}
+                                style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -851,14 +922,17 @@ export default function RegistrarBien() {
                     name="departamentoId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="w-full text-xs md:text-[13px] sm:text-sm"
+                        >
                           Departamento
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                              style={{ height: inputHeight }}
+                                style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -929,14 +1003,17 @@ export default function RegistrarBien() {
                     name="categoriaId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel style={{ height: labelHeight }} className="w-full text-xs md:text-[13px] sm:text-sm">
+                        <FormLabel
+                          style={{ height: labelHeight }}
+                          className="w-full text-xs md:text-[13px] sm:text-sm"
+                        >
                           Categoría
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                              style={{ height: inputHeight }}
+                                style={{ height: inputHeight }}
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -944,7 +1021,6 @@ export default function RegistrarBien() {
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
-                                
                                 {field.value
                                   ? categorias.find(
                                       (cat) => cat.value === field.value
@@ -1006,8 +1082,7 @@ export default function RegistrarBien() {
 
             {/* Panel RFID como Card */}
             <Card className="h-fit self-start w-full">
-              <CardHeader >
-                
+              <CardHeader>
                 <CardTitle className="font-semibold text-xs md:text-[13px] sm:text-sm">
                   Tarjeta RFID
                 </CardTitle>

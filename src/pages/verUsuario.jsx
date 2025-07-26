@@ -31,15 +31,18 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react"; // Importamos los iconos
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/utils/UserContext"; // Asegúrate de importar tu contexto de usuario
+import { crearLog } from "@/utils/logs";
 
 export default function VerUsuario() {
+  const { user } = useUser();
   const [usuarios, setUsuarios] = useState([]);
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +96,6 @@ export default function VerUsuario() {
       ]
     : ["nombre", "apellido", "estado", "horario", "acciones"];
 
-  // Obtener usuarios y horarios al cargar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -111,6 +113,10 @@ export default function VerUsuario() {
         setLoading(false);
       } catch (error) {
         console.error("Error al cargar datos:", error);
+        await crearLog(
+          `ERROR: Error al cargar datos: ${error.message}`,
+          user.userId
+        );
         toast.error("Error", {
           description: "No se pudieron cargar los horarios laborales.",
           richColors: true,
@@ -124,7 +130,7 @@ export default function VerUsuario() {
     };
 
     fetchData();
-  }, []);
+  }, [user.userId]);
 
   // Función para cambiar el estado del usuario (habilitado/inhabilitado)
   const toggleEstadoUsuario = async (id) => {
@@ -161,8 +167,16 @@ export default function VerUsuario() {
           richColors: true,
         }
       );
+      await crearLog(
+        `INFO: El usuario ${nombreCompleto} ha sido ${nuevoEstado ? "habilitado" : "inhabilitado"}`,
+        user.userId
+      );
     } catch (error) {
       console.error("Error al cambiar estado:", error);
+      await crearLog(
+        `ERROR: Error al cambiar estado de usuario: ${error.message}`,
+        user.userId
+      );
       toast.error("Error", {
         description: "No se pudo actualizar el estado del usuario.",
         richColors: true,
@@ -195,12 +209,21 @@ export default function VerUsuario() {
         )
       );
 
+      console.log("user", user.userId);
+      await crearLog(
+        `INFO: El horario laboral del usuario ${usuario.id} ha sido cambiado a "${horario.nombreHorario}"`,
+        user.userId
+      );
       toast.success("Horario actualizado", {
         description: `Se ha asignado el horario "${horario.nombreHorario}" a ${usuario.nombre} ${usuario.apellido}.`,
         richColors: true,
       });
     } catch (error) {
       console.error("Error al cambiar horario:", error);
+      await crearLog(
+        `ERROR: Error al cambiar horario de usuario: ${error.message}`,
+        user.userId
+      );
       toast.error("Error", {
         description: "No se pudo actualizar el horario laboral.",
         richColors: true,
@@ -245,12 +268,19 @@ export default function VerUsuario() {
         description: `${usuarioAEliminar.nombre} ${usuarioAEliminar.apellido} ha sido eliminado correctamente.`,
         richColors: true,
       });
-
+      await crearLog(
+        `INFO: El usuario ${usuarioAEliminar.nombre} ${usuarioAEliminar.apellido} ha sido eliminado`,
+        user.userId
+      );
       // Cerrar el diálogo
       setDialogoConfirmacionAbierto(false);
       setUsuarioAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar usuario:", error);
+      await crearLog(
+        `ERROR: Error al eliminar usuario: ${error.message}`,
+        user.userId
+      );
       toast.error("Error", {
         description: "No se pudo eliminar el usuario. Intente nuevamente.",
         richColors: true,

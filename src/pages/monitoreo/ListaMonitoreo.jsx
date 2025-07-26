@@ -8,19 +8,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Clock } from "lucide-react";
 import clsx from "clsx";
 import { Input } from "@/components/ui/input";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 export default function MonitoreoLista() {
+  const { user } = useUser();
   const [registros, setRegistros] = useState([]);
   const [filtro, setFiltro] = useState("TODOS");
   const [busqueda, setBusqueda] = useState("");
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
-  api
-    .get("/monitoreos")
-    .then((res) => setRegistros(res.data))
-    .catch((err) => console.error("Error cargando monitoreos:", err));
-}, []);
+    api
+      .get("/monitoreos")
+      .then((res) => setRegistros(res.data))
+      .catch((err) => {
+        console.error("Error cargando monitoreos:", err);
+        crearLog(
+          `ERROR: Error cargando monitoreos`,
+          user.userId
+        );
+      });
+}, [user.userId]);
 
 
   useEffect(() => {

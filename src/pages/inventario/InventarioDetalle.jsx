@@ -25,8 +25,11 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 export default function InventarioDetalle() {
+  const { user } = useUser();
   const { id } = useParams();
   const [historial, setHistorial] = useState([]);
   const [lugarInventario, setLugarInventario] = useState("");
@@ -56,6 +59,10 @@ export default function InventarioDetalle() {
         setHistorial(res.data);
       } catch (err) {
         console.error("Error al cargar historial:", err);
+        await crearLog(
+          `ERROR: Error al cargar historial con ID ${id}`,
+          user.userId
+        );
       }
     };
 
@@ -65,6 +72,10 @@ export default function InventarioDetalle() {
         setLugarInventario(res.data.lugarInventario);
       } catch (err) {
         console.error("Error al obtener lugar del inventario:", err);
+        await crearLog(
+          `ERROR: Error al obtener lugar del inventario con ID ${id}`,
+          user.userId
+        );
       }
     };
 
@@ -92,7 +103,10 @@ export default function InventarioDetalle() {
           headers: { "Content-Type": "application/json" },
         }
       );
-
+      await crearLog(
+        `INFO: Descripción actualizada para bien ${bienEditar.bienesInmueblesId}`,
+        user.userId
+      );
       setHistorial((prev) =>
         prev.map((h) =>
           h.bienesInmueblesId === bienEditar.bienesInmueblesId
@@ -104,6 +118,10 @@ export default function InventarioDetalle() {
       setNuevaDescripcion("");
     } catch (err) {
       console.error("Error actualizando descripción:", err);
+      await crearLog(
+        `ERROR: Error al actualizar descripción para bien ${bienEditar.bienesInmueblesId}`,
+        user.userId
+      );
     }
   };
   const [searchTerm, setSearchTerm] = useState("");
@@ -128,7 +146,9 @@ export default function InventarioDetalle() {
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Total Bienes</CardTitle>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">
+              Total Bienes
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xl font-bold">{total}</p>
@@ -136,7 +156,9 @@ export default function InventarioDetalle() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Inventariados</CardTitle>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">
+              Inventariados
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xl font-bold">{inventariados}</p>
@@ -144,7 +166,9 @@ export default function InventarioDetalle() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Faltantes</CardTitle>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">
+              Faltantes
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xl font-bold">{faltantes}</p>
@@ -152,7 +176,9 @@ export default function InventarioDetalle() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xs md:text-[13px] sm:text-sm">Hora Actual</CardTitle>
+            <CardTitle className="text-xs md:text-[13px] sm:text-sm">
+              Hora Actual
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-xl font-bold">
             <Clock className="h-5 w-5" /> {horaActual}
@@ -169,37 +195,55 @@ export default function InventarioDetalle() {
         />
         <div className="rounded shadow overflow-x-auto">
           <div className="overflow-y-auto  max-h-none">
-           <Table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
-
+            <Table className="table-fixed w-full text-xs md:text-[13px] sm:text-sm">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Nombre Bien</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Descripción</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Encargado</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Lugar</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Fecha</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Estado</TableHead>
-                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">Acciones</TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Nombre Bien
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Descripción
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Encargado
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Lugar
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Fecha
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Estado
+                  </TableHead>
+                  <TableHead className="text-xs md:text-[13px] sm:text-sm w-[15%]">
+                    Acciones
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {historialFiltrado.map((h) => (
                   <TableRow key={h.id}>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">{h.nombreBien}</TableCell>
-                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">{h.descripcionBien}</TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
+                      {h.nombreBien}
+                    </TableCell>
+                    <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
+                      {h.descripcionBien}
+                    </TableCell>
                     <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {h.nombreEncargado || "Sin encargado"}
                     </TableCell>
                     <TableCell
-  className={clsx(
-    "text-xs md:text-[13px] sm:text-sm w-[15%] truncate",
-    {
-      "text-red-600 font-semibold": h.lugar !== lugarInventario,
-    }
-  )}
->
-  {h.lugar || "Sin ubicación"}
-</TableCell>
+                      className={clsx(
+                        "text-xs md:text-[13px] sm:text-sm w-[15%] truncate",
+                        {
+                          "text-red-600 font-semibold":
+                            h.lugar !== lugarInventario,
+                        }
+                      )}
+                    >
+                      {h.lugar || "Sin ubicación"}
+                    </TableCell>
 
                     <TableCell className="text-xs md:text-[13px] sm:text-sm w-[15%] truncate">
                       {new Date(h.fechaInventario).toLocaleDateString()}

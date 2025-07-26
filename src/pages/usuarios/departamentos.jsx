@@ -33,7 +33,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 // 1) Esquema Zod con .max(30) y regex para prohibir especiales
 const FormSchema = z.object({
   nombreDepartamento: z
@@ -41,12 +42,12 @@ const FormSchema = z.object({
     .min(2, { message: "Debe tener al menos 2 caracteres" })
     .max(30, { message: "No debe superar los 30 caracteres" })
     .regex(/^[\p{L}\p{N} ]+$/u, {
-  message: "Solo se permiten letras, números y espacios",
-})
-
+      message: "Solo se permiten letras, números y espacios",
+    }),
 });
 
 export default function Departamentos() {
+  const { user } = useUser();
   const [departamentos, setDepartamentos] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -54,8 +55,7 @@ export default function Departamentos() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
-
-   // 👇 Medir tamaño de pantalla
+  // 👇 Medir tamaño de pantalla
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -83,19 +83,18 @@ export default function Departamentos() {
     return 8;
   })();
 
+  const departamentosFiltrados = departamentos.filter((dep) =>
+    dep.nombreDepartamento.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  const departamentosPaginados = isDesktop
+    ? departamentosFiltrados.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : departamentosFiltrados;
 
- const departamentosFiltrados = departamentos.filter((dep) =>
-  dep.nombreDepartamento.toLowerCase().includes(searchTerm.toLowerCase())
-);
-
-const departamentosPaginados = isDesktop
-  ? departamentosFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : departamentosFiltrados;
-
-const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
-
-
+  const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
 
   // Reinicia la página si cambia la lista de departamentos
   useEffect(() => {
@@ -118,6 +117,10 @@ const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
       toast.error("Error al cargar departamentos", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al cargar departamentos`,
+        user.userId
+      );
     }
   };
 
@@ -141,11 +144,19 @@ const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
         toast.success("Departamento actualizado", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Departamento actualizado: ${data.nombreDepartamento}`,
+          user.userId
+        );
       } else {
         await api.post("/departamentos", data);
         toast.success("Departamento creado", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Departamento creado: ${data.nombreDepartamento}`,
+          user.userId
+        );
       }
       cargarDepartamentos();
       setDialogOpen(false);
@@ -153,6 +164,10 @@ const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
       toast.error("Error al guardar departamento", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al guardar departamento: ${data.nombreDepartamento}`,
+        user.userId
+      );
     }
   };
 
@@ -170,14 +185,14 @@ const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
 
         <CardContent>
           <div className="px-0 sm:px-0 mb-4">
-    <Input
-      type="text"
-      placeholder="Buscar departamento..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-full text-xs md:text-[13px] sm:text-sm"
-    />
-  </div>
+            <Input
+              type="text"
+              placeholder="Buscar departamento..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full text-xs md:text-[13px] sm:text-sm"
+            />
+          </div>
           {/*
             Contenedor con:
              - overflow-x-hidden en móvil, overflow-x-auto en ≥ sm
@@ -192,89 +207,90 @@ const totalPages = Math.ceil(departamentosFiltrados.length / itemsPerPage);
               sm:max-h-[400px]
             "
             style={
-            isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
-          }
+              isDesktop ? { maxHeight: availableHeight, overflowY: "auto" } : {}
+            }
           >
             <div className="rounded-md border   overflow-hidden">
-  <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
-
-              <thead>
-                <tr>
-                  <th className="text-left p-2">Nombre</th>
-                  <th className="text-right p-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {departamentosPaginados.length > 0 ? (
-                  departamentosPaginados.map((dep) => (
-                    <tr key={dep.id} className="border-t">
-                      <td className="p-2 break-words whitespace-normal">
-                        {dep.nombreDepartamento}
-                      </td>
-                      <td className="p-2 text-right">
-                        <Button
-                          size="icon"
-                          onClick={() => abrirModal(dep)}
-                          className="bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
+              <table className="w-full min-w-0 sm:min-w-[400px] text-xs md:text-[13px] sm:text-sm table-auto">
+                <thead>
+                  <tr>
+                    <th className="text-left p-2">Nombre</th>
+                    <th className="text-right p-2">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departamentosPaginados.length > 0 ? (
+                    departamentosPaginados.map((dep) => (
+                      <tr key={dep.id} className="border-t">
+                        <td className="p-2 break-words whitespace-normal">
+                          {dep.nombreDepartamento}
+                        </td>
+                        <td className="p-2 text-right">
+                          <Button
+                            size="icon"
+                            onClick={() => abrirModal(dep)}
+                            className="bg-blue-500 text-white hover:bg-blue-600"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={2} className="text-center p-2">
+                        No hay departamentos.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={2} className="text-center p-2">
-                      No hay departamentos.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            
-            {isDesktop && (
-              <Pagination className="mt-4" style={{ minHeight: "48px" }}>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      aria-disabled={currentPage === 1}
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        isActive={currentPage === i + 1}
-                        onClick={() => setCurrentPage(i + 1)}
-                      >
-                        {i + 1}
-                      </PaginationLink>
+                  )}
+                </tbody>
+              </table>
+
+              {isDesktop && (
+                <Pagination className="mt-4" style={{ minHeight: "48px" }}>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        aria-disabled={currentPage === 1}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
                     </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      aria-disabled={currentPage === totalPages}
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          )
+                        }
+                        aria-disabled={currentPage === totalPages}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

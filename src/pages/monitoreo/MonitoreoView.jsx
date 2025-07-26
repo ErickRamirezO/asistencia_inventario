@@ -20,8 +20,10 @@ import { ChevronsUpDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/utils/axios";
 import { cn } from "@/lib/utils";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 export default function MonitoreoView() {
+  const { user } = useUser();
   const [lugares, setLugares] = useState([]);
   const [ubicacion, setUbicacion] = useState("");
   const [confirmado, setConfirmado] = useState(false);
@@ -37,6 +39,10 @@ export default function MonitoreoView() {
         toast.error("Error al cargar lugares",{
           richColors: true,
         });
+        await crearLog(
+          `ERROR: Error al cargar lugares de monitoreo`,
+          user.userId
+        );
       }
     };
 
@@ -47,7 +53,7 @@ export default function MonitoreoView() {
       setUbicacion(ubicacionGuardada);
       setConfirmado(true);
     }
-  }, []);
+  }, [user.userId]);
 
   useEffect(() => {
     if (!confirmado) return;
@@ -91,12 +97,20 @@ export default function MonitoreoView() {
       toast.error("Error al registrar tag",{
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo registrar el tag ${rfid} en el monitoreo`,
+        user.userId
+      );
     }
   };
 
   const iniciarMonitoreo = () => {
     localStorage.setItem("ubicacionMonitoreo", ubicacion);
     setConfirmado(true);
+    crearLog(
+      `INFO: Monitoreo iniciado en: ${ubicacion}`,
+      user.userId
+    );
   };
 
   const pararMonitoreo = () => {
@@ -106,6 +120,10 @@ export default function MonitoreoView() {
     toast.info("Monitoreo detenido",{
       richColors: true,
     });
+    crearLog(
+      `INFO: Monitoreo detenido en: ${ubicacion}`,
+      user.userId
+    );
   };
 
   return (

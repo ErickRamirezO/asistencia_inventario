@@ -30,8 +30,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getUserIdFromToken } from "@/pages/auth/auth";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 export default function CambioEncargadoView() {
+  const { user } = useUser();
   const [bienes, setBienes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [bienesSeleccionados, setBienesSeleccionados] = useState([]);
@@ -83,9 +86,15 @@ export default function CambioEncargadoView() {
 
       const documentoId = res.data?.documentoId || res.data?.id;
 
-      toast.success("Encargado actualizado correctamente",{
+      toast.success("Encargado actualizado correctamente", {
         richColors: true,
       });
+      await crearLog(
+        `INFO: Cambio de encargado realizado para bienes ${bienesSeleccionados.join(
+          ", "
+        )}`,
+        user.userId
+      );
 
       setBienesSeleccionados([]);
       setUsuarioSeleccionado(null);
@@ -98,9 +107,13 @@ export default function CambioEncargadoView() {
         setBienes(resBienes.data);
       }
     } catch (err) {
-      toast.error("Error al actualizar los encargados",{
+      toast.error("Error al actualizar los encargados", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo realizar el cambio de encargado: ${err.message}`,
+        user.userId
+      );
     }
   };
 
@@ -191,7 +204,7 @@ export default function CambioEncargadoView() {
           <CardContent>
             <Select
               value={usuarioSeleccionado ? String(usuarioSeleccionado) : ""}
-              onValueChange={value => setUsuarioSeleccionado(Number(value))}
+              onValueChange={(value) => setUsuarioSeleccionado(Number(value))}
             >
               <SelectTrigger className="w-full text-xs md:text-[13px] sm:text-sm">
                 <SelectValue placeholder="-- Selecciona un encargado --" />
@@ -241,10 +254,17 @@ export default function CambioEncargadoView() {
             seleccionados?
           </p>
           <DialogFooter className="pt-4">
-            <Button variant="outline" onClick={() => setConfirmarCambio(false)} className="text-xs md:text-[13px] sm:text-sm">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmarCambio(false)}
+              className="text-xs md:text-[13px] sm:text-sm"
+            >
               Cancelar
             </Button>
-            <Button onClick={realizarCambio} className="bg-blue-600 text-white text-xs md:text-[13px] sm:text-sm">
+            <Button
+              onClick={realizarCambio}
+              className="bg-blue-600 text-white text-xs md:text-[13px] sm:text-sm"
+            >
               Aceptar
             </Button>
           </DialogFooter>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import {
   Form,
@@ -17,7 +17,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
-
+import { crearLog } from "@/utils/logs";
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
@@ -172,10 +172,18 @@ const ProfilePage = () => {
         toast.success("Perfil actualizado correctamente", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Perfil actualizado por el usuario ${userId}`,
+          userId
+        );
       } catch (err) {
         toast.error("Error al actualizar el perfil", {
           richColors: true,
         });
+        await crearLog(
+          `ERROR: Error al actualizar perfil: ${err.message}`,
+          userId
+        );
         setError(err.response?.data?.message || err.message);
       }
     } catch (e) {

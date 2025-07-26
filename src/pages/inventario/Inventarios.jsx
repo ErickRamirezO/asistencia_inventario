@@ -52,7 +52,8 @@ import {
 } from "@/components/ui/pagination";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 const FormSchema = z.object({
   nombreInventario: z.string().min(2, {
     message: "Debe tener al menos 2 caracteres",
@@ -63,14 +64,13 @@ const FormSchema = z.object({
 });
 
 export default function Inventarios() {
+  const { user } = useUser();
   const [inventarios, setInventarios] = useState([]);
   const [lugares, setLugares] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [inventarioActual, setInventarioActual] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
-
 
   // Reinicia la página si cambia la lista de inventarios
   useEffect(() => {
@@ -92,20 +92,23 @@ export default function Inventarios() {
     ? windowSize.height - 230 // ajusta 200px según header + paddings
     : undefined;
 
-    const itemsPerPage = (() => {
-  if (!isDesktop) return 3;
-  if (availableHeight < 350) return 3;
-  if (availableHeight < 400) return 4;
-  if (availableHeight < 450) return 5;
+  const itemsPerPage = (() => {
+    if (!isDesktop) return 3;
+    if (availableHeight < 350) return 3;
+    if (availableHeight < 400) return 4;
+    if (availableHeight < 450) return 5;
     if (availableHeight < 550) return 6;
-  if (availableHeight < 600) return 8;
+    if (availableHeight < 600) return 8;
 
-  return 8;
-})();
- const totalPages = Math.ceil(inventarios.length / itemsPerPage);
-   const inventariosPaginados = isDesktop
-  ? inventarios.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : inventarios;
+    return 8;
+  })();
+  const totalPages = Math.ceil(inventarios.length / itemsPerPage);
+  const inventariosPaginados = isDesktop
+    ? inventarios.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : inventarios;
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -123,6 +126,7 @@ export default function Inventarios() {
       toast.error("Error al cargar inventarios", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al cargar inventarios`, user.userId);
     }
   };
 
@@ -134,6 +138,7 @@ export default function Inventarios() {
       toast.error("Error al cargar lugares", {
         richColors: true,
       });
+      await crearLog(`ERROR: Error al cargar lugares`, user.userId);
     }
   };
 
@@ -166,11 +171,19 @@ export default function Inventarios() {
         toast.success("Inventario actualizado", {
           richColors: true,
         });
+        crearLog(
+          `INFO: Inventario actualizado con ID ${inventarioActual.id}`,
+          user.userId
+        );
       } else {
         await api.post("/inventarios", payload);
         toast.success("Inventario creado", {
           richColors: true,
         });
+        crearLog(
+          `INFO: Inventario creado con nombre ${data.nombreInventario}`,
+          user.userId
+        );
       }
 
       cargarInventarios();
@@ -179,6 +192,7 @@ export default function Inventarios() {
       toast.error("Error al guardar inventario", {
         richColors: true,
       });
+      crearLog(`ERROR: Error al guardar inventario`, user.userId);
     }
   };
 
@@ -372,34 +386,51 @@ export default function Inventarios() {
                 </tbody>
               </table>
               {isDesktop && (
-              <Pagination className="mt-4 text-xs md:text-[13px] sm:text-sm" style={{ minHeight: "48px" }}>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                      aria-disabled={currentPage === 1}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        isActive={currentPage === i + 1}
-                        onClick={() => setCurrentPage(i + 1)}
-                      >
-                        {i + 1}
-                      </PaginationLink>
+                <Pagination
+                  className="mt-4 text-xs md:text-[13px] sm:text-sm"
+                  style={{ minHeight: "48px" }}
+                >
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        aria-disabled={currentPage === 1}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
                     </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                      aria-disabled={currentPage === totalPages}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          )
+                        }
+                        aria-disabled={currentPage === totalPages}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               )}
             </div>
           </div>

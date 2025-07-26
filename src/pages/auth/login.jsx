@@ -7,10 +7,11 @@ import api from "@/utils/axios";
 import { jwtDecode } from "jwt-decode";
 import { useUser } from "../../utils/UserContext";
 import { Alert, AlertDescription} from "@/components/ui/alert";
-import { Eye, EyeOff } from "lucide-react"; // Agrega esto arriba
-import { toast } from "sonner"; // Asegúrate de tener instalado sonner para los toasts
-const Login = () => {
+import { Eye, EyeOff } from "lucide-react";
+import { crearLog } from "@/utils/logs";
 
+const Login = () => {
+  const { user } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +20,6 @@ const Login = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showTerminosToast, setShowTerminosToast] = useState(false);
-  const [userId, setUserId] = useState(null);
 
   const roleBasedRedirects = {
     Administrador: "/verUsuarios",
@@ -36,8 +36,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
     try {
       const loginResponse = await api.post("/auth/login", { email, password });
       const token = loginResponse.data.token;
@@ -54,12 +52,19 @@ const Login = () => {
         navigate(redirectPath); // O la ruta que corresponda
       } catch (error) {
         console.error("Error al obtener el rol:", error);
-        // Manejar el error (mostrar un mensaje, etc.)
+        await crearLog(
+          `ERROR: No se pudo obtener el rol del usuario ${decoded.userId}`,
+          user.userId
+        );
       }
     } catch (err) {
       setError(
         err.response?.data?.message ||
         "No se pudo iniciar sesión. Verifica tus credenciales."
+      );
+      await crearLog(
+        `ERROR: No se pudo iniciar sesión con el correo ${email}`,
+        user.userId
       );
     } finally {
       setIsLoading(false);

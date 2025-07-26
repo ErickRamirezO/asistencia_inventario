@@ -4,8 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
 import api from "@/utils/axios";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 export default function AsistenciaSimple() {
+  const { user } = useUser();
   const [rfidTag, setRfidTag] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +17,6 @@ export default function AsistenciaSimple() {
   const [processing, setProcessing] = useState(false);
   const [scanningRFID, setScanningRFID] = useState(false);
   const [exitUserInfo, setExitUserInfo] = useState(null);
-  const [exitReason, setExitReason] = useState("");
   const [savedTempRfidTag, setSavedTempRfidTag] = useState("");
   const [exitProcessing, setExitProcessing] = useState(false);
   const [exitReasonType, setExitReasonType] = useState("");
@@ -38,7 +40,6 @@ export default function AsistenciaSimple() {
     setError(null);
     try {
       const response = await api.get(`/usuarios/tag/${tag}`);
-      console.log("User info response:", response.data);
       setUserInfo(response.data);
 
       setTimeout(() => {
@@ -58,6 +59,10 @@ export default function AsistenciaSimple() {
       toast.error("Usuario no encontrado para este Tag", {
         richColors: true,
       });
+      crearLog(
+        `ERROR: Usuario no encontrado para el tag ${tag}`,
+        user.userId
+      );
       setTimeout(() => {
         setError(null);
         setRfidTag("");
@@ -78,6 +83,10 @@ export default function AsistenciaSimple() {
     if (!userId) {
       console.error("El ID del usuario es nulo o inválido.");
       setError("El ID del usuario es nulo o inválido.");
+      await crearLog(
+        `ERROR: El ID del usuario es nulo o inválido al verificar estado de salida`,
+        user.userId
+      );
       return null;
     }
 
@@ -86,8 +95,6 @@ export default function AsistenciaSimple() {
 
     try {
       const response = await api.get(`/asistencias/estado-salida/${userId}`);
-      console.log("Estado de salida:", response.data);
-
       // Validar si alcanzó el límite de salidas temporales
       if (response.data.limiteAlcanzado) {
         return { ...response.data, puedeRegistrar: false };
@@ -100,6 +107,10 @@ export default function AsistenciaSimple() {
       toast.error("Error al verificar el estado de salida", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo verificar el estado de salida del usuario ${userId}: ${error.message}`,
+        user.userId
+      );
       return null;
     } finally {
       setIsLoading(false);
@@ -107,7 +118,6 @@ export default function AsistenciaSimple() {
   };
 
   const registerAttendance = useCallback(async (tag) => {
-    console.log("Registering attendance for RFID tag:", tag);
     if (!tag) {
       return;
     }
@@ -121,17 +131,29 @@ export default function AsistenciaSimple() {
         toast.success(mensaje,{
           richColors: true,
         });
+        crearLog(
+          `INFO: Asistencia registrada para el tag ${tag}`,
+          user.userId
+        );
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error(error.response.data.mensaje, {
           richColors: true,
         });
+        crearLog(
+          `ERROR: No se pudo registrar asistencia para el tag ${tag}: ${error.response.data.mensaje}`,
+          user.userId
+        );
       } else {
         toast.error("Error al registrar asistencia", {
           description: "No se pudo conectar con el servidor.",
           richColors: true,
         });
+        crearLog(
+          `ERROR: No se pudo registrar asistencia para el tag ${tag}: ${error.message}`,
+          user.userId
+        );
       }
     } finally {
       setIsLoading(false);
@@ -230,6 +252,10 @@ export default function AsistenciaSimple() {
         toast.error("Ya no puede registrar más salidas temporales hoy.", {
           richColors: true,
         });
+        await crearLog(
+          `ERROR: El usuario ${userResponse.data.id} alcanzó el límite de salidas temporales`,
+          user.userId
+        );
         return;
       }
 
@@ -241,6 +267,10 @@ export default function AsistenciaSimple() {
         toast.info("Registrando regreso de salida temporal...", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Registrando regreso de salida temporal para el usuario ${userResponse.data.id}`,
+          user.userId
+        );
       } else {
         // User doesn't have a pending exit, show the form
         setExitStatus("exit");
@@ -261,6 +291,10 @@ export default function AsistenciaSimple() {
       toast.error("Error al verificar el estado de salida", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo verificar el estado de salida del usuario: ${error.message}`,
+        user.userId
+      );
     }
   };
 

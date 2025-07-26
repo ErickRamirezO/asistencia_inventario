@@ -43,8 +43,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 const ReporteAsistencia = () => {
+  const { user } = useUser();
   const [dateRange, setDateRange] = useState();
   const [todosUsuarios, setTodosUsuarios] = useState([]);
   const [usuariosSeleccionados, setUsuariosSeleccionados] = useState([]);
@@ -96,7 +99,6 @@ const ReporteAsistencia = () => {
           fechaInicio,
           fechaFin,
         });
-        console.log("Vista previa de asistencia:", response.data);
         setAsistenciaPreview(response.data);
       } catch (error) {
         setAsistenciaPreview([]);
@@ -106,6 +108,11 @@ const ReporteAsistencia = () => {
             "Error al cargar la vista previa de asistencia.",
           richColors: true,
         });
+        await crearLog(
+          `ERROR: No se pudo cargar la vista previa de asistencia: ${error.message}`,
+          user.userId
+        );
+        console.error("Error al cargar la asistencia previa:", error);
       } finally {
         setCargandoPreview(false);
       }
@@ -132,6 +139,10 @@ const ReporteAsistencia = () => {
             "No se pudieron cargar los usuarios. Recargue la página.",
           richColors: true,
         });
+        await crearLog(
+          `ERROR: No se pudieron cargar los usuarios: ${error.message}`,
+          user.userId
+        );
         setTodosUsuarios([]); // Asegurarse de que no haya datos de prueba en prod
         setCargando(false);
       }
@@ -188,6 +199,10 @@ const ReporteAsistencia = () => {
           "No se pudo verificar la disponibilidad de datos.",
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo verificar datos del reporte: ${error.message}`,
+        user.userId
+      );
       return false;
     }
   };
@@ -263,8 +278,18 @@ const ReporteAsistencia = () => {
         richColors: true,
         id: toastId,
       });
+      await crearLog(
+        `INFO: Reporte de asistencia generado para usuarios ${usuarioIds.join(
+          ", "
+        )} desde ${fechaInicio} hasta ${fechaFin}`,
+        user.userId
+      );
     } catch (error) {
       console.error("Error al descargar el reporte:", error);
+      await crearLog(
+        `ERROR: No se pudo descargar el reporte: ${error.message}`,
+        user.userId
+      );
       let errorMessage = "Ocurrió un error desconocido al generar el reporte.";
       if (error.response && error.response.data) {
         // Intentar leer el mensaje de error del backend si es un Blob
@@ -293,6 +318,10 @@ const ReporteAsistencia = () => {
               richColors: true,
               id: toastId,
             });
+            crearLog(
+              `ERROR: No se pudo generar el reporte: ${errorMessage}`,
+              user.userId
+            );
           }
         };
         reader.readAsText(error.response.data);
@@ -303,6 +332,10 @@ const ReporteAsistencia = () => {
           richColors: true,
           id: toastId,
         });
+        crearLog(
+          `ERROR: No se pudo generar el reporte o hubo un problema de red: ${error.message}`,
+          user.userId
+        );
       }
     } finally {
       setDescargando(false);

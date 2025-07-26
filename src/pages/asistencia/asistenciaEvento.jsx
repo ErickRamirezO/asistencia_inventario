@@ -24,11 +24,14 @@ import {
 } from "../../components/ui/dialog";
 import { toast } from "sonner";
 import api from "@/utils/axios";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 const nombreEventoValido = (nombre) =>
   /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü0-9\s-]+$/.test(nombre);
 
 export default function AsistenciaEvento() {
+  const { user } = useUser();
   const [rfidTag, setRfidTag] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,6 +104,10 @@ export default function AsistenciaEvento() {
         description: error.message,
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudieron cargar los eventos disponibles: ${error.message}`,
+        user.userId
+      );
     } finally {
       setIsLoading(false);
     }
@@ -141,6 +148,10 @@ export default function AsistenciaEvento() {
       toast.success("Evento creado correctamente.", {
         richColors: true,
       });
+      await crearLog(
+        `INFO: Evento creado correctamente: ${newEvent.nombre}`,
+        user.userId
+      );
       setShowCreateEvent(false);
       setNewEvent({ nombre: "", horaIngreso: "07:00", horaSalida: "09:00" });
       await fetchEvents();
@@ -149,6 +160,10 @@ export default function AsistenciaEvento() {
         description: error?.response?.data?.mensaje || error.message,
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo crear el evento ${newEvent.nombre}: ${error.message}`,
+        user.userId
+      );
     } finally {
       setIsLoading(false);
     }
@@ -181,6 +196,10 @@ export default function AsistenciaEvento() {
             "No se pudo conectar con el servidor.",
           richColors: true,
         });
+        await crearLog(
+          `ERROR: No se pudo obtener la información del usuario para el tag ${tag}: ${error.message}`,
+          user.userId
+        );
         setTimeout(() => {
           setRfidTag("");
           if (inputRef.current) {
@@ -218,17 +237,29 @@ export default function AsistenciaEvento() {
           toast.success(mensaje, {
             richColors: true,
           });
+          await crearLog(
+            `INFO: Asistencia registrada para el evento ${selectedEvent} con tag ${tag}`,
+            user.userId
+          );
         }
       } catch (error) {
         if (error.response && error.response.status === 400) {
           toast.error(error.response.data.mensaje, {
             richColors: true,
           });
+          await crearLog(
+            `ERROR: No se pudo registrar asistencia en evento: ${error.response.data.mensaje}`,
+            user.userId
+          );
         } else {
           toast.error("Error al registrar asistencia en evento", {
             description: "No se pudo conectar con el servidor.",
             richColors: true,
           });
+          await crearLog(
+            `ERROR: No se pudo registrar asistencia en evento: ${error.message}`,
+            user.userId
+          );
         }
       } finally {
         setIsLoading(false);
@@ -265,6 +296,10 @@ export default function AsistenciaEvento() {
       toast.success("Hora de fin actualizada correctamente.", {
         richColors: true,
       });
+      await crearLog(
+        `INFO: Hora de fin actualizada para el evento ${selectedEvent}: ${nuevaHoraFin}`,
+        user.userId
+      );
       setShowEditHoraFin(false);
       setNuevaHoraFin("");
       await fetchEvents();
@@ -273,6 +308,10 @@ export default function AsistenciaEvento() {
         description: error?.response?.data?.mensaje || error.message,
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo actualizar la hora de fin del evento ${selectedEvent}: ${error.message}`,
+        user.userId
+      );
     } finally {
       setIsLoading(false);
     }
@@ -290,6 +329,10 @@ export default function AsistenciaEvento() {
         description: error?.response?.data?.mensaje || error.message,
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo obtener la hora de fin del evento ${eventoNombre}: ${error.message}`,
+        user.userId
+      );
       setShowEditHoraFin(false); // Cierra el modal de edición
       setNuevaHoraFin("");
       return "";

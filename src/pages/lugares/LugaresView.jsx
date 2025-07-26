@@ -33,7 +33,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 const FormSchema = z.object({
   nombreLugar: z
     .string()
@@ -45,6 +46,7 @@ const FormSchema = z.object({
 });
 
 export default function LugaresView() {
+  const { user } = useUser();
   const [lugares, setLugares] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -130,6 +132,10 @@ const totalPages = Math.ceil(lugaresFiltrados.length / itemsPerPage);
       toast.error("Error al cargar lugares", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al cargar lugares`,
+        user.userId
+      );
     }
   };
 
@@ -154,11 +160,19 @@ const totalPages = Math.ceil(lugaresFiltrados.length / itemsPerPage);
         toast.success("Lugar actualizado", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Lugar actualizado: ${data.nombreLugar}`,
+          user.userId
+        );
       } else {
         await api.post("/lugares", data);
         toast.success("Lugar creado", {
           richColors: true,
         });
+        await crearLog(
+          `INFO: Lugar creado: ${data.nombreLugar}`,
+          user.userId
+        );
       }
       cargarLugares();
       setDialogOpen(false);
@@ -166,6 +180,10 @@ const totalPages = Math.ceil(lugaresFiltrados.length / itemsPerPage);
       toast.error("Error al guardar lugar", {
         richColors: true,
       });
+      await crearLog(
+        `ERROR: Error al guardar lugar`,
+        user.userId
+      );
     }
   };
 

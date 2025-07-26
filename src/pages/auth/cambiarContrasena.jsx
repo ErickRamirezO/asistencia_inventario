@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-]).{12,}$/;
 
 function CambiarContrasena() {
+  const { user } = useUser();
   const [nuevaContrasena, setNuevaContrasena] = useState("");
   const [confirmarContrasena, setConfirmarContrasena] = useState("");
   const [passwordMatchMessage, setPasswordMatchMessage] = useState("");
@@ -73,6 +75,10 @@ function CambiarContrasena() {
         position: "top-right",
         richColors: true,
       });
+      await crearLog(
+        `INFO: Contraseña cambiada exitosamente para el usuario ${user.userId}`,
+        user.userId
+      );
       setTimeout(() => {
         navigate("/login"); // Redirigir al inicio de sesión después de un tiempo
       }, 3000);
@@ -82,6 +88,10 @@ function CambiarContrasena() {
         position: "top-right",
         richColors: true,
       });
+      await crearLog(
+        `ERROR: No se pudo cambiar la contraseña para el usuario ${user.userId}: ${error.message}`,
+        user.userId
+      );
     }
   };
 

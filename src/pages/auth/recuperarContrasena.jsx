@@ -1,15 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import api from "@/utils/axios"; // Importa tu cliente Axios
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner";
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 
 function RecuperarContrasena() {
+  const { user } = useUser();
   const [email, setEmail] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ function RecuperarContrasena() {
         position: "top-right",
         richColors: true,
       });
+      crearLog(`INFO: Correo de recuperación enviado a ${email}`, user.userId);
     } catch (error) {
       // Cerrar el toast de carga y mostrar un toast de error
       toast.error("Error al enviar el correo electrónico. Por favor, inténtalo de nuevo.", {
@@ -36,6 +38,7 @@ function RecuperarContrasena() {
         position: "top-right",
         richColors: true,
       });
+      crearLog(`ERROR: No se pudo enviar correo de recuperación a ${email}`, user.userId);
     }
   };
 

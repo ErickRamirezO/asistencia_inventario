@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +9,10 @@ import api from "@/utils/axios";
 import { getUserIdFromToken } from "@/pages/auth/auth";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button"; // asegúrate de tener esto también
-
+import { useUser } from "@/utils/UserContext";
+import { crearLog } from "@/utils/logs";
 export default function RealizarInventario() {
+  const { user } = useUser();
   const { id: inventarioId } = useParams();
   const [tag, setTag] = useState("");
   const [bien, setBien] = useState(null);
@@ -35,6 +36,10 @@ export default function RealizarInventario() {
             toast.success("Inventario actualizado con tag " + tag, {
               richColors: true,
             });
+            crearLog(
+              `INFO: Inventario actualizado con tag ${tag}`,
+              user.userId
+            );
             setTag("");
           })
           .catch((err) => {
@@ -45,13 +50,17 @@ export default function RealizarInventario() {
                 richColors: true,
               }
             );
+            crearLog(
+              `ERROR: No se pudo actualizar inventario con tag ${tag}`,
+              user.userId
+            );
             setTag("");
           });
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [tag]);
+  }, [inventarioId, tag, user.userId, usuarioId]);
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">

@@ -42,6 +42,8 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
+import { crearLog } from "@/utils/logs";
+import { useUser } from "@/utils/UserContext";
 // Helper function to convert "HH:mm" string to minutes for easy comparison
 const timeToMinutes = (timeString) => {
   if (!timeString) return null;
@@ -232,6 +234,7 @@ const FormSchema = z
   });
 
 export default function TurnosLaborales() {
+  const { user } = useUser();
   const [turnos, setTurnos] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [windowSize, setWindowSize] = useState({
@@ -245,32 +248,30 @@ export default function TurnosLaborales() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const isDesktop = windowSize.width >= 768;
+  const availableHeight = isDesktop
+    ? windowSize.height - 50 // ajusta según tu layout
+    : undefined;
 
-const isDesktop = windowSize.width >= 768;
-const availableHeight = isDesktop
-  ? windowSize.height - 50 // ajusta según tu layout
-  : undefined;
-
-// Cálculo dinámico de filas
-const itemsPerPage = (() => {
-  if (!isDesktop) return turnos.length;
-  if (availableHeight < 350) return 3;
-  if (availableHeight < 400) return 4;
-  if (availableHeight < 450) return 5;
-  if (availableHeight < 500) return 8;
+  // Cálculo dinámico de filas
+  const itemsPerPage = (() => {
+    if (!isDesktop) return turnos.length;
+    if (availableHeight < 350) return 3;
+    if (availableHeight < 400) return 4;
+    if (availableHeight < 450) return 5;
+    if (availableHeight < 500) return 8;
     if (availableHeight < 600) return 9;
-     if (availableHeight < 650) return 10;
-  if (availableHeight < 700) return 11;
-  return 8;
-})();
+    if (availableHeight < 650) return 10;
+    if (availableHeight < 700) return 11;
+    return 8;
+  })();
 
-const [currentPage, setCurrentPage] = useState(1);
-const turnosPaginados = isDesktop
-  ? turnos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-  : turnos;
+  const [currentPage, setCurrentPage] = useState(1);
+  const turnosPaginados = isDesktop
+    ? turnos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : turnos;
 
-const totalPages = Math.ceil(turnos.length / itemsPerPage);
-
+  const totalPages = Math.ceil(turnos.length / itemsPerPage);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -291,6 +292,10 @@ const totalPages = Math.ceil(turnos.length / itemsPerPage);
       setTurnos(response.data);
     } catch (error) {
       console.error("Error al recuperar los horarios laborales:", error);
+      await crearLog(
+        `ERROR: Error al recuperar horarios laborales: ${error.message}`,
+        user.userId
+      );
       toast.error("Error al cargar turnos laborales.", {
         richColors: true,
       });
@@ -322,11 +327,18 @@ const totalPages = Math.ceil(turnos.length / itemsPerPage);
         description: "El turno laboral se ha registrado correctamente.",
         richColors: true,
       });
+      await crearLog(
+        `INFO: Turno laboral creado: ${data.shiftName} (${data.startTime} - ${data.endTime})`,
+        user.userId
+      );
       form.reset();
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Error al registrar el turno laboral:", error);
-
+      await crearLog(
+        `ERROR: Error al registrar turno laboral: ${error.message}`,
+        user.userId
+      );
       let errorMessage =
         "No se pudo registrar el turno laboral. Intente nuevamente.";
       if (axios.isAxiosError(error) && error.response) {
@@ -518,7 +530,9 @@ const totalPages = Math.ceil(turnos.length / itemsPerPage);
               <TableHead className="text-xs md:text-[13px] sm:text-sm">
                 Hora de Inicio
               </TableHead>
-              <TableHead className="text-xs md:text-[13px] sm:text-sm">Hora de Fin</TableHead>
+              <TableHead className="text-xs md:text-[13px] sm:text-sm">
+                Hora de Fin
+              </TableHead>
               <TableHead className="text-xs md:text-[13px] sm:text-sm">
                 Inicio de Almuerzo
               </TableHead>
@@ -570,9 +584,7 @@ const totalPages = Math.ceil(turnos.length / itemsPerPage);
                   }
                   aria-disabled={currentPage === 1}
                   className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : ""
+                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
                   }
                 />
               </PaginationItem>
