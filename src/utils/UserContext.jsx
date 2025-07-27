@@ -1,16 +1,14 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import api from "./axios";
-import { useNavigate, useLocation  } from "react-router-dom";
-import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
-  const toastShown = useRef(false); // <-- bandera para controlar el toast
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const location = useLocation();
   const roleBasedRedirects = {
     Administrador: "/verUsuarios",
@@ -28,49 +26,16 @@ export function UserProvider({ children }) {
       ]);
       const rol = rolResponse.data;
       const aceptoTerminos = usuarioResponse.data.aceptoTerminos;
-      setUser({ ...decoded, rol, aceptoTerminos });
+      const userData = { ...decoded, rol, aceptoTerminos };
+      setUser(userData);
 
-      // Mostrar toast solo si no ha sido mostrado antes
-      if (!aceptoTerminos) {
-        if (!toastShown.current) {
-          toastShown.current = true;
-          toast(
-            "Debe aceptar los Términos y Condiciones para continuar.",
-            {
-              description: (
-                <span>
-                  Lea los <a href="/terminos" className="underline text-primary" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
-                </span>
-              ),
-              action: {
-                label: "Aceptar",
-                onClick: async () => {
-                  await aceptarTerminos();
-                  toastShown.current = false; // Permitir mostrar de nuevo si es necesario
-                }
-              },
-              cancel: {
-                label: "Rechazar",
-                onClick: () => {
-                  toastShown.current = false; // Permitir mostrar de nuevo si es necesario
-                }
-              },
-              duration: 999999,
-              position: "top-center",
-              closeButton: true,
-            }
-          );
-        }
-      } else {
-        toastShown.current = false; // Resetear si ya aceptó
-        if (location.pathname === "/login" || location.pathname === "/") {
-          const redirectPath = roleBasedRedirects[rol] || "/no-autorizado";
-          navigate(redirectPath, { replace: true });
-        }
+      // Redirección si corresponde
+      if (aceptoTerminos && (location.pathname === "/login" || location.pathname === "/")) {
+        const redirectPath = roleBasedRedirects[rol] || "/no-autorizado";
+        navigate(redirectPath, { replace: true });
       }
     } catch {
       setUser(null);
-      toastShown.current = false;
     }
   };
 
@@ -79,7 +44,6 @@ export function UserProvider({ children }) {
       fetchAndSetUser(token);
     } else {
       setUser(null);
-      toastShown.current = false;
     }
     // eslint-disable-next-line
   }, [token]);
@@ -88,8 +52,6 @@ export function UserProvider({ children }) {
     if (user && user.userId) {
       await api.patch(`/usuarios/${user.userId}/aceptar-terminos`, { aceptoTerminos: true });
       setUser({ ...user, aceptoTerminos: true });
-      const redirectPath = roleBasedRedirects[user.rol] || "/no-autorizado";
-      navigate(redirectPath, { replace: true });
     }
   };
 

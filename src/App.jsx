@@ -27,10 +27,12 @@ import CambiarContrasena from "./pages/auth/cambiarContrasena"
 import ProfilePage from "./pages/perfil"
 import DocumentosCambioView from "./pages/inventario/DocumentosCambioView"
 import HistorialDocumentoView from "./pages/inventario/HistorialDocumentoView"
+import TerminosToast from "./TerminosToast";
 
 function App() {
   return (
     <>
+      <TerminosToast />
       <Toaster position="top-right" />
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />

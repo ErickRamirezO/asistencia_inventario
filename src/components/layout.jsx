@@ -36,18 +36,19 @@ import logo from "../assets/LogoName.png"
 import api from "@/utils/axios";
 import { useUser } from "@/utils/UserContext";
 import { ModeToggle } from "@/components/mode-toogle";
+import { toast } from "sonner";
 
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [defaultOpen, setDefaultOpen] = useState(true)
-  const { user, setUser } = useUser();
+  const { user, setUser, logout } = useUser();
   const [userInitials, setUserInitials] = useState("AD");
   const [openIndex, setOpenIndex] = useState(null);
 
   const handleLogout = useCallback(async (event) => {
     event.stopPropagation(); // Evita la propagación del evento
-
+    toast.dismiss("terminos-toast");
     try {
     const token = localStorage.getItem('token');
     if (!token) {
