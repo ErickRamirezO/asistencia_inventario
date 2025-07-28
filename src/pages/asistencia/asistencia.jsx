@@ -453,17 +453,19 @@ export default function Asistencia() {
           md:grid-cols-2
         "
         >
-          <div className="w-full">
-            <TabsList className="flex flex-wrap gap-2 px-2 py-1 w-full">
+          <div className="w-full flex items-center mt-5.5">
+            <TabsList className="flex flex-wrap gap-1 px-1 py-0 w-full">
               <TabsTrigger
                 value="regular"
-                className="text-xs md:text-[13px] sm:text-sm"
+                className="text-[10px] md:text-[11px] sm:text-[11px] px-2 py-1"
+                style={{ minHeight: labelHeight}}
               >
                 Asistencia Diaria
               </TabsTrigger>
               <TabsTrigger
                 value="events"
-                className="text-xs md:text-[13px] sm:text-sm"
+                className="text-[10px] md:text-[11px] sm:text-[11px] px-2 py-1"
+                style={{ minHeight: labelHeight }}
               >
                 Asistencia en Eventos
               </TabsTrigger>
