@@ -1,6 +1,9 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+vi.mock('@/utils/UserContext', () => ({
+  useUser: () => ({ user: { userId: 1, nombre: "Test" } }),
+}));
 import Attendance from '../asistencia/asistencia'; 
 
 // --- CAMBIOS AQUÍ ---
@@ -26,7 +29,9 @@ vi.mock('sonner', () => ({
   }
 }));
 
-
+vi.mock('@/utils/UserContext', () => ({
+  useUser: () => ({ user: { userId: 1, nombre: "Test" } }),
+}));
 // Datos de prueba (se mantienen igual)
 const mockAttendanceData = [
   {

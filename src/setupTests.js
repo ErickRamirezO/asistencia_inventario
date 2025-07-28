@@ -65,4 +65,20 @@ vi.mock('axios', () => ({
   default: axiosMock,
 }));
 
+// Mock global para window.matchMedia
+if (!window.matchMedia) {
+  window.matchMedia = function (query) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    };
+  };
+}
+
 // --- FIN del MOCK DE AXIOS MEJORADO ---
