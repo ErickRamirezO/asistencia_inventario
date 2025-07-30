@@ -37,6 +37,9 @@ export default function InventarioDetalle() {
   const [bienEditar, setBienEditar] = useState(null);
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const navigate = useNavigate();
+  const [filtroActivo, setFiltroActivo] = useState("TODOS");
+  
+ 
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -126,9 +129,21 @@ export default function InventarioDetalle() {
   };
   const [searchTerm, setSearchTerm] = useState("");
 
-  const historialFiltrado = historial.filter((h) =>
-    h.nombreBien.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const historialFiltrado = historial.filter((h) => {
+  const termino = searchTerm.toLowerCase();
+
+  const coincideNombre = h.nombreBien.toLowerCase().includes(termino);
+  const coincideEncargado = (h.nombreEncargado || "").toLowerCase().includes(termino);
+
+  const coincideFiltro =
+    filtroActivo === "TODOS" ||
+    (filtroActivo === "INVENTARIADOS" && h.status === 1) ||
+    (filtroActivo === "FALTANTES" && h.status === 0);
+
+  return (coincideNombre || coincideEncargado) && coincideFiltro;
+});
+
+
 
   return (
     <div
@@ -144,7 +159,7 @@ export default function InventarioDetalle() {
       </Button>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card onClick={() => setFiltroActivo("TODOS")}>
           <CardHeader>
             <CardTitle className="text-xs md:text-[13px] sm:text-sm">
               Total Bienes
@@ -154,7 +169,7 @@ export default function InventarioDetalle() {
             <p className="text-xl font-bold">{total}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card  onClick={() => setFiltroActivo("INVENTARIADOS")}>
           <CardHeader>
             <CardTitle className="text-xs md:text-[13px] sm:text-sm">
               Inventariados
@@ -164,7 +179,7 @@ export default function InventarioDetalle() {
             <p className="text-xl font-bold">{inventariados}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card onClick={() => setFiltroActivo("FALTANTES")}>
           <CardHeader>
             <CardTitle className="text-xs md:text-[13px] sm:text-sm">
               Faltantes

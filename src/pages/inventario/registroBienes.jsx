@@ -114,19 +114,11 @@ const FormSchema = z.object({
 
   observacionBien: z.string().optional(),
 
-  ubicacionBien: z
-    .string()
-    .min(2, { message: "Debe tener al menos 2 caracteres." })
-    .max(100, {
-      message: "La ubicación debe tener un máximo de 100 caracteres.",
-    })
-    .regex(/^[^\[\]\{\}\(\)<>]*$/, {
-      message: "El nombre no puede contener caracteres especiales.",
-    }),
+  ubicacionBien: z.string().nonempty({ message: "Debe seleccionar un lugar." }),
 
   categoriaId: z.string(),
   departamentoId: z.string(),
-  tagRfidNumero: z.string(),
+  tagRfidNumero: z.string().min(1, { message: "Debe escanear un tag RFID." }),
   usuarioId: z.string().optional(),
   status: z.coerce.number().optional().default(1),
 });
@@ -446,7 +438,7 @@ export default function RegistrarBien() {
             ubicacionBien: bien.ubicacionBien,
             categoriaId: String(bien.categoriaId),
             departamentoId: String(bien.departamentoId),
-            tagRfidNumero: bien.tagRfidNumero,
+            tagRfidNumero: bien.tagRfidNumero ?? "",
             usuarioId: bien.usuarioId ? String(bien.usuarioId) : "",
             status: bien.status ?? 1,
           });
@@ -488,7 +480,7 @@ export default function RegistrarBien() {
         ...data,
         categoriaId: parseInt(data.categoriaId),
         departamentoId: parseInt(data.departamentoId),
-        tagRfidNumero: data.tagRfidNumero,
+        tagRfidNumero: data.tagRfidNumero ?? "",
         usuarioId: data.usuarioId ? parseInt(data.usuarioId) : null,
       };
 
@@ -1140,6 +1132,12 @@ export default function RegistrarBien() {
                     </>
                   )}
                 </div>
+                {form.formState.errors.tagRfidNumero && (
+                  <p className="text-red-600 text-xs md:text-[13px] sm:text-sm">
+                    {form.formState.errors.tagRfidNumero.message}
+                  </p>
+                )}
+
 
                 {/* ✅ Botón de submit aquí, enlazado con el formulario principal */}
                 <Button

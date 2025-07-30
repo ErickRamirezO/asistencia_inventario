@@ -16,7 +16,7 @@ export default function MonitoreoLista() {
   const [filtro, setFiltro] = useState("TODOS");
   const [busqueda, setBusqueda] = useState("");
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
-
+  
   useEffect(() => {
     api
       .get("/monitoreos")
