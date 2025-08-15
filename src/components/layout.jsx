@@ -171,7 +171,7 @@ useEffect(() => {
                         <SidebarMenuButton asChild isActive={isActive("/new-feature")} data-close-sidebar>
                           <Link to="/cambio">
                             <Users className="h-5 w-5" />
-                            <span>Cambio de Encargado</span>
+                            <span>Cambio de Custodio</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>

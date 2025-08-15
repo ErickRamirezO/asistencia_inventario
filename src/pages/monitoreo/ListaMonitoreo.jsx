@@ -10,6 +10,13 @@ import clsx from "clsx";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/utils/UserContext";
 import { crearLog } from "@/utils/logs";
+
+// DESPUÉS (esto evita el uso de código Node interno)
+import SockJS from "sockjs-client/dist/sockjs.min.js";
+import { Client } from "@stomp/stompjs";
+
+
+
 export default function MonitoreoLista() {
   const { user } = useUser();
   const [registros, setRegistros] = useState([]);
@@ -17,18 +24,36 @@ export default function MonitoreoLista() {
   const [busqueda, setBusqueda] = useState("");
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
   
-  useEffect(() => {
-    api
-      .get("/monitoreos")
-      .then((res) => setRegistros(res.data))
-      .catch((err) => {
-        console.error("Error cargando monitoreos:", err);
-        crearLog(
-          `ERROR: Error cargando monitoreos`,
-          user.userId
-        );
+useEffect(() => {
+  api
+    .get("/monitoreos")
+    .then((res) => setRegistros(res.data))
+    .catch((err) => {
+      console.error("Error cargando monitoreos:", err);
+      crearLog(`ERROR: Error cargando monitoreos`, user.userId);
+    });
+
+  const stompClient = new Client({
+    webSocketFactory: () => new SockJS("http://localhost:8002/ws-monitoreo"),
+    reconnectDelay: 5000,
+    onConnect: () => {
+      stompClient.subscribe("/topic/monitoreo", (message) => {
+        const nuevoRegistro = JSON.parse(message.body);
+        setRegistros((prev) => [nuevoRegistro, ...prev]);
       });
+    },
+    onStompError: (frame) => {
+      console.error("STOMP error:", frame.headers["message"]);
+    },
+  });
+
+  stompClient.activate();
+
+  return () => {
+    stompClient.deactivate();
+  };
 }, [user.userId]);
+
 
 
   useEffect(() => {

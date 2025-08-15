@@ -232,7 +232,7 @@ export default function CambioEncargadoView() {
           variant="blue"
           className="text-xs md:text-[13px] sm:text-sm"
         >
-          Confirmar cambio de encargado
+          Confirmar cambio de custiodio
         </Button>
       </div>
 
@@ -242,7 +242,7 @@ export default function CambioEncargadoView() {
             <DialogTitle>Confirmar cambio</DialogTitle>
           </DialogHeader>
           <p>
-            ¿Estás seguro que deseas asignar como encargado a
+            ¿Estás seguro que deseas asignar como custodio a
             <strong>
               {" "}
               {usuarios.find((u) => u.id === usuarioSeleccionado)?.nombre ||

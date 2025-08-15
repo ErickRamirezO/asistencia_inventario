@@ -46,6 +46,13 @@ export default defineConfig({
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       skipWaiting: true,
+      navigateFallback: '/index.html',
+navigateFallbackAllowlist: [
+  /^\/$/, // raíz
+  /^\/lista-monitoreo/, // tu vista principal
+  /^\/monitoreo-tag/,   // si usas esta también
+],
+
       runtimeCaching: [
         {
           urlPattern: /^\/api\//, // Cambia esto según tu endpoint
